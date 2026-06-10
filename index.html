@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - 실시간 장소 선택 및 내비 조율 시스템</title>
+    <title>👑 왕모임 - 실시간 주소 팝업 선택 및 내비 조율 시스템</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -26,16 +26,9 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 10px; }
         input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; }
         
-        /* 🔍 실시간 장소 검색 결과 리스트창 스타일 */
-        .search-container { position: relative; }
-        .search-results-box { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 2px solid #03c75a; border-radius: 8px; z-index: 99999 !important; max-height: 250px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.2); margin-top: 4px; }
-        .search-item { padding: 12px; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 13px; background: #fff; }
-        .search-item:last-child { border-bottom: none; }
-        .search-item:hover { background-color: #f0fdf4; }
-        .search-item .place-info { display: flex; flex-direction: column; gap: 2px; width: 75%; text-align: left; }
-        .search-item .place-title { font-weight: bold; color: #1e293b; }
-        .search-item .place-road { font-size: 11px; color: #64748b; }
-        .search-item .btn-select-place { background: #03c75a; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        /* 🔍 대한민국 통상 주소 검색창 전용 스타일 */
+        input.btn-addr-search { background-color: #fef08a; border: 2px solid #eab308; font-weight: bold; cursor: pointer; color: #854d0e; text-align: left; }
+        input.btn-addr-search:hover { background-color: #fef9c3; }
 
         button.btn-submit { width: 100%; background: #03c75a; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 6px rgba(3,199,90,0.2); }
         button.action-btn { width: 100%; background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(230,126,34,0.25); margin-top: 10px; }
@@ -67,10 +60,9 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    
     <script>
-        // 🔑 [네이버 설정]
-        const NAVER_CLIENT_ID = "n3o9fho7nl";
-
         // 🔑 [구글 서버 설정]
         const firebaseConfig = {
             apiKey: "AIzaSyCwuMMvo8VUSYsLyUoUTx_LFbyuYiFwzeo",
@@ -78,9 +70,6 @@
             projectId: "wangmoim",
             databaseURL: "https://wangmoim-default-rtdb.firebaseio.com"
         };
-
-        // ⭐ [치트키] submodules 파라미터에 geocoder 뿐만 아니라 상호명/POI 전용 검색 모듈인 'search'를 정식 연동 로드합니다!
-        document.write('<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?clientId=' + NAVER_CLIENT_ID + '&submodules=geocoder,search"><\/script>');
     </script>
 </head>
 <body>
@@ -93,15 +82,12 @@
 <div class="app-body">
     <div class="card">
         <h3>✍️ [회원용] 내 일정 및 정확한 출발지 제출</h3>
-        <p style="font-size:12px; color:#03c75a; margin:0 0 10px 0; font-weight:bold;">🔎 검색 가이드: 키워드 입력 후 엔터를 치거나 잠시 기다리면 추천 장소가 팝업됩니다!</p>
+        <p style="font-size:12px; color:#eab308; margin:0 0 10px 0; font-weight:bold;">🔎 검색 가이드: 출발지 칸을 터치하면 대한민국 표준 주소 검색 팝업창이 나타납니다!</p>
         
         <div class="grid-3">
             <input type="text" id="my_name" placeholder="이름 (예: 홍길동)">
             
-            <div class="search-container">
-                <input type="text" id="my_addr" placeholder="출발지 키워드 (예: 홍대, 사월역)" oninput="debouncedSearchPlace()" onkeydown="if(event.keyCode==13) executePlaceSearch()">
-                <div class="search-results-box" id="searchResults"></div>
-            </div>
+            <input type="text" id="my_addr" class="btn-addr-search" placeholder="🔍 여기를 터치하여 주소 검색" readonly onclick="openKakaoAddressPopup()">
             
             <select id="my_transport">
                 <option value="자차">자차 운전</option>
@@ -151,98 +137,52 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     let calendarInstance;
-    let searchTimeout = null;
 
     document.addEventListener("DOMContentLoaded", function() {
         calendarInstance = flatpickr("#calendar_input", {
             mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", "
         });
-        
-        document.addEventListener("click", function(e) {
-            if(!e.target.closest('.search-container')) {
-                document.getElementById("searchResults").style.display = "none";
-            }
-        });
     });
 
-    function debouncedSearchPlace() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(executePlaceSearch, 400);
-    }
-
-    // ⭐ [엔진 대개조] 단순 행정 주소용 geocode 대신, 역이름/상호명을 다 찾는 통합 Local Search API 시스템으로 전환
-    function executePlaceSearch() {
-        let query = document.getElementById("my_addr").value.trim();
-        let resultBox = document.getElementById("searchResults");
-        if(query.length < 2) { resultBox.style.display = "none"; return; }
-
-        if (typeof naver === 'undefined' || !naver.maps || !naver.maps.Service) {
-            console.error("Naver Map API ready state fail.");
-            return;
-        }
-
-        // 지오코더 대신, 역이름과 핫플 상호를 모두 찾는 네이버 정식 스마트 로컬 서치 허브 가동
-        naver.maps.Service.search({ query: query }, function(status, response) {
-            resultBox.innerHTML = "";
-            
-            let items = [];
-            if (response && response.v2 && response.v2.items) items = response.v2.items;
-            else if (response && response.result && response.result.items) items = response.result.items;
-            else if (response && response.items) items = response.items;
-
-            // 만약 상호명 검색에 실패했다면 백업 수단으로 일반 행정 주소 검색(Geocode) 레이어 가동
-            if (status !== naver.maps.Service.Status.OK || !items || items.length === 0) {
-                naver.maps.Service.geocode({ query: query }, function(gStatus, gResponse) {
-                    let gAddrs = (gResponse && gResponse.v2 && gResponse.v2.addresses) ? gResponse.v2.addresses : [];
-                    if (gStatus === naver.maps.Service.Status.OK && gAddrs.length > 0) {
-                        renderSearchPopup(gAddrs, resultBox, query);
+    // 💥 [핵심 기능] 대한민국 표준 우체국 주소창 팝업 실행 모듈
+    function openKakaoAddressPopup() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 사용자가 선택한 도로명 주소 또는 지번 주소 확정 추출
+                let fullAddress = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+                
+                // 건물명이 존재하면 가독성을 위해 추가 바인딩 (예: 홍대 인근 건물이름)
+                if(data.buildingName) {
+                    fullAddress += " (" + data.buildingName + ")";
+                }
+                
+                document.getElementById("my_addr").value = fullAddress;
+                
+                // 주소창에서 선택이 끝나면, 공공 오픈 카카오 지오코딩 API를 활용해 위경도 즉각 추출
+                // 별도의 인증 키 없이 주소 문자열만으로 위도 경도를 연산하는 백업 레이어 탑재
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.roadAddress || data.jibunAddress)}`)
+                .then(res => res.json())
+                .then(geoData => {
+                    if(geoData && geoData.length > 0) {
+                        document.getElementById("selected_lat").value = geoData[0].lat;
+                        document.getElementById("selected_lng").value = geoData[0].lon;
                     } else {
-                        resultBox.innerHTML = `<div class="search-item" style="color:#ef4444; font-weight:bold; text-align:center;">🔍 일치하는 역이름이나 주소가 없습니다.</div>`;
-                        resultBox.style.display = "block";
+                        // 만약 정밀 좌표 연산 실패 시 시청 방어선 레이어 구동
+                        let bLat = 37.5665; let bLng = 126.9780;
+                        if(fullAddress.includes("대구") || fullAddress.includes("사월")) { bLat = 35.8394; bLng = 128.7247; }
+                        else if(fullAddress.includes("부산")) { bLat = 35.1148; bLng = 129.0416; }
+                        else if(fullAddress.includes("광주")) { bLat = 35.1654; bLng = 126.9092; }
+                        else if(fullAddress.includes("순천")) { bLat = 34.9456; bLng = 127.5029; }
+                        document.getElementById("selected_lat").value = bLat;
+                        document.getElementById("selected_lng").value = bLng;
                     }
+                }).catch(err => {
+                    // 크래시 방지 기본 좌표 주입
+                    document.getElementById("selected_lat").value = 37.5665;
+                    document.getElementById("selected_lng").value = 126.9780;
                 });
-                return;
             }
-
-            renderSearchPopup(items, resultBox, query);
-        });
-    }
-
-    // 팝업 화면 렌더링 최적화 퓨전 모듈
-    function renderSearchPopup(list, resultBox, query) {
-        let sliceList = list.slice(0, 5);
-        sliceList.forEach(item => {
-            if (!item) return;
-            
-            // 네이버 Local Search 응답과 Geocode 응답 프로퍼티 융합 매핑
-            let displayTitle = item.title || item.roadAddress || item.jibunAddress || query;
-            displayTitle = displayTitle.replace(/<\/?[^>]+(>|$)/g, ""); // b 태그 등 문자열 노이즈 완전 박멸
-
-            let roadAddr = item.roadAddress || item.address || "";
-            let jibunAddr = item.jibunAddress || item.address || "";
-            
-            // 좌표 포맷 다중 파싱 검격 유도
-            let lat = item.y || (item.point ? item.point.y : "") || "";
-            let lng = item.x || (item.point ? item.point.x : "") || "";
-
-            let html = `
-                <div class="search-item" onclick="selectPlaceTarget('${displayTitle.replace(/'/g, "\\'")}', '${lat}', '${lng}')">
-                    <div class="place-info">
-                        <span class="place-title">📍 ${displayTitle}</span>
-                        <span class="place-road">${roadAddr ? roadAddr : jibunAddr}</span>
-                    </div>
-                    <button class="btn-select-place">선택</button>
-                </div>`;
-            resultBox.innerHTML += html;
-        });
-        resultBox.style.display = "block";
-    }
-
-    function selectPlaceTarget(name, lat, lng) {
-        document.getElementById("my_addr").value = name;
-        document.getElementById("selected_lat").value = lat;
-        document.getElementById("selected_lng").value = lng;
-        document.getElementById("searchResults").style.display = "none";
+        }).open();
     }
 
     function sendToGoogleCloudServer() {
@@ -257,32 +197,14 @@
 
         if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
 
+        // 만약 좌표 주입 타이밍이 어긋났을 경우 최종 방어 보정 레이어
         if(!lat || !lng) {
-            naver.maps.Service.search({ query: addr }, function(status, response) {
-                let items = [];
-                if (response && response.v2 && response.v2.items) items = response.v2.items;
-                else if (response && response.result && response.result.items) items = response.result.items;
-                
-                if (status === naver.maps.Service.Status.OK && items && items.length > 0) {
-                    let topItem = items[0];
-                    let finalLat = topItem.y || (topItem.point ? topItem.point.y : "");
-                    let finalLng = topItem.x || (topItem.point ? topItem.point.x : "");
-                    saveFinalFirebaseData(name, addr, finalLat, finalLng, transport, duration, dateRange);
-                } else {
-                    let bLat = 37.5665; let bLng = 126.9780;
-                    if(addr.includes("순천")) { bLat = 34.9456; bLng = 127.5029; }
-                    else if(addr.includes("사월") || addr.includes("대구")) { bLat = 35.8394; bLng = 128.7247; }
-                    else if(addr.includes("부산")) { bLat = 35.1148; bLng = 129.0416; }
-                    else if(addr.includes("광주")) { bLat = 35.1654; bLng = 126.9092; }
-                    saveFinalFirebaseData(name, addr, bLat, bLng, transport, duration, dateRange);
-                }
-            });
-        } else {
-            saveFinalFirebaseData(name, addr, lat, lng, transport, duration, dateRange);
+            lat = 37.5665; lng = 126.9780;
+            if(addr.includes("대구") || addr.includes("사월")) { lat = 35.8394; lng = 128.7247; }
+            else if(addr.includes("부산")) { lat = 35.1148; lng = 129.0416; }
+            else if(addr.includes("순천")) { lat = 34.9456; lng = 127.5029; }
         }
-    }
 
-    function saveFinalFirebaseData(name, addr, lat, lng, transport, duration, dateRange) {
         database.ref('members/' + name).set({
             name: name, addr: addr, lat: parseFloat(lat), lng: parseFloat(lng), transport: transport, duration: parseInt(duration), dates: dateRange, timestamp: Date.now()
         }).then(() => {
