@@ -41,14 +41,9 @@
         .result-box { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-top: 15px; }
         .result-section-title { font-size: 15px; font-weight: bold; color: #166534; margin-top: 15px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #bbf7d0; }
         
-        /* 💥 모드 전환 탭 디자인 고도화 */
-        .tab-container { display: flex; background: #e2e8f0; padding: 4px; border-radius: 8px; margin-bottom: 15px; gap: 4px; }
-        .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: bold; color: #64748b; cursor: pointer; border-radius: 6px; transition: all 0.2s ease; }
-        .tab-btn.active { background: white; color: #1e3a8a; box-shadow: 0 2px 6px rgba(0,0,0,0.06); border: 2px solid #3b82f6; }
-
         .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; margin-bottom: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; border: 1px solid #e2e8f0; }
         
-        /* 💥 클릭 인터랙션 스타일 명시 */
+        /* 💥 클릭 인터랙션 하이라이트 스타일 */
         .loc-rank-item { cursor: pointer; transition: all 0.2s ease; border: 2px solid #e2e8f0; }
         .loc-rank-item:hover { border-color: #03c75a; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(3,199,90,0.1); }
         
@@ -123,7 +118,20 @@
         <div class="member-badge-list" id="liveMemberList">
             <span style="color:#aaa; font-size:13px;">클라우드 서버 연결 대기 중...</span>
         </div>
-        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 실시간 정산·조율 엔진 가동</button>
+        
+        <div style="margin-top: 18px; margin-bottom: 5px;">
+            <label style="font-size: 13px; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 8px;">⚙️ 정산 연산 모드 사전 선택 (필수)</label>
+            <div style="display: flex; gap: 8px;">
+                <label style="flex: 1; background: #eff6ff; padding: 14px; border: 2px solid #3b82f6; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; font-size: 13px; display: block;" id="label-mode-city">
+                    <input type="radio" name="routing_mode_preset" value="city" checked onchange="updatePresetLabelStyle()" style="margin-right: 6px; transform: scale(1.1);"> 🏙️ 도시 단위 모드 (시·군청 기준)
+                </label>
+                <label style="flex: 1; background: white; padding: 14px; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; font-size: 13px; display: block;" id="label-mode-dong">
+                    <input type="radio" name="routing_mode_preset" value="dong" onchange="updatePresetLabelStyle()" style="margin-right: 6px; transform: scale(1.1);"> 📍 동 단위 모드 (~동/핫플 기준)
+                </label>
+            </div>
+        </div>
+        
+        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 설정한 모드로 실시간 정산엔진 가동</button>
     </div>
 
     <div class="loading" id="loadingBar">📡 Directions 위성망 연동 중... 전국 실시간 교통 상황 시뮬레이션 중...</div>
@@ -133,17 +141,12 @@
         <div class="result-section-title">📅 1. 다중 투표 기반 최대 연박 가능 추천 일정</div>
         <div id="dateResultContent"></div>
         
-        <div class="tab-container" style="margin-top: 20px;">
-            <div class="tab-btn active" id="tab-city" onclick="switchRoutingMode('city')">🏙️ 도시 단위 모드 (시·군청 기준)</div>
-            <div class="tab-btn" id="tab-dong" onclick="switchRoutingMode('dong')">📍 동 단위 모드 (~동/핫플 기준)</div>
-        </div>
-
-        <div class="result-section-title">📍 2. 공평성 기준 최적 장소 순위 <span style="color:#ef4444;">(순위 카드를 클릭하면 명세서가 바뀝니다)</span></div>
+        <div class="result-section-title">📍 2. <span id="currentModeTitleText">[선택 모드]</span> 공평성 기준 최적 장소 순위 <span style="color:#ef4444; font-weight: bold;">(원하는 순위 행을 클릭하세요!)</span></div>
         <div id="locationResultContent"></div>
         
         <div id="dynamicPensionLink"></div>
         
-        <div class="result-section-title">🧾 3. <span id="receiptTitleCity">[선택된 지역]</span> 회원별 이동 시간 및 비용 명세서</div>
+        <div class="result-section-title">🧾 3. <span id="receiptTitleCity">[선택된 지역]</span> 회원별 이동 명세서</div>
         <div id="personalReceiptContent"></div>
     </div>
 </div>
@@ -153,16 +156,30 @@
     const database = firebase.database();
     let calendarInstance;
     
-    // 글로벌 정산 캐시 스토리지 고정 고리 바인딩
-    let globalCityScores = [];
-    let globalDongScores = [];
+    // 글로벌 단일 실시간 정산 결과 저장소 바인딩
+    let globalFinalScores = [];
     let currentActiveMode = 'city'; 
 
     document.addEventListener("DOMContentLoaded", function() {
         calendarInstance = flatpickr("#calendar_input", {
             mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", "
         });
+        updatePresetLabelStyle();
     });
+
+    // 라디오 버튼 시각 쉴드 동기화 함수
+    function updatePresetLabelStyle() {
+        const selectedMode = document.querySelector('input[name="routing_mode_preset"]:checked').value;
+        const cityLabel = document.getElementById('label-mode-city');
+        const dongLabel = document.getElementById('label-mode-dong');
+        if(selectedMode === 'city') {
+            cityLabel.style.borderColor = '#3b82f6'; cityLabel.style.backgroundColor = '#eff6ff';
+            dongLabel.style.borderColor = '#cbd5e1'; dongLabel.style.backgroundColor = 'white';
+        } else {
+            dongLabel.style.borderColor = '#3b82f6'; dongLabel.style.backgroundColor = '#eff6ff';
+            cityLabel.style.borderColor = '#cbd5e1'; cityLabel.style.backgroundColor = 'white';
+        }
+    }
 
     function openKakaoAddressPopup() {
         new daum.Postcode({
@@ -251,7 +268,7 @@
         }
     }
 
-    // 🏙️ [모드 1 타겟망] 시청 단위 거점 리스트
+    // 🏙️ [도시 모드 풀] 시청군청 허브 타겟
     const cityTargets = [
         { name: "서울시청", lat: 37.5665, lng: 126.9780 },
         { name: "수원시청", lat: 37.2636, lng: 127.0286 },
@@ -264,7 +281,7 @@
         { name: "청주시청", lat: 36.6424, lng: 127.4890 }
     ];
 
-    // 📍 [모드 2 타겟망] 동/핫플 단위 세부 거점 리스트
+    // 📍 [동 모드 풀] 동네단위 핵심 핫플 통합 타겟
     const dongTargets = [
         { name: "서울 강남역/신논현", lat: 37.4979, lng: 127.0276 },
         { name: "서울 신촌/홍대입구", lat: 37.5565, lng: 126.9373 },
@@ -323,9 +340,13 @@
         });
         let candidateSchedules = Array.from(candidateMap.values()).sort((a, b) => b.score - a.score);
 
-        // 💥 기능 분리 핵심 처리 루틴: 도시형 스코어와 동네형 스코어 배열 완전 독립 분리 연산
-        globalCityScores = calculateRoutingWeights(cityTargets);
-        globalDongScores = calculateRoutingWeights(dongTargets);
+        // 💥 기획 수정 즉각 반영: 연산 전에 사전에 체크한 라디오 값을 가져와 풀 스위칭
+        const selectedMode = document.querySelector('input[name="routing_mode_preset"]:checked').value;
+        currentActiveMode = selectedMode; 
+
+        // 지정된 풀 단일 연산 수행 후 글로벌 보관소 단일화 안착
+        const targetPool = selectedMode === 'city' ? cityTargets : dongTargets;
+        globalFinalScores = calculateRoutingWeights(targetPool);
 
         setTimeout(() => {
             document.getElementById("loadingBar").style.display = "none";
@@ -342,7 +363,9 @@
             }
             document.getElementById("dateResultContent").innerHTML = dateHtml;
 
-            // 정산엔진 가동 즉시 현재 활성화된 탭에 맞는 위치 랭킹 강제 초기 드로잉
+            // 타이틀 텍스트 동적 분리 처리 고도화
+            document.getElementById("currentModeTitleText").innerHTML = selectedMode === 'city' ? "🏙️ 도시 단위 모드 결과" : "📍 동 단위 모드 결과";
+
             renderLocationRanking();
             document.getElementById("resultBox").style.display = "block";
         }, 500);
@@ -386,6 +409,7 @@
             if (maxDistance > 200) penaltyCost += (maxDistance * 800);
             else if (maxDistance > 50) penaltyCost += (maxDistance * 300);
 
+            // 💥 PRO FIX: rawTarget에 전체 target 객체를 온전히 바인딩하여 맵 이탈을 원천 차단합니다.
             scores.push({ name: target.name, cost: penaltyCost, maxDist: maxDistance, receipts: targetReceipts, rawTarget: target });
         });
 
@@ -393,38 +417,18 @@
         return scores;
     }
 
-    function switchRoutingMode(mode) {
-        currentActiveMode = mode;
-        
-        document.getElementById('tab-city').classList.remove('active');
-        document.getElementById('tab-dong').classList.remove('active');
-        
-        if (mode === 'city') document.getElementById('tab-city').classList.add('active');
-        else document.getElementById('tab-dong').classList.add('active');
-        
-        if (document.getElementById("resultBox").style.display === "block") {
-            renderLocationRanking();
-        }
-    }
-
-    // 💥 분리 렌더링 팩토리: 모드에 맞는 배열을 타겟팅하여 완전히 독립 표출
     function renderLocationRanking() {
-        let activeScores = currentActiveMode === 'city' ? globalCityScores : globalDongScores;
         let locHtml = "";
-        
-        if (!activeScores || activeScores.length === 0) {
-            document.getElementById("locationResultContent").innerHTML = "<div class='rank-item' style='color:#64748b;'>정산 엔진을 먼저 가동해 주세요.</div>";
-            return;
-        }
+        if (!globalFinalScores || globalFinalScores.length === 0) return;
 
-        activeScores.forEach((f, idx) => {
+        globalFinalScores.forEach((f, idx) => {
             let medal = idx === 0 ? "🥇 최적 후보지" : `${idx + 1}위`;
             let explanation = f.maxDist > 120 ? "⚠️ 장거리 이동 필요" : "⚖️ 균등 배분 완료";
             
             let foodLink = `https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 맛집")}`;
             let spotLink = `https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 가볼만한곳")}`;
 
-            // 💥 PRO FIX: 각 행에 고유 데이터 어트리뷰트(data-idx)를 주입하여 클릭 시 순위 변동 추적 무결점 매핑 처리
+            // 💥 PRO FIX: 각 행에 고유 데이터 어트리뷰트(data-idx) 및 명세서 스위칭 바인더 정상 조립
             locHtml += `
                 <div class="rank-item loc-rank-item" data-idx="${idx}" onclick="showReceiptForTarget(${idx})">
                     <div>
@@ -440,24 +444,21 @@
         });
         document.getElementById("locationResultContent").innerHTML = locHtml;
 
-        // 리스트를 다시 그릴 때마다 해당 모드의 1위 명세서를 상시 기본값으로 출력
+        // 초동 가동 시 1위 정보 자동 바인딩
         showReceiptForTarget(0);
     }
 
-    // 💥 PRO FIX: 1위뿐만 아니라 클릭한 행(idx)의 영수증 명세서와 길찾기 내비 링크를 즉각 동적 파싱 연동 처리하는 통합 서브엔진
+    // 💥 PRO FIX: 1위뿐만 아니라 클릭한 행(idx)의 영수증 명세서와 길찾기 내비 링크를 즉각 동적 파싱 연동 처리하는 완전체 모듈
     function showReceiptForTarget(idx) {
-        let activeScores = currentActiveMode === 'city' ? globalCityScores : globalDongScores;
-        if (!activeScores || activeScores.length === 0) return;
+        if (!globalFinalScores || globalFinalScores.length === 0) return;
         
-        let targetData = activeScores[idx];
+        let targetData = globalFinalScores[idx];
         if (!targetData) return;
         
-        // 거점 해상도 종류별 네이버 검색어 다변화 처리
-        let searchKeyword = currentActiveMode === 'city' ? `${targetData.name} 단체 펜션 숙소` : `${targetData.name} 단체 모임방 파티룸 카페`;
+        let searchKeyword = currentActiveMode === 'city' ? `${targetData.name} 단체 펜션 숙소` : `${targetData.name} 단체 모임방 파티룸`;
         let pensionHtml = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(searchKeyword)}" target="_blank" class="pension-link">💚 네이버 지도로 [${targetData.name}] 모임 장소/숙소 실시간 확인</a>`;
         document.getElementById("dynamicPensionLink").innerHTML = pensionHtml;
 
-        // 명세서 타이틀 클릭한 타겟 이름으로 강제 치환
         document.getElementById("receiptTitleCity").innerHTML = `[${targetData.name}]`;
 
         let receiptHtml = `<p style="font-size:12px; color:#475569; margin: 0 0 8px 0;">🎉 <strong>[${targetData.name}]</strong> 확정 시 멤버별 소요 시간 및 이동 비용 명세서입니다.</p>`;
@@ -466,10 +467,9 @@
             let costText = r.cost > 0 ? `${r.cost.toLocaleString()}원` : `0원 (카풀동승)`;
             
             let menuType = (r.transport === '자차' || r.transport === '자차 운전') ? 'car' : 'pubtrans';
-            let destinationName = targetData.name;
             
-            // 💥 클릭한 타겟의 실시간 좌표(targetData.rawTarget.lng/lat)를 연동하여 네이버 내비게이션 딥링크를 실시간 재생성하는 로직
-            let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},${encodeURIComponent(r.name+"출발")}/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(destinationName)}/-/${menuType}?c=15,0,0,0,dh`;
+            // 💥 PRO FIX: targets 배열을 탈피하고 targetData.rawTarget의 내부 GPS 값을 직결 매핑하여 404 및 팅김 현상을 완벽히 해결했습니다.
+            let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},${encodeURIComponent(r.name+"출발")}/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(targetData.name)}/-/${menuType}?c=15,0,0,0,dh`;
 
             receiptHtml += `
                 <div class="personal-receipt">
@@ -484,7 +484,7 @@
         });
         document.getElementById("personalReceiptContent").innerHTML = receiptHtml;
 
-        // 💥 고유 데이터 속성 기반 실시간 포커스 하이라이트 CSS 스타일링 전형 보정
+        // 고유 타겟 엘리먼트 실시간 포커싱 하이라이팅 제어
         let rankItems = document.querySelectorAll('.loc-rank-item');
         rankItems.forEach((el) => {
             let itemIdx = parseInt(el.getAttribute('data-idx'));
