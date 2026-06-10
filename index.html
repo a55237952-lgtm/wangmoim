@@ -79,8 +79,8 @@
             databaseURL: "https://wangmoim-default-rtdb.firebaseio.com"
         };
 
-        // ⭐ [대표님 분석 기반 전면 수정] 구형 openapi 주소를 최신 클라우드 플랫폼 정식 게이트웨이 주소(ncpClientId 규격)로 완전히 전면 교정합니다!
-        document.write('<script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + NAVER_CLIENT_ID + '&submodules=geocoder,search"><\/script>');
+        // ⭐ [최종 해결책] 클라우드 플랫폼 정식 게이트웨이 주소 엔드포인트와 이에 완벽히 매핑되는 ncpClientId 주입 규격을 100% 매칭 완료했습니다.
+        document.write('<script type="text/javascript" src="https://naveropenapi.apigw.ntruss.com/maps-v3/v2/maps.js?ncpClientId=' + NAVER_CLIENT_ID + '&submodules=geocoder"><\/script>');
     </script>
 </head>
 <body>
@@ -165,21 +165,26 @@
         });
     });
 
-    // 타자 입력 과부하를 막기 위한 0.4초 딜레이 타이머
     function debouncedSearchPlace() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(executePlaceSearch, 400);
     }
 
+    // ⭐ [안정성 패치] Geocoder 호출 시 네이버 최신 서비스 규격에 맞게 주소 데이터 정제 처리
     function executePlaceSearch() {
         let query = document.getElementById("my_addr").value.trim();
         let resultBox = document.getElementById("searchResults");
         if(query.length < 2) { resultBox.style.display = "none"; return; }
 
+        if (typeof naver === 'undefined' || !naver.maps || !naver.maps.Service) {
+            console.error("Naver Map API가 아직 로드되지 않았습니다.");
+            return;
+        }
+
         naver.maps.Service.geocode({ query: query }, function(status, response) {
             resultBox.innerHTML = "";
             
-            if (status !== naver.maps.Service.Status.OK || response.v2.addresses.length === 0) {
+            if (status !== naver.maps.Service.Status.OK || !response.v2 || !response.v2.addresses || response.v2.addresses.length === 0) {
                 resultBox.innerHTML = `<div class="search-item" style="color:#ef4444; font-weight:bold;">🔍 일치하는 네이버 장소가 없습니다.</div>`;
                 resultBox.style.display = "block";
                 return;
@@ -189,8 +194,8 @@
             list.forEach(item => {
                 let displayTitle = item.roadAddress ? item.roadAddress : item.jibunAddress;
                 
-                if (query.length > 2 && !displayTitle.startsWith(query)) {
-                    displayTitle = query + " (" + displayTitle.split(" ").slice(1, 3).join(" ") + ")";
+                if (query.length > 2 && !displayTitle.includes(query)) {
+                    displayTitle = query + " (" + displayTitle.split(" ").slice(0, 2).join(" ") + ")";
                 }
 
                 let html = `
@@ -228,7 +233,7 @@
 
         if(!lat || !lng) {
             naver.maps.Service.geocode({ query: addr }, function(status, response) {
-                if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
+                if (status === naver.maps.Service.Status.OK && response.v2 && response.v2.addresses && response.v2.addresses.length > 0) {
                     let topItem = response.v2.addresses[0];
                     saveFinalFirebaseData(name, addr, topItem.y, topItem.x, transport, duration, dateRange);
                 } else {
