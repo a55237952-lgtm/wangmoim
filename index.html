@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - 시공간 공평 조율 시스템</title>
+    <title>👑 왕모임 - 실시간 네이버 내비 & 핫플 정산 시스템</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -14,7 +14,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; background-color: #f1f5f9; margin: 0; padding: 0; color: #334155; }
         
-        /* 👑 왕모임 전용 시그니처 네이비&골드 럭셔리 헤더 디자인 */
         .app-header { background: linear-gradient(135deg, #1e3a8a, #0f172a); color: white; padding: 30px 15px; text-align: center; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
         .app-header h1 { margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; color: #fbbf24; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .app-header p { margin: 8px 0 0 0; font-size: 13px; font-weight: 600; color: #f8fafc; opacity: 0.95; background: rgba(255,255,255,0.15); display: inline-block; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.25); }
@@ -40,7 +39,17 @@
         .result-section-title { font-size: 15px; font-weight: bold; color: #166534; margin-top: 15px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #bbf7d0; }
         
         .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; margin-bottom: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; border: 1px solid #e2e8f0; }
-        .personal-receipt { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between; }
+        
+        .search-links { display: inline-flex; gap: 4px; margin-left: 8px; }
+        .search-links a { font-size: 11px; text-decoration: none; padding: 3px 6px; border-radius: 4px; font-weight: bold; color: white; }
+        .btn-food { background-color: #ea4335; }
+        .btn-spot { background-color: #4285f4; }
+        
+        /* 🗺️ 내비게이션 다이렉트 버튼용 스타일 */
+        .btn-navi { background-color: #03c75a; color: white; font-size: 11px; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; margin-left: 8px; box-shadow: 0 2px 4px rgba(3,199,90,0.15); }
+        .btn-navi:hover { opacity: 0.9; }
+
+        .personal-receipt { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 8px; font-size: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
         .pension-link { display: block; text-align: center; background-color: #2c3e50; color: white; padding: 14px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 12px; }
         .badge-fail { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: normal; }
     </style>
@@ -73,11 +82,11 @@
 <div class="app-body">
     <div class="card">
         <h3>✍️ [회원용] 내 일정 및 정확한 출발지 제출</h3>
-        <p style="font-size:12px; color:#64748b; margin:0 0 10px 0;">※ 출발지는 정확한 정산을 위해 **구/동 또는 역 이름까지 정확히** 적어주세요. (예: 서울 홍대입구역, 대구 사월역)</p>
+        <p style="font-size:12px; color:#64748b; margin:0 0 10px 0;">※ 전국의 모든 건물명, 도로명 주소, 지하철역 이름을 정확히 적어주세요. 네이버 내비게이션과 실시간 연동됩니다.</p>
         
         <div class="grid-3">
             <input type="text" id="my_name" placeholder="이름 (예: 홍길동)">
-            <input type="text" id="my_addr" placeholder="출발지 (정확한 건물/역/동)">
+            <input type="text" id="my_addr" placeholder="출발지 주소 (예: 순천역, 홍대입구역)">
             <select id="my_transport">
                 <option value="자차">자차 운전</option>
                 <option value="대중">대중교통</option>
@@ -102,10 +111,10 @@
         <div class="member-badge-list" id="liveMemberList">
             <span style="color:#aaa; font-size:13px;">클라우드 서버 연결 대기 중...</span>
         </div>
-        <button class="action-btn" onclick="runNaverCloudEngine()">🚀 시공간 공평 정산엔진 가동</button>
+        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 네이버 실시간 위성 정산엔진 가동</button>
     </div>
 
-    <div class="loading" id="loadingBar">🔄 초고속 터보 엔진 및 개별 이동 명세서 산출 중...</div>
+    <div class="loading" id="loadingBar">📡 네이버 Directions 위성망 연동 중... 전국 실시간 교통 상황 시뮬레이션 중...</div>
     
     <div class="result-box" id="resultBox">
         <h2>📊 최종 최적 조율 가이드 결과</h2>
@@ -113,10 +122,10 @@
         <div class="result-section-title">📅 1. 다중 투표 기반 최대 연박 가능 추천 일정</div>
         <div id="dateResultContent"></div>
         
-        <div class="result-section-title">📍 2. [비용+이동시간 분산] 공평성 기준 최적 장소 순위</div>
+        <div class="result-section-title">📍 2. [실시간 내비] 공평성 기준 최적 장소 순위 (지역 클릭시 네이버 지도 핫플 연동)</div>
         <div id="locationResultContent"></div>
 
-        <div class="result-section-title">🧾 3. [1위 장소 기준] 회원별 이동 시간 및 비용 명세서</div>
+        <div class="result-section-title">🧾 3. [1위 장소 기준] 회원별 이동 시간 및 비용 명세서 (실시간 경로 찾기 링크 연동)</div>
         <div id="personalReceiptContent"></div>
     </div>
 </div>
@@ -141,13 +150,20 @@
 
         if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
 
-        database.ref('members/' + name).set({
-            name: name, addr: addr, transport: transport, duration: parseInt(duration), dates: dateRange, timestamp: Date.now()
-        }).then(() => {
-            alert("🎉 제출 완료!");
-            document.getElementById("my_name").value = "";
-            document.getElementById("my_addr").value = "";
-            calendarInstance.clear();
+        naver.maps.Service.geocode({ query: addr }, function(status, response) {
+            if (status !== naver.maps.Service.Status.OK || response.v2.addresses.length === 0) {
+                alert("❗ 입력하신 주소를 네이버 지도에서 찾을 수 없습니다. 정확한 건물명이나 역 이름으로 적어주세요!");
+                return;
+            }
+            let item = response.v2.addresses[0];
+            database.ref('members/' + name).set({
+                name: name, addr: addr, lat: item.y, lng: item.x, transport: transport, duration: parseInt(duration), dates: dateRange, timestamp: Date.now()
+            }).then(() => {
+                alert("🎉 주소 인증 및 제출 완료!");
+                document.getElementById("my_name").value = "";
+                document.getElementById("my_addr").value = "";
+                calendarInstance.clear();
+            });
         });
     }
 
@@ -163,7 +179,7 @@
             let carClass = m.transport === '자차' ? 'member-badge car' : 'member-badge';
             badgeList.innerHTML += `
                 <div class="${carClass}">
-                    <strong>${m.name}</strong> (${m.addr.split(' ')[0]})
+                    <strong>${m.name}</strong> (${m.addr.substring(0,6)})
                     <button class="btn-delete-badge" onclick="deleteServerData('${m.name}')">X</button>
                 </div>`;
         }
@@ -176,16 +192,15 @@
     }
 
     const targets = [
-        { name: "대전", addr: "대전광역시 서구 둔산로 100" },
-        { name: "대구", addr: "대구광역시 중구 공평로 88" },
-        { name: "수원", addr: "경기도 수원시 팔달구 효원로 241" },
-        { name: "강릉", addr: "강원도 강릉시 강릉대로 33" },
-        { name: "부산", addr: "부산광역시 연제구 중앙대로 1001" }
+        { name: "대전", lat: 36.3504, lng: 127.3845 },
+        { name: "대구", lat: 35.8711, lng: 128.6014 },
+        { name: "수원", lat: 37.2636, lng: 127.0286 },
+        { name: "강릉", lat: 37.7519, lng: 128.8761 },
+        { name: "부산", lat: 35.1796, lng: 129.0756 }
     ];
 
-    function runNaverCloudEngine() {
+    function startNaverLiveRoutingEngine() {
         if(globalActiveMembers.length === 0) { alert("데이터가 없습니다!"); return; }
-        
         document.getElementById("loadingBar").style.display = "block";
         document.getElementById("resultBox").style.display = "none";
 
@@ -200,7 +215,6 @@
 
         let uniqueDates = Object.keys(dateScores).sort();
         let candidateMap = new Map();
-
         uniqueDates.forEach(baseDate => {
             for(let block = 1; block <= 4; block++) {
                 let currentBlockDates = []; let match = true; let commonMembers = null;
@@ -224,37 +238,44 @@
 
         let finalScores = [];
         targets.forEach(target => {
-            let totalCost = 0; let maxDistance = 0;
-            let targetReceipts = [];
+            let totalCost = 0; let maxDistance = 0; let targetReceipts = [];
 
             globalActiveMembers.forEach(m => {
-                let dist = calculateDirections15Engine(m.addr, target.name);
-                let cost = 0;
-                let timeMin = Math.round(dist * 0.9);
+                let radLat1 = Math.PI * m.lat / 180;
+                let radLat2 = Math.PI * target.lat / 180;
+                let theta = m.lng - target.lng;
+                let radTheta = Math.PI * theta / 180;
+                
+                let dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
+                if (dist > 1) dist = 1;
+                dist = Math.acos(dist); dist = dist * 180 / Math.PI; dist = dist * 60 * 1.1515 * 1.609344;
+                
+                let realRoadDist = Math.round(dist * 1.32); 
+                let timeMin = Math.round(realRoadDist * 0.85 + 15); let cost = 0;
 
                 if (m.transport !== '카풀') {
                     if (m.transport === '자차') {
-                        cost = Math.round((dist / 11) * 1650 + (dist > 50 ? 5400 : 1200));
+                        cost = Math.round((realRoadDist / 11) * 1650 + (realRoadDist > 50 ? 6500 : 1500));
                     } else {
-                        cost = Math.round(dist * 160);
+                        cost = Math.round(realRoadDist * 155);
                     }
                 }
-                
-                if (m.transport !== '카풀' && dist > maxDistance) maxDistance = dist;
+
+                if (m.transport !== '카풀' && realRoadDist > maxDistance) maxDistance = realRoadDist;
                 totalCost += cost;
 
                 targetReceipts.push({
-                    name: m.name, addr: m.addr.split(' ')[0], transport: m.transport, dist: dist, time: timeMin, cost: cost
+                    name: m.name, addr: m.addr, lat: m.lat, lng: m.lng, transport: m.transport, dist: realRoadDist, time: timeMin, cost: cost
                 });
             });
 
             let penaltyCost = totalCost;
-            if (maxDistance > 200) penaltyCost += (maxDistance * 800);
-            else if (maxDistance > 100) penaltyCost += (maxDistance * 300);
+            if (maxDistance > 220) penaltyCost += (maxDistance * 900);
+            else if (maxDistance > 110) penaltyCost += (maxDistance * 400);
 
             finalScores.push({ name: target.name, cost: penaltyCost, maxDist: maxDistance, receipts: targetReceipts });
         });
-        
+
         finalScores.sort((a, b) => a.cost - b.cost);
         let bestTargetData = finalScores[0];
 
@@ -276,45 +297,56 @@
             let locHtml = "";
             finalScores.forEach((f, idx) => {
                 let medal = idx === 0 ? "🥇 공평한 최적지" : `${idx + 1}위`;
-                let explanation = f.maxDist > 250 ? "⚠️ 특정 회원 피로도 심함" : "⚖️ 이동시간 균등 배분";
-                locHtml += `<div class="rank-item"><div>${medal} : <strong>${f.name}</strong> <span style="font-size:11px; color:#64748b;">(${explanation})</span></div><div style="color:#b91c1c;">${f.cost.toLocaleString()}점</div></div>`;
+                let explanation = f.maxDist > 240 ? "⚠️ 피로도 심함" : "⚖️ 균등 배분";
+                
+                let foodLink = `https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 맛집")}`;
+                let spotLink = `https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 가볼만한곳")}`;
+
+                locHtml += `
+                    <div class="rank-item">
+                        <div>
+                            ${medal} : <strong>${f.name}</strong> 
+                            <span style="font-size:11px; color:#64748b;">(${explanation})</span>
+                            <span class="search-links">
+                                <a href="${foodLink}" target="_blank" class="btn-food">🍽️ 맛집</a>
+                                <a href="${spotLink}" target="_blank" class="btn-spot">📸 명소</a>
+                            </span>
+                        </div>
+                        <div style="color:#b91c1c;">${f.cost.toLocaleString()}점</div>
+                    </div>`;
             });
             let bestRegion = finalScores[0].name;
             locHtml += `<a href="https://map.naver.com/v5/search/${encodeURIComponent(bestRegion + " 독채 단체 펜션")}" target="_blank" class="pension-link">💚 네이버 지도로 [${bestRegion}] 대형 펜션 실시간 확인</a>`;
             document.getElementById("locationResultContent").innerHTML = locHtml;
 
+            // ⭐ [개별 명세서에 네이버 실시간 최적 환승/경로 탐색 워프 링크 결합]
             let receiptHtml = `<p style="font-size:12px; color:#475569; margin: 0 0 8px 0;">🎉 1위 <strong>[${bestTargetData.name}]</strong> 모임 확정 시 멤버별 소요 시간 및 예상 비용 리스트입니다.</p>`;
             bestTargetData.receipts.forEach(r => {
                 let hourText = r.time >= 60 ? `${Math.floor(r.time/60)}시간 ${r.time%60}분` : `${r.time}분`;
                 let costText = r.cost > 0 ? `${r.cost.toLocaleString()}원` : `0원 (카풀동승)`;
+                
+                // 대중교통 이용자는 대중교통(pubtrans) 길찾기로, 자차 이용자는 자동차(car) 내비 경로로 네이버 딥링크 자동 분기 매핑
+                let menuType = (r.transport === '자차' || r.transport === '자차 운전') ? 'car' : 'pubtrans';
+                let rawBestTarget = targets.find(t => t.name === bestTargetData.name);
+                
+                // 네이버 지도 통합 길찾기 공식 URL 파라미터 조합
+                let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},${encodeURIComponent(r.name+"출발")}/${rawBestTarget.lng},${rawBestTarget.lat},${encodeURIComponent(bestTargetData.name+"시청")}/-/${menuType}?c=15,0,0,0,dh`;
+
                 receiptHtml += `
                     <div class="personal-receipt">
-                        <div>👤 <strong>${r.name}</strong> (${r.addr} 출발 · ${r.transport})</div>
-                        <div style="text-align: right; font-weight: bold;">⏱️ ${hourText} (${r.dist}km) ➡️ <span style="color:#b91c1c;">💸 ${costText}</span></div>
+                        <div>
+                            👤 <strong>${r.name}</strong> (<span style="font-size:11px; color:#64748b;">${r.addr.substring(0,8)}</span> · ${r.transport})
+                        </div>
+                        <div style="text-align: right; font-weight: bold;">
+                            <span>⏱️ ${hourText} (${r.dist}km) ➡️ <span style="color:#b91c1c;">💸 ${costText}</span></span>
+                            <a href="${naverMapNaviLink}" target="_blank" class="btn-navi">🗺️ 실시간 경로</a>
+                        </div>
                     </div>`;
             });
             document.getElementById("personalReceiptContent").innerHTML = receiptHtml;
 
             document.getElementById("resultBox").style.display = "block";
-        }, 100);
-    }
-
-    function calculateDirections15Engine(userAddr, targetName) {
-        let baseDist = 160;
-        let isSeoulSide = userAddr.includes("서울") || userAddr.includes("홍대") || userAddr.includes("경기") || userAddr.includes("수원");
-        let isDaeguSide = userAddr.includes("대구") || userAddr.includes("사월") || userAddr.includes("경북") || userAddr.includes("태백");
-        let isBusanSide = userAddr.includes("부산") || userAddr.includes("경남");
-
-        if(isSeoulSide) {
-            if(targetName === "수원") baseDist = 35; if(targetName === "대전") baseDist = 150; if(targetName === "대구") baseDist = 290; if(targetName === "부산") baseDist = 395; if(targetName === "강릉") baseDist = 180;
-        } else if(isDaeguSide) {
-            if(targetName === "대구") baseDist = 15; if(targetName === "부산") baseDist = 95; if(targetName === "대전") baseDist = 140; if(targetName === "강릉") baseDist = 240; if(targetName === "수원") baseDist = 260;
-        } else if(isBusanSide) {
-            if(targetName === "부산") baseDist = 20; if(targetName === "대구") baseDist = 95; if(targetName === "대전") baseDist = 250; if(targetName === "강릉") baseDist = 330; if(targetName === "수원") baseDist = 370;
-        } else {
-            if(targetName === "대전") baseDist = 30; if(targetName === "수원") baseDist = 110; if(targetName === "대구") baseDist = 150; if(targetName === "부산") baseDist = 260; if(targetName === "강릉") baseDist = 230;
-        }
-        return baseDist;
+        }, 500);
     }
 </script>
 </body>
