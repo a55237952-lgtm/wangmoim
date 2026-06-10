@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - PRO 시공간 균등 조율 시스템 (무결점 버전)</title>
+    <title>👑 왕모임 - PRO 대한민국 전역 다이내믹 스캔 시스템</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -64,11 +64,17 @@
         .badge-fail { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: normal; }
         .time-badge { background: #e0e7ff; color: #1d4ed8; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid #bfdbfe; display: inline-block; margin-bottom: 4px; }
         .deviation-badge { background: #fef2f2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 11px; border: 1px solid #fee2e2; font-weight: normal; }
+
+        #postcode_overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 999999; }
+        #postcode_box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 92%; max-width: 450px; height: 550px; max-height: 80vh; background: #fff; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        #postcode_header { background: #fbbf24; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #d97706; }
+        #postcode_embed { flex: 1; width: 100%; height: 100%; -webkit-overflow-scrolling: touch; }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?clientId=n3o9fho7nl&submodules=geocoder"></script>
     
     <script>
         const firebaseConfig = {
@@ -81,15 +87,25 @@
 </head>
 <body>
 
+<div id="postcode_overlay">
+    <div id="postcode_box">
+        <div id="postcode_header">
+            <span style="font-weight: 900; color: #1e293b;">📍 우체국 주소 검색</span>
+            <button onclick="closeKakaoAddressPopup()" style="background: #ef4444; color: #fff; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer;">닫기 X</button>
+        </div>
+        <div id="postcode_embed"></div>
+    </div>
+</div>
+
 <div class="app-header">
     <h1>👑 왕모임 (WangMoim)</h1>
-    <p>PRO 시간 균등 배분 및 시공간 다중 조율 시스템</p>
+    <p>PRO 대한민국 전역 무제한 다이내믹 스캔 엔진</p>
 </div>
 
 <div class="app-body">
     <div class="card">
         <h3>✍️ [회원용] 내 유동적 출발지 및 이동수단 제출</h3>
-        <p style="font-size:11px; color:#64748b; margin:0 0 10px 0;">* 출발 가능한 주소나 수단이 여러 개라면 모두 등록하세요. 시스템이 가장 시간 낭비가 적은 최적안을 고릅니다.</p>
+        <p style="font-size:11px; color:#64748b; margin:0 0 10px 0;">* 출발 주소나 수단이 2개 이상이면 모두 등록하세요. 엔진이 비용과 시간 편차가 최소화되는 경로를 찾습니다.</p>
         
         <input type="text" id="my_name" placeholder="이름 (예: 홍길동)" style="margin-bottom: 10px;">
         
@@ -123,34 +139,34 @@
     </div>
 
     <div class="card">
-        <h3>📊 [총무용] 균등 이동시간 정산 엔진 가동</h3>
+        <h3>📊 [총무용] 무제한 영토 스캔 엔진 가동</h3>
         <div class="member-badge-list" id="liveMemberList" style="margin-bottom: 15px;">
             <span style="color:#aaa; font-size:13px;">서버 데이터 동기화 중...</span>
         </div>
         
         <div style="margin-bottom: 15px;">
             <label style="font-size: 12px; font-weight: bold; color: #e67e22; display: block; margin-bottom: 6px;">⏰ 목표 집결 시간 (역산 출발 시간표 생성용)</label>
-            <input type="text" id="assembly_time" placeholder="시간 선택 (예: 오후 2시 00분)">
+            <input type="text" id="assembly_time" placeholder="시간 선택 (예: 14:00)">
         </div>
 
         <div style="margin-bottom: 15px;">
-            <label style="font-size: 12px; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 8px;">⚙️ 행정구역 탐색 스케일 설정</label>
+            <label style="font-size: 12px; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 8px;">⚙️ 행정구역 탐색 해상도 설정</label>
             <div style="display: flex; gap: 8px;">
                 <label style="flex: 1; background: #eff6ff; padding: 12px; border: 2px solid #3b82f6; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; font-size: 12px; display: block;" id="label-mode-city">
-                    <input type="radio" name="routing_mode_preset" value="city" checked onchange="updatePresetLabelStyle()" style="margin-right: 4px;"> 🏙️ 시·군청 단위 (지역 거점 중심)
+                    <input type="radio" name="routing_mode_preset" value="city" checked onchange="updatePresetLabelStyle()" style="margin-right: 4px;"> 🏙️ 시·군·구 (광역 스캔)
                 </label>
                 <label style="flex: 1; background: white; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; font-size: 12px; display: block;" id="label-mode-dong">
-                    <input type="radio" name="routing_mode_preset" value="dong" onchange="updatePresetLabelStyle()" style="margin-right: 4px;"> 📍 읍·면·동 단위 (상세 핫플 중심)
+                    <input type="radio" name="routing_mode_preset" value="dong" onchange="updatePresetLabelStyle()" style="margin-right: 4px;"> 📍 읍·면·동 (정밀 스캔)
                 </label>
             </div>
         </div>
         
-        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 시공간 균등 조율 엔진 가동</button>
+        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 대한민국 전역 다이내믹 스캔 가동</button>
     </div>
 
     <div class="loading" id="loadingBar">
         <div class="loading-spinner"></div>
-        <div id="loadingText">이동시간 편차를 최소화하는 공평한 목적지를 스캔 중입니다...</div>
+        <div id="loadingText">대한민국 전 영토를 바둑판으로 쪼개어 수학적 중심지를 스캔 중입니다...</div>
     </div>
     
     <div class="result-box" id="resultBox">
@@ -160,12 +176,12 @@
         <div id="dateResultContent"></div>
         <div style="font-size: 13px; font-weight: bold; color: #e67e22; background: #fff7ed; padding: 8px; border-radius: 6px; margin-top: 8px; border: 1px dashed #fdba74;" id="display_assembly_time"></div>
 
-        <div class="result-section-title">📍 2. 시간 편차 최소화 정밀 순위 <span style="color:#ef4444; font-weight: bold;">(순위 행을 누르면 하단 명세서 연동!)</span></div>
+        <div class="result-section-title">📍 2. 지리적 평형 핀셋 추출 결과 <span style="color:#ef4444; font-weight: bold;">(행을 누르면 명세서 연동!)</span></div>
         <div id="locationResultContent"></div>
         
         <div id="dynamicPensionLink"></div>
         
-        <div class="result-section-title">🧾 3. <span id="receiptTitleCity">[선택된 지역]</span> 개인별 역산 출발 시간표 및 명세서</div>
+        <div class="result-section-title">🧾 3. <span id="receiptTitleCity">[선택된 지역]</span> 개인별 맞춤 타임라인 및 명세서</div>
         <div id="personalReceiptContent"></div>
     </div>
 </div>
@@ -183,9 +199,8 @@
         calendarInstance = flatpickr("#calendar_input", {
             mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", "
         });
-        // 시간 입력창 초기 설정
         timePickerInstance = flatpickr("#assembly_time", {
-            enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: false, defaultDate: "14:00"
+            enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "14:00"
         });
         updatePresetLabelStyle();
     });
@@ -217,28 +232,37 @@
     }
 
     function openKakaoAddressPopup(targetIdx) {
+        document.getElementById('postcode_overlay').style.display = 'block';
+        let embedBox = document.getElementById('postcode_embed');
+        embedBox.innerHTML = ""; 
+
         new daum.Postcode({
             oncomplete: function(data) {
                 let fullAddress = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
                 if(data.buildingName) fullAddress += " (" + data.buildingName + ")";
                 document.getElementById('my_addr' + targetIdx).value = fullAddress;
                 
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.roadAddress || data.jibunAddress)}`)
-                .then(res => res.json())
-                .then(geoData => {
-                    if(geoData && geoData.length > 0) {
-                        document.getElementById('selected_lat' + targetIdx).value = geoData[0].lat;
-                        document.getElementById('selected_lng' + targetIdx).value = geoData[0].lon;
-                    } else {
-                        document.getElementById('selected_lat' + targetIdx).value = 37.5665;
-                        document.getElementById('selected_lng' + targetIdx).value = 126.9780;
-                    }
-                }).catch(err => {
-                    document.getElementById('selected_lat' + targetIdx).value = 37.5665;
-                    document.getElementById('selected_lng' + targetIdx).value = 126.9780;
-                });
-            }
-        }).open(); 
+                if (typeof naver !== 'undefined' && naver.maps.Service) {
+                    naver.maps.Service.geocode({ query: fullAddress }, function(status, response) {
+                        if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
+                            document.getElementById('selected_lat' + targetIdx).value = response.v2.addresses[0].y;
+                            document.getElementById('selected_lng' + targetIdx).value = response.v2.addresses[0].x;
+                        } else {
+                            document.getElementById('selected_lat' + targetIdx).value = 37.5665;
+                            document.getElementById('selected_lng' + targetIdx).value = 126.9780;
+                        }
+                    });
+                }
+                closeKakaoAddressPopup();
+            },
+            width: '100%',
+            height: '100%'
+        }).embed(embedBox); 
+    }
+
+    function closeKakaoAddressPopup() {
+        document.getElementById('postcode_overlay').style.display = 'none';
+        document.getElementById('postcode_embed').innerHTML = "";
     }
 
     function sendToGoogleCloudServer() {
@@ -284,7 +308,6 @@
         
         for(let key in data) {
             let m = data[key]; 
-            // 💥 [안전장치 1] 구형 데이터베이스 완벽 호환 변환기
             if(!m.locations && m.lat && m.lng) {
                 m.locations = [{ addr: m.addr || "이전 주소", lat: parseFloat(m.lat), lng: parseFloat(m.lng) }];
             }
@@ -310,29 +333,7 @@
         }
     }
 
-    const baseRegionalHubs = [
-        { name: "경남 산청군청", lat: 35.4141, lng: 127.8791, type: "city" },
-        { name: "전북 무주군청", lat: 36.0068, lng: 127.6607, type: "city" },
-        { name: "충북 단양군청", lat: 36.9845, lng: 128.3648, type: "city" },
-        { name: "강원 가평군청", lat: 37.8314, lng: 127.5095, type: "city" },
-        { name: "충남 태안군청", lat: 36.7551, lng: 126.2981, type: "city" },
-        { name: "경북 영덕군청", lat: 36.4150, lng: 129.3653, type: "city" },
-        { name: "남해군청 광장", lat: 34.8377, lng: 127.8924, type: "city" },
-        { name: "대전시청", lat: 36.3504, lng: 127.3845, type: "city" },
-        { name: "대구시청", lat: 35.8711, lng: 128.6014, type: "city" },
-        { name: "서울시청", lat: 37.5665, lng: 126.9780, type: "city" },
-        { name: "부산시청", lat: 35.1796, lng: 129.0756, type: "city" },
-        { name: "광주시청", lat: 35.1595, lng: 126.8526, type: "city" },
-        { name: "경남 산청읍 수계리", lat: 35.4162, lng: 127.8812, type: "dong" },
-        { name: "전북 무주읍 당산리", lat: 36.0091, lng: 127.6621, type: "dong" },
-        { name: "강원 가평읍 달전리", lat: 37.8066, lng: 127.5252, type: "dong" },
-        { name: "대구 동성로", lat: 35.8655, lng: 128.5934, type: "dong" },
-        { name: "대구 동대구역", lat: 35.8779, lng: 128.6285, type: "dong" },
-        { name: "대전 둔산동", lat: 36.3528, lng: 127.3789, type: "dong" },
-        { name: "서울 강남역", lat: 37.4979, lng: 127.0276, type: "dong" },
-        { name: "부산 서면", lat: 35.1577, lng: 129.0591, type: "dong" }
-    ];
-
+    // 💥 [핵심 기능 1] 대한민국 전역 스캔 주소 변환기
     async function extractKoreanAddress(lat, lng, mode) {
         try {
             let res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=ko`);
@@ -343,8 +344,9 @@
                 let p2 = addr.city || addr.county || addr.town || "";
                 if(p1 === p2) p1 = ""; 
                 let p3 = addr.suburb || addr.borough || addr.village || addr.neighbourhood || addr.quarter || addr.city_district || "";
+                
                 let base = `${p1} ${p2}`.trim();
-                return mode === 'city' ? (base || "대한민국 중심 거점") : `${base} ${p3}`.replace(/\s+/g, ' ').trim();
+                return mode === 'city' ? (base || "대한민국 최적 군/구") : `${base} ${p3}`.replace(/\s+/g, ' ').trim();
             }
             return null;
         } catch(e) { return null; }
@@ -353,17 +355,16 @@
     async function startNaverLiveRoutingEngine() {
         if(globalActiveMembers.length === 0) { alert("데이터가 없습니다!"); return; }
         
-        // 💥 [안전장치 2] 시간 파싱 에러(NaN) 원천 방지 폴백 로직
         let timeVal = document.getElementById("assembly_time").value;
         if(timeVal && timeVal.includes(":")) {
             let parts = timeVal.split(":");
             currentAssemblyTimeMins = parseInt(parts[0]) * 60 + parseInt(parts[1]);
         } else {
-            currentAssemblyTimeMins = 14 * 60; // 14:00 (오후 2시) 기본값 고정
+            currentAssemblyTimeMins = 14 * 60; 
         }
 
         document.getElementById("loadingBar").style.display = "flex";
-        document.getElementById("loadingText").innerText = "⏳ 시간 편차 밸런스를 잡기 위해 대한민국 영토 전역을 위성 스캔 중입니다...";
+        document.getElementById("loadingText").innerText = "⏳ 대한민국 영토를 바둑판으로 쪼개어 멤버들의 수학적 무게 중심을 찾고 있습니다...";
         document.getElementById("resultBox").style.display = "none";
 
         let dateScores = {};
@@ -400,7 +401,7 @@
 
         const selectedMode = document.querySelector('input[name="routing_mode_preset"]:checked').value;
         
-        // 💥 [안전장치 3] 좌표 평균점 연산 시 0으로 나누기 방지
+        // 💥 [핵심 기능 2] 하드코딩 리스트 삭제 완료! -> 100% 동적 위성 그리드 생성
         let sumLat = 0, sumLng = 0, validCount = 0;
         globalActiveMembers.forEach(m => {
             if(m.locations && m.locations.length > 0 && !isNaN(m.locations[0].lat)) {
@@ -408,55 +409,48 @@
             }
         });
         
-        // 만약 유효 좌표가 아예 없다면 대전 중심으로 강제 세팅 (에러 회피)
         let centerLat = validCount > 0 ? (sumLat / validCount) : 36.3504;
         let centerLng = validCount > 0 ? (sumLng / validCount) : 127.3845;
 
+        // 멤버들의 평균 중심점 주변으로 49개의 가상 위성 좌표(Grid)를 바둑판처럼 찍어냅니다.
         let searchPool = [];
-        let step = selectedMode === 'city' ? 0.14 : 0.03; 
-        for(let i = -2; i <= 2; i++) {
-            for(let j = -2; j <= 2; j++) {
+        let step = selectedMode === 'city' ? 0.08 : 0.02; // 광역 단위는 약 8km 간격, 동 단위는 2km 간격으로 정밀 타격
+        for(let i = -3; i <= 3; i++) {
+            for(let j = -3; j <= 3; j++) {
                 searchPool.push({ name: "스캔 좌표", lat: centerLat + (i * step), lng: centerLng + (j * step) });
             }
         }
-        baseRegionalHubs.forEach(hub => {
-            if(hub.type === selectedMode) searchPool.push(hub);
-        });
 
-        // 💥 순수 수학적 평형성 연산 (임의 페널티 전부 소각됨)
+        // 로컬 CPU를 이용해 49개 좌표 중 이동 비용 및 시간 편차가 가장 적은 곳을 수학적으로 찾아냅니다. (통신 0번)
         let tempScores = searchPool.map(pt => calculatePROBalancedWeights(pt, currentAssemblyTimeMins));
         tempScores.sort((a, b) => a.finalScore - b.finalScore);
 
-        document.getElementById("loadingText").innerText = "🗺️ 선별된 최적지 정보의 실제 행정 주소를 파싱하고 있습니다...";
+        document.getElementById("loadingText").innerText = "🗺️ 선별된 상위 3곳의 위성 좌표를 실제 주소명으로 역추적하고 있습니다...";
         globalFinalScores = [];
         let usedNames = new Set();
 
+        // 가장 우수한 좌표 3개의 실제 지명을 위성 API를 통해 가져옵니다. (디도스 차단 회피형 핀셋 추출)
         for(let i = 0; i < tempScores.length; i++) {
             if(globalFinalScores.length >= 3) break; 
             let ptData = tempScores[i];
             
-            let nameSeed = ptData.name;
-            if (ptData.name === "스캔 좌표") {
-                nameSeed = await extractKoreanAddress(ptData.rawTarget.lat, ptData.rawTarget.lng, selectedMode);
+            let nameSeed = await extractKoreanAddress(ptData.rawTarget.lat, ptData.rawTarget.lng, selectedMode);
+            
+            if(!nameSeed || nameSeed.includes("undefined") || nameSeed.trim() === "") {
+                continue; // 바다, 깊은 산속 등 주소가 없는 곳은 스킵하고 다음 좌표 탐색
             }
             
-            // 💥 [안전장치 4] 무료 위성 API 차단 시, 빈 화면(백지) 대신 가상 이름 강제 부여 
-            if(!nameSeed || nameSeed.includes("undefined")) {
-                nameSeed = selectedMode === 'city' ? `대한민국 최적 거점 (위성통신 대기중)` : `최적 중심 동네 (위성통신 대기중)`;
+            if(!usedNames.has(nameSeed)) {
+                usedNames.add(nameSeed);
+                ptData.name = nameSeed;
+                globalFinalScores.push(ptData);
             }
-            
-            // 중복된 이름이 나올 경우 뒤에 숫자를 붙여서라도 무조건 리스트를 띄움
-            let uniqueName = nameSeed;
-            let nCnt = 1;
-            while(usedNames.has(uniqueName)) {
-                uniqueName = `${nameSeed} (${nCnt++})`;
-            }
-            
-            usedNames.add(uniqueName);
-            ptData.name = uniqueName;
-            globalFinalScores.push(ptData);
-            
-            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+
+        // 만약 3개를 못 채우면 오류 방지용 안전장치
+        if(globalFinalScores.length === 0) {
+             globalFinalScores.push(tempScores[0]);
+             globalFinalScores[0].name = "대한민국 최적 중심 좌표점";
         }
 
         document.getElementById("loadingBar").style.display = "none";
@@ -477,13 +471,12 @@
         let ampm = aH < 12 ? "오전" : "오후"; let fH = aH % 12 === 0 ? 12 : aH % 12;
         document.getElementById("display_assembly_time").innerHTML = `⏰ 목표 집결 시간: <strong>${ampm} ${fH}시 ${aM.toString().padStart(2, '0')}분</strong> <span style="font-size:11px; color:#9a3412;">(네이버 지도에서 정확한 배차 확인 필요)</span>`;
 
-        document.getElementById("currentModeTitleText").innerHTML = selectedMode === 'city' ? "🏙️ [도시 모드]" : "📍 [동 단위 모드]";
+        document.getElementById("currentModeTitleText").innerHTML = selectedMode === 'city' ? "🏙️ [시·군·구]" : "📍 [읍·면·동]";
 
         renderLocationRanking();
         document.getElementById("resultBox").style.display = "block";
     }
 
-    // 🧠 순수 소요비용, 순수 소요시간의 종합 편차 밸런스 연산
     function calculatePROBalancedWeights(targetCoords, assembleMins) {
         let targetReceipts = [];
         let totalCost = 0;
@@ -517,7 +510,6 @@
                     let departMins = assembleMins - timeMin;
                     if (departMins < 0) departMins += 24 * 60; 
 
-                    // 💥 페널티 없이 오직 순수한 경제적 기회비용만을 계산하여 유저에게 유리한 안을 고름
                     let comboScore = cost + (timeMin * 200); 
                     if (comboScore < bestComboScore) {
                         bestComboScore = comboScore;
@@ -532,7 +524,6 @@
             });
         });
 
-        // 멤버들의 시간 격차 폭탄 페널티 
         let travelTimes = targetReceipts.map(r => r.time);
         let maxTime = Math.max(...travelTimes);
         let minTime = Math.min(...travelTimes);
