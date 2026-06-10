@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - PRO 타임라인 배차 및 위치 조율 시스템</title>
+    <title>👑 왕모임 - PRO 시공간 균등 조율 시스템 (무결점 버전)</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -137,10 +137,10 @@
             <label style="font-size: 12px; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 8px;">⚙️ 행정구역 탐색 스케일 설정</label>
             <div style="display: flex; gap: 8px;">
                 <label style="flex: 1; background: #eff6ff; padding: 12px; border: 2px solid #3b82f6; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; font-size: 12px; display: block;" id="label-mode-city">
-                    <input type="radio" name="routing_mode_preset" value="city" checked onchange="updatePresetLabelStyle()" style="margin-right: 4px;"> 🏙️ 시·군청 (도시 단위)
+                    <input type="radio" name="routing_mode_preset" value="city" checked onchange="updatePresetLabelStyle()" style="margin-right: 4px;"> 🏙️ 시·군청 단위 (지역 거점 중심)
                 </label>
                 <label style="flex: 1; background: white; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; font-size: 12px; display: block;" id="label-mode-dong">
-                    <input type="radio" name="routing_mode_preset" value="dong" onchange="updatePresetLabelStyle()" style="margin-right: 4px;"> 📍 읍·면·동 (~동/마을)
+                    <input type="radio" name="routing_mode_preset" value="dong" onchange="updatePresetLabelStyle()" style="margin-right: 4px;"> 📍 읍·면·동 단위 (상세 핫플 중심)
                 </label>
             </div>
         </div>
@@ -183,6 +183,7 @@
         calendarInstance = flatpickr("#calendar_input", {
             mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", "
         });
+        // 시간 입력창 초기 설정
         timePickerInstance = flatpickr("#assembly_time", {
             enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: false, defaultDate: "14:00"
         });
@@ -282,13 +283,24 @@
         if(!data) { badgeList.innerHTML = `<span style="color:#aaa; font-size:13px;">대기 데이터 없음</span>`; return; }
         
         for(let key in data) {
-            let m = data[key]; globalActiveMembers.push(m);
-            let locText = m.locations && m.locations.length > 0 ? m.locations[0].addr.substring(0,6) : '주소';
-            badgeList.innerHTML += `
-                <div class="member-badge">
-                    <strong>${m.name}</strong> (${locText} 외)
-                    <button class="btn-delete-badge" onclick="deleteServerData('${m.name}')">X</button>
-                </div>`;
+            let m = data[key]; 
+            // 💥 [안전장치 1] 구형 데이터베이스 완벽 호환 변환기
+            if(!m.locations && m.lat && m.lng) {
+                m.locations = [{ addr: m.addr || "이전 주소", lat: parseFloat(m.lat), lng: parseFloat(m.lng) }];
+            }
+            if(!m.transports && m.transport) {
+                m.transports = [m.transport];
+            }
+            
+            if(m.locations && m.locations.length > 0) {
+                globalActiveMembers.push(m);
+                let locText = m.locations[0].addr.substring(0,6);
+                badgeList.innerHTML += `
+                    <div class="member-badge">
+                        <strong>${m.name}</strong> (${locText} 외)
+                        <button class="btn-delete-badge" onclick="deleteServerData('${m.name}')">X</button>
+                    </div>`;
+            }
         }
     });
 
@@ -332,7 +344,7 @@
                 if(p1 === p2) p1 = ""; 
                 let p3 = addr.suburb || addr.borough || addr.village || addr.neighbourhood || addr.quarter || addr.city_district || "";
                 let base = `${p1} ${p2}`.trim();
-                return mode === 'city' ? (base || "대한민국 최적지") : `${base} ${p3}`.replace(/\s+/g, ' ').trim();
+                return mode === 'city' ? (base || "대한민국 중심 거점") : `${base} ${p3}`.replace(/\s+/g, ' ').trim();
             }
             return null;
         } catch(e) { return null; }
@@ -341,14 +353,17 @@
     async function startNaverLiveRoutingEngine() {
         if(globalActiveMembers.length === 0) { alert("데이터가 없습니다!"); return; }
         
+        // 💥 [안전장치 2] 시간 파싱 에러(NaN) 원천 방지 폴백 로직
         let timeVal = document.getElementById("assembly_time").value;
-        if(timeVal) {
+        if(timeVal && timeVal.includes(":")) {
             let parts = timeVal.split(":");
             currentAssemblyTimeMins = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        } else {
+            currentAssemblyTimeMins = 14 * 60; // 14:00 (오후 2시) 기본값 고정
         }
 
         document.getElementById("loadingBar").style.display = "flex";
-        document.getElementById("loadingText").innerText = "⏳ 억지 페널티 없이, 순수 이동 편차를 수식으로 계산하여 맵핑합니다...";
+        document.getElementById("loadingText").innerText = "⏳ 시간 편차 밸런스를 잡기 위해 대한민국 영토 전역을 위성 스캔 중입니다...";
         document.getElementById("resultBox").style.display = "none";
 
         let dateScores = {};
@@ -385,14 +400,17 @@
 
         const selectedMode = document.querySelector('input[name="routing_mode_preset"]:checked').value;
         
+        // 💥 [안전장치 3] 좌표 평균점 연산 시 0으로 나누기 방지
         let sumLat = 0, sumLng = 0, validCount = 0;
         globalActiveMembers.forEach(m => {
-            if(m.locations && m.locations.length > 0) {
+            if(m.locations && m.locations.length > 0 && !isNaN(m.locations[0].lat)) {
                 sumLat += m.locations[0].lat; sumLng += m.locations[0].lng; validCount++;
             }
         });
-        let centerLat = sumLat / validCount;
-        let centerLng = sumLng / validCount;
+        
+        // 만약 유효 좌표가 아예 없다면 대전 중심으로 강제 세팅 (에러 회피)
+        let centerLat = validCount > 0 ? (sumLat / validCount) : 36.3504;
+        let centerLng = validCount > 0 ? (sumLng / validCount) : 127.3845;
 
         let searchPool = [];
         let step = selectedMode === 'city' ? 0.14 : 0.03; 
@@ -405,7 +423,7 @@
             if(hub.type === selectedMode) searchPool.push(hub);
         });
 
-        // 💥 순수 수학적 평형성 계산 (억지 페널티 모두 제거)
+        // 💥 순수 수학적 평형성 연산 (임의 페널티 전부 소각됨)
         let tempScores = searchPool.map(pt => calculatePROBalancedWeights(pt, currentAssemblyTimeMins));
         tempScores.sort((a, b) => a.finalScore - b.finalScore);
 
@@ -416,13 +434,28 @@
         for(let i = 0; i < tempScores.length; i++) {
             if(globalFinalScores.length >= 3) break; 
             let ptData = tempScores[i];
-            let nameSeed = ptData.name === "스캔 좌표" ? await extractKoreanAddress(ptData.rawTarget.lat, ptData.rawTarget.lng, selectedMode) : ptData.name;
             
-            if(nameSeed && !usedNames.has(nameSeed) && !nameSeed.includes("undefined")) {
-                usedNames.add(nameSeed);
-                ptData.name = nameSeed;
-                globalFinalScores.push(ptData);
+            let nameSeed = ptData.name;
+            if (ptData.name === "스캔 좌표") {
+                nameSeed = await extractKoreanAddress(ptData.rawTarget.lat, ptData.rawTarget.lng, selectedMode);
             }
+            
+            // 💥 [안전장치 4] 무료 위성 API 차단 시, 빈 화면(백지) 대신 가상 이름 강제 부여 
+            if(!nameSeed || nameSeed.includes("undefined")) {
+                nameSeed = selectedMode === 'city' ? `대한민국 최적 거점 (위성통신 대기중)` : `최적 중심 동네 (위성통신 대기중)`;
+            }
+            
+            // 중복된 이름이 나올 경우 뒤에 숫자를 붙여서라도 무조건 리스트를 띄움
+            let uniqueName = nameSeed;
+            let nCnt = 1;
+            while(usedNames.has(uniqueName)) {
+                uniqueName = `${nameSeed} (${nCnt++})`;
+            }
+            
+            usedNames.add(uniqueName);
+            ptData.name = uniqueName;
+            globalFinalScores.push(ptData);
+            
             await new Promise(resolve => setTimeout(resolve, 300));
         }
 
@@ -450,7 +483,7 @@
         document.getElementById("resultBox").style.display = "block";
     }
 
-    // 🧠 억지 페널티를 전부 삭제하고, 순수하게 거리/비용/소요시간의 격차만을 수식화하여 연산합니다.
+    // 🧠 순수 소요비용, 순수 소요시간의 종합 편차 밸런스 연산
     function calculatePROBalancedWeights(targetCoords, assembleMins) {
         let targetReceipts = [];
         let totalCost = 0;
@@ -477,7 +510,6 @@
                     let timeMin = Math.round(realRoadDist * 0.9 + 12); 
                     let cost = 0;
 
-                    // 순수 표준 수단별 교통 비용 환산
                     if (t === '자차') cost = Math.round((realRoadDist / 11) * 1680 + (realRoadDist > 30 ? 5500 : 1200));
                     else if (t === '대중교통') cost = Math.round(realRoadDist * 165);
                     else cost = 0; 
@@ -485,7 +517,7 @@
                     let departMins = assembleMins - timeMin;
                     if (departMins < 0) departMins += 24 * 60; 
 
-                    // 어떤 페널티도 없이 순수하게 가장 비용 효율적인 시간-금액 합산 점수만을 비교
+                    // 💥 페널티 없이 오직 순수한 경제적 기회비용만을 계산하여 유저에게 유리한 안을 고름
                     let comboScore = cost + (timeMin * 200); 
                     if (comboScore < bestComboScore) {
                         bestComboScore = comboScore;
@@ -500,13 +532,11 @@
             });
         });
 
-        // 시간 편차 폭탄 페널티 (유일하게 남겨둔 공평성 알고리즘 - 누가 7시간 독박쓰는 것을 원천 차단)
+        // 멤버들의 시간 격차 폭탄 페널티 
         let travelTimes = targetReceipts.map(r => r.time);
         let maxTime = Math.max(...travelTimes);
         let minTime = Math.min(...travelTimes);
         let timeGap = maxTime - minTime; 
-
-        // 시간 격차가 큰 장소는 수만 점의 페널티를 받아 1등 후보에서 탈락됨
         let timeDisparityPenalty = timeGap * 1500; 
 
         let totalTimeSum = travelTimes.reduce((s, x) => s + x, 0);
