@@ -79,8 +79,8 @@
             databaseURL: "https://wangmoim-default-rtdb.firebaseio.com"
         };
 
-        // ⭐ [버그 해결] submodules 뒤에 geocoder와 search를 듀얼로 완벽하게 주입하여 401 에러를 영구 박멸합니다.
-        document.write('<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + NAVER_CLIENT_ID + '&submodules=geocoder,search"><\/script>');
+        // ⭐ [대표님 분석 기반 전면 수정] 구형 openapi 주소를 최신 클라우드 플랫폼 정식 게이트웨이 주소(ncpClientId 규격)로 완전히 전면 교정합니다!
+        document.write('<script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + NAVER_CLIENT_ID + '&submodules=geocoder,search"><\/script>');
     </script>
 </head>
 <body>
@@ -165,12 +165,12 @@
         });
     });
 
+    // 타자 입력 과부하를 막기 위한 0.4초 딜레이 타이머
     function debouncedSearchPlace() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(executePlaceSearch, 400);
     }
 
-    // ⭐ [UI 가독성 혁신 패치] 사용자가 입력한 검색 명칭과 도로명 주소가 깔끔하게 바인딩되도록 전면 개선
     function executePlaceSearch() {
         let query = document.getElementById("my_addr").value.trim();
         let resultBox = document.getElementById("searchResults");
@@ -187,10 +187,8 @@
 
             let list = response.v2.addresses.slice(0, 5);
             list.forEach(item => {
-                // 네이버가 내뱉는 원형 매칭 주소를 유저 화면용 타이틀로 세련되게 치환
                 let displayTitle = item.roadAddress ? item.roadAddress : item.jibunAddress;
                 
-                // 역 이름이나 고유 상호가 입력에 포함된 경우 검색어를 타이틀 전면에 강조 배치
                 if (query.length > 2 && !displayTitle.startsWith(query)) {
                     displayTitle = query + " (" + displayTitle.split(" ").slice(1, 3).join(" ") + ")";
                 }
