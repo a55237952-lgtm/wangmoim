@@ -22,14 +22,14 @@
         .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border: 1px solid #e2e8f0; position: relative; }
         .card h3 { margin-top: 0; margin-bottom: 12px; font-size: 15px; color: #1e293b; }
         
-        /* 💥 출발지 입력창과 버튼을 가로로 정렬하기 위한 그리드 */
-        .grid-3 { display: grid; grid-template-columns: 1fr 1.5fr 1fr 1.2fr; gap: 8px; margin-bottom: 10px; align-items: center; }
+        /* 💥 가로 정렬 레이아웃 균형 패치 */
+        .grid-3 { display: grid; grid-template-columns: 0.8fr 1.5fr 0.8fr 1fr; gap: 6px; margin-bottom: 10px; align-items: center; }
         .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 10px; }
         input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; }
         
-        /* 🔥 대표님이 말씀하신 전용 [주소 검색] 독립형 버튼 디자인 */
-        .btn-addr-trigger { width: 100%; padding: 12px 0; background-color: #eab308; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn-addr-trigger:hover { background-color: #ca8a04; }
+        /* 🔍 [주소 검색] 독립형 노란색 버튼 */
+        .btn-addr-trigger { width: 100%; padding: 12px 0; background-color: #fbbf24; color: #1e293b; border: 1px solid #d97706; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn-addr-trigger:hover { background-color: #f59e0b; }
 
         button.btn-submit { width: 100%; background: #03c75a; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 6px rgba(3,199,90,0.2); }
         button.action-btn { width: 100%; background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(230,126,34,0.25); margin-top: 10px; }
@@ -57,16 +57,18 @@
         .pension-link { display: block; text-align: center; background-color: #2c3e50; color: white; padding: 14px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 12px; }
         .badge-fail { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: normal; }
 
-        /* 💥 보안 차단 방지용 격리 오버레이 하우징 스타일 */
-        #kakaoWrap { display: none; position: fixed; top: 50%; left: 50%; width: 95%; max-width: 500px; height: 480px; transform: translate(-50%, -50%); border: 3px solid #eab308; border-radius: 12px; background: #fff; z-index: 999999; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; }
-        #kakaoHeader { background: #fef08a; padding: 10px; font-weight: bold; text-align: right; border-bottom: 1px solid #cbd5e1; color: #854d0e; }
-        #kakaoCloseBtn { background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        /* ⭐ [CSS 하우징 레이아웃 혁신 완료] 카카오 엔진이 마음 놓고 그림을 그릴 수 있도록 영역 비율을 완벽 교정했습니다. */
+        #kakaoWrap { display: none; position: fixed; top: 50%; left: 50%; width: 95%; max-width: 500px; height: 500px; transform: translate(-50%, -50%); border: 3px solid #fbbf24; border-radius: 12px; background: #fff; z-index: 999999 !important; box-shadow: 0 12px 36px rgba(0,0,0,0.35); overflow: hidden; }
+        #kakaoHeader { background: #fef08a; padding: 12px; font-weight: bold; text-align: right; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; }
+        #kakaoHeader span { color: #854d0e; font-size: 14px; }
+        #kakaoCloseBtn { background: #ef4444; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; box-shadow: 0 2px 4px rgba(239,68,68,0.2); }
+        #kakaoLayer { width: 100% !important; height: 445px !important; background: #fff; min-height: 440px; }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
-    <script src="https://ssl.daumcdn.net/external/postcode/v2.js"></script>
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     
     <script>
         const firebaseConfig = {
@@ -86,9 +88,10 @@
 
 <div id="kakaoWrap">
     <div id="kakaoHeader">
+        <span>📍 우체국 정밀 주소 검색</span>
         <button id="kakaoCloseBtn" onclick="closeKakaoLayer()">창 닫기 X</button>
     </div>
-    <div id="kakaoLayer" style="width:100%; height:430px; -webkit-overflow-scrolling:touch;"></div>
+    <div id="kakaoLayer"></div>
 </div>
 
 <div class="app-body">
@@ -158,10 +161,13 @@
         });
     });
 
+    // ⭐ [임베드 메커니즘 엔진 고도화] 카카오 객체가 타겟 디렉토리를 100% 가득 채워 화면을 무조건 강제 표출시킵니다.
     function openKakaoAddressPopup() {
         var element_layer = document.getElementById('kakaoLayer');
         var element_wrap = document.getElementById('kakaoWrap');
         
+        // 레이어 초기 갱신 및 오픈
+        element_layer.innerHTML = "";
         element_wrap.style.display = 'block';
         
         new daum.Postcode({
@@ -172,6 +178,7 @@
                 }
                 document.getElementById("my_addr").value = fullAddress;
                 
+                // 오픈 소스 기반 경량 정밀 GPS 수치 좌표 연산 필터망 연동
                 fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.roadAddress || data.jibunAddress)}`)
                 .then(res => res.json())
                 .then(geoData => {
