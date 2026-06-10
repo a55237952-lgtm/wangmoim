@@ -26,7 +26,6 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 10px; }
         input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; }
         
-        /* 🔍 실시간 장소 검색 결과 리스트창 스타일 */
         .search-container { position: relative; }
         .search-results-box { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 2px solid #03c75a; border-radius: 8px; z-index: 9999; max-height: 250px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.15); margin-top: 4px; }
         .search-item { padding: 12px; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
@@ -79,7 +78,7 @@
             databaseURL: "https://wangmoim-default-rtdb.firebaseio.com"
         };
 
-        // ⭐ [끝장 패치] 어떤 성격의 AI/Maps 계정이든 우회하여 401을 깨부수는 정식 스크립트 상호운용 매핑 라인입니다.
+        // ⭐ 주소와 파라미터 규격을 완벽히 일치시킨 최종 스크립트 로더입니다.
         document.write('<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?clientId=' + NAVER_CLIENT_ID + '&submodules=geocoder"><\/script>');
     </script>
 </head>
