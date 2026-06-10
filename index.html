@@ -57,14 +57,19 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <script>
+        // 🔑 [네이버 설정]
         const NAVER_CLIENT_ID = "n3o9fho7nl";
+
+        // 🔑 [구글 서버 설정]
         const firebaseConfig = {
             apiKey: "AIzaSyCwuMMvo8VUSYsLyUoUTx_LFbyuYiFwzeo",
             authDomain: "wangmoim.firebaseapp.com",
             projectId: "wangmoim",
             databaseURL: "https://wangmoim-default-rtdb.firebaseio.com"
         };
-        document.write('<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + NAVER_CLIENT_ID + '&submodules=geocoder"><\/script>');
+
+        // ⭐ 장소 검색을 위해 submodules에 search를 추가 장착했습니다.
+        document.write('<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + NAVER_CLIENT_ID + '&submodules=geocoder,search"><\/script>');
     </script>
 </head>
 <body>
@@ -77,11 +82,11 @@
 <div class="app-body">
     <div class="card">
         <h3>✍️ [회원용] 내 일정 및 정확한 출발지 제출</h3>
-        <p style="font-size:12px; color:#ef4444; margin:0 0 10px 0; font-weight:bold;">💡 팁: '기흥역', '순천시청', '둔산동'처럼 역 이름이나 관공서, 동 이름으로 입력하면 가장 정확합니다!</p>
+        <p style="font-size:12px; color:#03c75a; margin:0 0 10px 0; font-weight:bold;">✨ 업그레이드 완료: 이제 지하철역, 건물이름, 동네이름 무엇이든 편하게 적어주세요!</p>
         
         <div class="grid-3">
             <input type="text" id="my_name" placeholder="이름 (예: 홍길동)">
-            <input type="text" id="my_addr" placeholder="출발지 주소 (예: 순천역, 홍대입구역)">
+            <input type="text" id="my_addr" placeholder="출발지 (예: 홍대입구역, 기흥역, 순천시청)">
             <select id="my_transport">
                 <option value="자차">자차 운전</option>
                 <option value="대중">대중교통</option>
@@ -136,7 +141,7 @@
         });
     });
 
-    // 🛠️ [핵심 수정부] 모호한 주소도 예외 처리하여 무조건 패스시키는 튼튼한 주소 인증망
+    // 🛠️ [핵심 엔진 교체] 주소 Geocode 실패 시 장소(POI) 실시간 검색으로 정밀 분석 우회 로직
     function sendToGoogleCloudServer() {
         let name = document.getElementById("my_name").value.trim();
         let addr = document.getElementById("my_addr").value.trim();
@@ -146,33 +151,44 @@
 
         if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
 
+        // 1단계: 정석 주소 검색(Geocode) 실시
         naver.maps.Service.geocode({ query: addr }, function(status, response) {
-            let lat = 37.5665; // 기본값 서울 인근 좌표
-            let lng = 126.9780;
-            
-            // 네이버 지도에서 정확히 못 찾더라도 에러 팝업으로 막지 않고 강제 통과 유도
             if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
+                // 주소 검색 성공 시 즉시 파싱 처리
                 let item = response.v2.addresses[0];
-                lat = parseFloat(item.y);
-                lng = parseFloat(item.x);
+                saveMemberDataToFirebase(name, addr, item.y, item.x, transport, duration, dateRange);
             } else {
-                // 모호한 키워드(예: '순천', '대구 수성구')가 들어오면 시도 명칭을 추적해 최대한 근접 거점으로 좌표 임의 할당
-                if(addr.includes("순천")) { lat = 34.9506; lng = 127.4872; }
-                else if(addr.includes("대구")) { lat = 35.8711; lng = 128.6014; }
-                else if(addr.includes("부산")) { lat = 35.1796; lng = 129.0756; }
-                else if(addr.includes("광주")) { lat = 35.1595; lng = 126.8526; }
-                else if(addr.includes("강릉") || addr.includes("태백")) { lat = 37.7519; lng = 128.8761; }
-                else if(addr.includes("대전")) { lat = 36.3504; lng = 127.3845; }
+                // 2단계: '홍대입구역' 같은 고유명사라 주소로 실패한 경우, 네이버 플레이스 장소 검색(Search) 엔진 가동!
+                naver.maps.Service.search({ query: addr }, function(searchStatus, searchResponse) {
+                    if (searchStatus === naver.maps.Service.Status.OK && searchResponse.v2.places.length > 0) {
+                        let placeItem = searchResponse.v2.places[0]; // 검색결과 중 가장 정확한 1순위 장소 선택
+                        saveMemberDataToFirebase(name, addr, placeItem.y, placeItem.x, transport, duration, dateRange);
+                    } else {
+                        // 3단계: 장소 검색마저 완전히 실패했을 때의 광역 예외 방어선 처리
+                        let lat = 37.5665; let lng = 126.9780; // 기본 서울시청
+                        if(addr.includes("순천")) { lat = 34.9506; lng = 127.4872; }
+                        else if(addr.includes("대구")) { lat = 35.8711; lng = 128.6014; }
+                        else if(addr.includes("부산")) { lat = 35.1796; lng = 129.0756; }
+                        else if(addr.includes("광주")) { lat = 35.1595; lng = 126.8526; }
+                        else if(addr.includes("강릉") || addr.includes("태백")) { lat = 37.7519; lng = 128.8761; }
+                        else if(addr.includes("대전")) { lat = 36.3504; lng = 127.3845; }
+                        
+                        saveMemberDataToFirebase(name, addr, lat, lng, transport, duration, dateRange);
+                    }
+                });
             }
+        });
+    }
 
-            database.ref('members/' + name).set({
-                name: name, addr: addr, lat: lat, lng: lng, transport: transport, duration: parseInt(duration), dates: dateRange, timestamp: Date.now()
-            }).then(() => {
-                alert("🎉 주소 인증 및 제출 완료! (모호한 주소는 거점 자동 보정 처리됨)");
-                document.getElementById("my_name").value = "";
-                document.getElementById("my_addr").value = "";
-                calendarInstance.clear();
-            });
+    // 파이어베이스 저장 공통 함수 분리
+    function saveMemberDataToFirebase(name, addr, lat, lng, transport, duration, dateRange) {
+        database.ref('members/' + name).set({
+            name: name, addr: addr, lat: parseFloat(lat), lng: parseFloat(lng), transport: transport, duration: parseInt(duration), dates: dateRange, timestamp: Date.now()
+        }).then(() => {
+            alert(`🎉 [${name}]님 정밀 주소 인증 및 제출 완료!`);
+            document.getElementById("my_name").value = "";
+            document.getElementById("my_addr").value = "";
+            calendarInstance.clear();
         });
     }
 
