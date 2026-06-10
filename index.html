@@ -26,7 +26,7 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 10px; }
         input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; }
         
-        /* 🔍 대한민국 통상 주소 검색창 전용 스타일 */
+        /* 🔍 카카오 주소 검색 인풋 전용 스타일 (노란색 강조로 직관성 부여) */
         input.btn-addr-search { background-color: #fef08a; border: 2px solid #eab308; font-weight: bold; cursor: pointer; color: #854d0e; text-align: left; }
         input.btn-addr-search:hover { background-color: #fef9c3; }
 
@@ -144,22 +144,17 @@
         });
     });
 
-    // 💥 [핵심 기능] 대한민국 표준 우체국 주소창 팝업 실행 모듈
+    // 💥 [핵심 기능] 카카오 엔진 구동 및 GPS 경량 위경도 추출 연동 모듈
     function openKakaoAddressPopup() {
         new daum.Postcode({
             oncomplete: function(data) {
-                // 사용자가 선택한 도로명 주소 또는 지번 주소 확정 추출
                 let fullAddress = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
-                
-                // 건물명이 존재하면 가독성을 위해 추가 바인딩 (예: 홍대 인근 건물이름)
                 if(data.buildingName) {
                     fullAddress += " (" + data.buildingName + ")";
                 }
-                
                 document.getElementById("my_addr").value = fullAddress;
                 
-                // 주소창에서 선택이 끝나면, 공공 오픈 카카오 지오코딩 API를 활용해 위경도 즉각 추출
-                // 별도의 인증 키 없이 주소 문자열만으로 위도 경도를 연산하는 백업 레이어 탑재
+                // 오픈 소스 기반 위경도 추출 레이어 연동
                 fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.roadAddress || data.jibunAddress)}`)
                 .then(res => res.json())
                 .then(geoData => {
@@ -167,7 +162,6 @@
                         document.getElementById("selected_lat").value = geoData[0].lat;
                         document.getElementById("selected_lng").value = geoData[0].lon;
                     } else {
-                        // 만약 정밀 좌표 연산 실패 시 시청 방어선 레이어 구동
                         let bLat = 37.5665; let bLng = 126.9780;
                         if(fullAddress.includes("대구") || fullAddress.includes("사월")) { bLat = 35.8394; bLng = 128.7247; }
                         else if(fullAddress.includes("부산")) { bLat = 35.1148; bLng = 129.0416; }
@@ -177,7 +171,6 @@
                         document.getElementById("selected_lng").value = bLng;
                     }
                 }).catch(err => {
-                    // 크래시 방지 기본 좌표 주입
                     document.getElementById("selected_lat").value = 37.5665;
                     document.getElementById("selected_lng").value = 126.9780;
                 });
@@ -197,7 +190,6 @@
 
         if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
 
-        // 만약 좌표 주입 타이밍이 어긋났을 경우 최종 방어 보정 레이어
         if(!lat || !lng) {
             lat = 37.5665; lng = 126.9780;
             if(addr.includes("대구") || addr.includes("사월")) { lat = 35.8394; lng = 128.7247; }
