@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👥 우리 계모임 시공간 공평 조율 시스템 v14.0</title>
+    <title>👥 우리 계모임 시공간 공평 조율 시스템 v14.1</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -45,10 +45,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
     <script>
-        // 🔑 [네이버 설정] 네이버 MAP Client ID 입력
+        // 🔑 [네이버 설정]
         const NAVER_CLIENT_ID = "n3o9fho7nl";
 
-        // 🔑 [구글 서버 설정] 구글 Firebase 키 4가지 입력
+        // 🔑 [구글 서버 설정]
         const firebaseConfig = {
             apiKey: "AIzaSyCwuMMvo8VUSYsLyUoUTx_LFbyuYiFwzeo",
             authDomain: "wangmoim.firebaseapp.com",
@@ -62,12 +62,11 @@
 <body>
 
 <div class="app-header">
-    <h1>👥 계모임 시공간 공평 조율 시스템 v14.0</h1>
-    <p>다중 날짜 콕콕 투표 기능 및 이동시간 피로도 상쇄 공평 정산 알고리즘 탑재</p>
+    <h1>👥 계모임 시공간 공평 조율 시스템 v14.1</h1>
+    <p>경량화 터보 연산 알고리즘 적용 버전 · 장소 및 날짜 실시간 0.5초 정산</p>
 </div>
 
 <div class="app-body">
-    
     <div class="card">
         <h3>✍️ [회원용] 내 일정 및 정확한 출발지 제출</h3>
         <p style="font-size:12px; color:#64748b; margin:0 0 10px 0;">※ 출발지는 정확한 정산을 위해 **구/동 또는 역 이름까지 정확히** 적어주세요. (예: 서울 홍대입구역, 대구 사월역)</p>
@@ -102,14 +101,12 @@
         <button class="action-btn" onclick="runNaverCloudEngine()">🚀 시공간 공평 정산엔진 가동</button>
     </div>
 
-    <div class="loading" id="loadingBar">🔄 네이버 위성 내비게이션망 연동 및 원거리 참석자 이동시간 피로도 시뮬레이션 중...</div>
+    <div class="loading" id="loadingBar">🔄 초고속 터보 엔진 가동 중...</div>
     
     <div class="result-box" id="resultBox">
         <h2>📊 최종 최적 조율 가이드 결과</h2>
-        
         <div class="result-section-title">📅 1. 다중 투표 기반 최대 연박 가능 추천 일정</div>
         <div id="dateResultContent"></div>
-
         <div class="result-section-title">📍 2. [비용+이동시간 분산] 공평성 기준 최적 장소 순위</div>
         <div id="locationResultContent"></div>
     </div>
@@ -121,13 +118,8 @@
     let calendarInstance;
 
     document.addEventListener("DOMContentLoaded", function() {
-        // 1번 해결책: 연달아서 긁는게 아닌, 콕콕 찍어서 멀티플 선택이 가능한 달력 모드로 전환
         calendarInstance = flatpickr("#calendar_input", {
-            mode: "multiple",
-            locale: "ko",
-            dateFormat: "Y-m-d",
-            minDate: "today",
-            conjunction: ", "
+            mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", "
         });
     });
 
@@ -138,14 +130,12 @@
         let duration = document.getElementById("my_duration").value;
         let dateRange = document.getElementById("calendar_input").value;
 
-        if(!name || !addr || !dateRange) {
-            alert("이름, 정확한 출발지 주소, 달력 투표를 모두 완료해 주세요!"); return;
-        }
+        if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
 
         database.ref('members/' + name).set({
             name: name, addr: addr, transport: transport, duration: parseInt(duration), dates: dateRange, timestamp: Date.now()
         }).then(() => {
-            alert("🎉 성공적으로 제출되었습니다!");
+            alert("🎉 제출 완료!");
             document.getElementById("my_name").value = "";
             document.getElementById("my_addr").value = "";
             calendarInstance.clear();
@@ -156,19 +146,12 @@
     database.ref('members').on('value', (snapshot) => {
         const data = snapshot.val();
         const badgeList = document.getElementById("liveMemberList");
-        badgeList.innerHTML = "";
-        globalActiveMembers = [];
-
-        if(!data) {
-            badgeList.innerHTML = `<span style="color:#aaa; font-size:13px;">아직 대기 중인 회원 정보가 없습니다.</span>`;
-            return;
-        }
-
+        badgeList.innerHTML = ""; globalActiveMembers = [];
+        if(!data) { badgeList.innerHTML = `<span style="color:#aaa; font-size:13px;">대기 데이터 없음</span>`; return; }
         for(let key in data) {
-            let m = data[key];
-            globalActiveMembers.push(m);
+            let m = data[key]; globalActiveMembers.push(m);
             let carClass = m.transport === '자차' ? 'member-badge car' : 'member-badge';
-            badgeList.innerHTML += `<div class="${carClass}"><strong>${m.name}</strong> (${m.addr.split(' ')[0]} / ${m.duration}박)</div>`;
+            badgeList.innerHTML += `<div class="${carClass}"><strong>${m.name}</strong> (${m.addr.split(' ')[0]})</div>`;
         }
     });
 
@@ -186,99 +169,76 @@
         document.getElementById("loadingBar").style.display = "block";
         document.getElementById("resultBox").style.display = "none";
 
-        // --- PART 1: 멀티 투표 날짜 교집합 매칭 엔진 ---
+        // --- 고속 알고리즘 리팩토링 공간 ---
         let dateScores = {};
         globalActiveMembers.forEach(m => {
-            let mDates = m.dates.split(", ");
-            mDates.forEach(dStr => {
-                let d = dStr.trim();
-                if(!dateScores[d]) dateScores[d] = { count: 0, members: [] };
-                dateScores[d].count += 1;
-                dateScores[d].members.push(m.name);
+            m.dates.split(", ").forEach(dStr => {
+                let d = dStr.trim(); if(!d) return;
+                if(!dateScores[d]) dateScores[d] = { count: 0, members: new Set() };
+                dateScores[d].count += 1; dateScores[d].members.add(m.name);
             });
         });
 
-        let sortedDates = Object.keys(dateScores).sort();
-        let candidateSchedules = [];
+        let uniqueDates = Object.keys(dateScores).sort();
+        let candidateMap = new Map();
 
-        // 연속된 연박 덩어리 추출 알고리즘
-        for(let i=0; i<sortedDates.length; i++) {
-            let baseDate = sortedDates[i];
-            
-            for(let block = 1; block <= 4; block++) { // 1박부터 4박까지 조사
-                let match = true;
+        uniqueDates.forEach(baseDate => {
+            for(let block = 1; block <= 4; block++) {
                 let currentBlockDates = [];
-                let commonMembers = [...globalActiveMembers.map(m => m.name)];
+                let match = true;
+                let commonMembers = null;
 
-                for(let j=0; j<=block; j++) {
-                    let d = new Date(baseDate);
-                    d.setDate(d.getDate() + j);
+                for(let j = 0; j <= block; j++) {
+                    let d = new Date(baseDate); d.setDate(d.getDate() + j);
                     let dStr = d.toISOString().split('T')[0];
                     currentBlockDates.push(dStr);
 
                     if(dateScores[dStr]) {
-                        commonMembers = commonMembers.filter(x => dateScores[dStr].members.includes(x));
-                    } else {
-                        match = false;
+                        if(commonMembers === null) commonMembers = new Set(dateScores[dStr].members);
+                        else commonMembers = new Set([...commonMembers].filter(x => dateScores[dStr].members.has(x)));
+                    } else { match = false; break; }
+                }
+
+                if(match && commonMembers && commonMembers.size > 0) {
+                    let key = `${currentBlockDates[0]} ~ ${currentBlockDates[currentBlockDates.length-1]} (${block}박 ${block+1}일)`;
+                    if(!candidateMap.has(key) || candidateMap.get(key).score < commonMembers.size) {
+                        candidateMap.set(key, { text: key, score: commonMembers.size, attendees: Array.from(commonMembers) });
                     }
                 }
-
-                if(match && commonMembers.length > 0) {
-                    candidateSchedules.push({
-                        text: `${currentBlockDates[0]} ~ ${currentBlockDates[currentBlockDates.length-1]} (${block}박 ${block+1}일)`,
-                        score: commonMembers.length,
-                        attendees: commonMembers
-                    });
-                }
             }
-        }
-        candidateSchedules.sort((a, b) => b.score - a.score);
+        });
 
-        // --- PART 3: 시공간 공평성 기반 장소 조율 알고리즘 ---
+        let candidateSchedules = Array.from(candidateMap.values()).sort((a, b) => b.score - a.score);
+
+        // --- 장소 가중치 연산 고속화 ---
         let finalScores = [];
         targets.forEach(target => {
-            let totalCost = 0;
-            let maxDistance = 0; // 3번 해결책: 가장 멀리서 오는 사람의 거리(시간 피로도 기여분)
-
+            let totalCost = 0; let maxDistance = 0;
             globalActiveMembers.forEach(m => {
                 if (m.transport === '카풀') return;
-                
                 let dist = calculateDirections15Engine(m.addr, target.name);
-                if (dist > maxDistance) maxDistance = dist; // 가장 고통받는 원거리 이용자 추적
-
-                // 유류비 + 톨비 시뮬레이션
-                if (m.transport === '자차') {
-                    totalCost += ((dist / 11) * 1650 + (dist > 50 ? 5400 : 1200));
-                } else {
-                    totalCost += (dist * 160); // 대중교통비 비례 산정
-                }
+                if (dist > maxDistance) maxDistance = dist;
+                if (m.transport === '자차') totalCost += ((dist / 11) * 1650 + (dist > 50 ? 5400 : 1200));
+                else totalCost += (dist * 160);
             });
-
-            // ⚖️ [핵심 패널티 추가] 특정 누군가가 편도 200km 이상 독박 운전/장거리 이동을 해야 할 경우,
-            // 장거리 이동 가중치(시간 피로도 환산값)를 총비용에 엄청나게 더해버려서 순위에서 격하시킴!
-            if (maxDistance > 200) {
-                totalCost += (maxDistance * 800); // 200km 이상 원거리 고통 가중치 반영
-            } else if (maxDistance > 100) {
-                totalCost += (maxDistance * 300);
-            }
-
+            if (maxDistance > 200) totalCost += (maxDistance * 800);
+            else if (maxDistance > 100) totalCost += (maxDistance * 300);
             finalScores.push({ name: target.name, cost: Math.round(totalCost), maxDist: maxDistance });
         });
-        
         finalScores.sort((a, b) => a.cost - b.cost);
 
+        // 0.1초 연산 후 즉시 렌더링
         setTimeout(() => {
             document.getElementById("loadingBar").style.display = "none";
-
             let dateHtml = "";
             if(candidateSchedules.length === 0) {
-                dateHtml = "<div style='color:#ef4444;'>회원들의 분산 투표 날짜 중 겹치는 연박 일정이 없습니다. 일정을 더 추가해 주세요.</div>";
+                dateHtml = "<div>겹치는 일정이 없습니다.</div>";
             } else {
                 candidateSchedules.slice(0, 3).forEach((s, idx) => {
                     let medal = idx === 0 ? "🥇 최다 인원 가능" : `${idx + 1}순위`;
                     let absents = globalActiveMembers.filter(m => !s.attendees.includes(m.name)).map(m => m.name);
-                    let absentText = absents.length > 0 ? `<span class="badge-fail">❌ 조정필요: ${absents.join(', ')}</span>` : `<span style='color:#166534; font-size:11px;'>🎉 전원 참석!</span>`;
-                    dateHtml += `<div class="rank-item"><div><strong>${medal} : ${s.text}</strong> (${s.score}명 가능)</div><div>${absentText}</div></div>`;
+                    let absentText = absents.length > 0 ? `<span class="badge-fail">❌ 미참: ${absents.join(', ')}</span>` : `<span style='color:#166534; font-size:11px;'>🎉 전원 참석!</span>`;
+                    dateHtml += `<div class="rank-item"><div><strong>${medal} : ${s.text}</strong> (${s.score}명)</div><div>${absentText}</div></div>`;
                 });
             }
             document.getElementById("dateResultContent").innerHTML = dateHtml;
@@ -286,18 +246,14 @@
             let locHtml = "";
             finalScores.forEach((f, idx) => {
                 let medal = idx === 0 ? "🥇 공평한 최적지" : `${idx + 1}위`;
-                let explanation = f.maxDist > 250 ? "⚠️ 특정 회원 독박 운전 심함" : "⚖️ 전원 이동시간 균등 배분";
-                locHtml += `<div class="rank-item"><div>${medal} : <strong>${f.name}</strong> <span style="font-size:11px; color:#64748b; margin-left:5px;">(${explanation})</span></div><div style="color:#b91c1c;">밸런스 점수 ${f.cost.toLocaleString()}점</div></div>`;
+                let explanation = f.maxDist > 250 ? "⚠️ 특정 회원 피로도 심함" : "⚖️ 이동시간 균등 배분";
+                locHtml += `<div class="rank-item"><div>${medal} : <strong>${f.name}</strong> <span style="font-size:11px; color:#64748b;">(${explanation})</span></div><div style="color:#b91c1c;">${f.cost.toLocaleString()}점</div></div>`;
             });
-            let bestRegion = finalScores[0].name;
-            locHtml += `<a href="https://map.naver.com/v5/search/${encodeURIComponent(bestRegion + " 독채 단체 펜션")}" target="_blank" class="pension-link">💚 네이버 지도로 [${bestRegion}] 균형 분산형 펜션 검색하기</a>`;
-            
             document.getElementById("locationResultContent").innerHTML = locHtml;
             document.getElementById("resultBox").style.display = "block";
-        }, 1200);
+        }, 100);
     }
 
-    // 2번 해결책: 상세 주소 매핑 정밀화 내비게이션 시뮬레이터
     function calculateDirections15Engine(userAddr, targetName) {
         let baseDist = 160;
         let isSeoulSide = userAddr.includes("서울") || userAddr.includes("홍대") || userAddr.includes("경기") || userAddr.includes("수원");
@@ -305,29 +261,13 @@
         let isBusanSide = userAddr.includes("부산") || userAddr.includes("경남");
 
         if(isSeoulSide) {
-            if(targetName === "수원") baseDist = 35;
-            if(targetName === "대전") baseDist = 150; // 대전까지는 시간 균등 구간
-            if(targetName === "대구") baseDist = 290; // 서울-대구 이동시간 대폭 상향 피로도 반영
-            if(targetName === "부산") baseDist = 395;
-            if(targetName === "강릉") baseDist = 180;
+            if(targetName === "수원") baseDist = 35; if(targetName === "대전") baseDist = 150; if(targetName === "대구") baseDist = 290; if(targetName === "부산") baseDist = 395; if(targetName === "강릉") baseDist = 180;
         } else if(isDaeguSide) {
-            if(targetName === "대구") baseDist = 15;
-            if(targetName === "부산") baseDist = 95;
-            if(targetName === "대전") baseDist = 140;
-            if(targetName === "강릉") baseDist = 240;
-            if(targetName === "수원") baseDist = 260;
+            if(targetName === "대구") baseDist = 15; if(targetName === "부산") baseDist = 95; if(targetName === "대전") baseDist = 140; if(targetName === "강릉") baseDist = 240; if(targetName === "수원") baseDist = 260;
         } else if(isBusanSide) {
-            if(targetName === "부산") baseDist = 20;
-            if(targetName === "대구") baseDist = 95;
-            if(targetName === "대전") baseDist = 250;
-            if(targetName === "강릉") baseDist = 330;
-            if(targetName === "수원") baseDist = 370;
+            if(targetName === "부산") baseDist = 20; if(targetName === "대구") baseDist = 95; if(targetName === "대전") baseDist = 250; if(targetName === "강릉") baseDist = 330; if(targetName === "수원") baseDist = 370;
         } else {
-            if(targetName === "대전") baseDist = 30;
-            if(targetName === "수원") baseDist = 110;
-            if(targetName === "대구") baseDist = 150;
-            if(targetName === "부산") baseDist = 260;
-            if(targetName === "강릉") baseDist = 230;
+            if(targetName === "대전") baseDist = 30; if(targetName === "수원") baseDist = 110; if(targetName === "대구") baseDist = 150; if(targetName === "부산") baseDist = 260; if(targetName === "강릉") baseDist = 230;
         }
         return baseDist;
     }
