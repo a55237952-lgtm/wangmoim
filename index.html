@@ -26,7 +26,7 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 10px; }
         input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; }
         
-        /* 🔍 카카오 주소 검색 인풋 전용 스타일 (노란색 강조로 직관성 부여) */
+        /* 🔍 카카오 주소 검색 인풋 스타일 (노란색) */
         input.btn-addr-search { background-color: #fef08a; border: 2px solid #eab308; font-weight: bold; cursor: pointer; color: #854d0e; text-align: left; }
         input.btn-addr-search:hover { background-color: #fef9c3; }
 
@@ -55,15 +55,19 @@
         .personal-receipt { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 8px; font-size: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
         .pension-link { display: block; text-align: center; background-color: #2c3e50; color: white; padding: 14px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 12px; }
         .badge-fail { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: normal; }
+
+        /* 💥 [보안 레이어 우회 전용] 카카오 주소창을 안전하게 감싸 안을 오버레이 스타일 */
+        #kakaoWrap { display: none; position: fixed; top: 50%; left: 50%; width: 95%; max-width: 500px; height: 480px; transform: translate(-50%, -50%); border: 3px solid #eab308; border-radius: 12px; background: #fff; z-index: 999999; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; }
+        #kakaoHeader { background: #fef08a; padding: 10px; font-weight: bold; text-align: right; border-bottom: 1px solid #cbd5e1; color: #854d0e; }
+        #kakaoCloseBtn { background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     
-    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script src="https://ssl.daumcdn.net/external/postcode/v2.js"></script>
     
     <script>
-        // 🔑 [구글 서버 설정]
         const firebaseConfig = {
             apiKey: "AIzaSyCwuMMvo8VUSYsLyUoUTx_LFbyuYiFwzeo",
             authDomain: "wangmoim.firebaseapp.com",
@@ -77,6 +81,13 @@
 <div class="app-header">
     <h1>👑 왕모임 (WangMoim)</h1>
     <p>아무도 안해서 김왕재가 직접 만든 모임 프로그램</p>
+</div>
+
+<div id="kakaoWrap">
+    <div id="kakaoHeader">
+        <button id="kakaoCloseBtn" onclick="closeKakaoLayer()">창 닫기 X</button>
+    </div>
+    <div id="kakaoLayer" style="width:100%; height:430px; -webkit-overflow-scrolling:touch;"></div>
 </div>
 
 <div class="app-body">
@@ -144,8 +155,13 @@
         });
     });
 
-    // 💥 [핵심 기능] 카카오 엔진 구동 및 GPS 경량 위경도 추출 연동 모듈
+    // 💥 [보안 돌파 치트키] 깃허브 https 차단망을 완벽하게 관통하는 임베디드 팝업 제어 장치
     function openKakaoAddressPopup() {
+        var element_layer = document.getElementById('kakaoLayer');
+        var element_wrap = document.getElementById('kakaoWrap');
+        
+        element_wrap.style.display = 'block';
+        
         new daum.Postcode({
             oncomplete: function(data) {
                 let fullAddress = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
@@ -154,7 +170,7 @@
                 }
                 document.getElementById("my_addr").value = fullAddress;
                 
-                // 오픈 소스 기반 위경도 추출 레이어 연동
+                // 경량 위경도 역치 변환 가동
                 fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.roadAddress || data.jibunAddress)}`)
                 .then(res => res.json())
                 .then(geoData => {
@@ -174,8 +190,17 @@
                     document.getElementById("selected_lat").value = 37.5665;
                     document.getElementById("selected_lng").value = 126.9780;
                 });
-            }
-        }).open();
+                
+                element_wrap.style.display = 'none';
+            },
+            width : '100%',
+            height : '100%',
+            maxSuggestItems : 5
+        }).embed(element_layer);
+    }
+
+    function closeKakaoLayer() {
+        document.getElementById('kakaoWrap').style.display = 'none';
     }
 
     function sendToGoogleCloudServer() {
