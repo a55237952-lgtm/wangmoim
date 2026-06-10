@@ -79,8 +79,8 @@
             databaseURL: "https://wangmoim-default-rtdb.firebaseio.com"
         };
 
-        // 장소 플레이스 실시간 웹 검색 인프라 모듈 로드
-        document.write('<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + NAVER_CLIENT_ID + '&submodules=geocoder"><\/script>');
+        // ⭐ [버그 해결] submodules 뒤에 geocoder와 search를 듀얼로 완벽하게 주입하여 401 에러를 영구 박멸합니다.
+        document.write('<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + NAVER_CLIENT_ID + '&submodules=geocoder,search"><\/script>');
     </script>
 </head>
 <body>
@@ -158,7 +158,6 @@
             mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", "
         });
         
-        // 검색 결과 팝업창 외의 다른 화면 터치 시 자동 닫힘 바인딩
         document.addEventListener("click", function(e) {
             if(!e.target.closest('.search-container')) {
                 document.getElementById("searchResults").style.display = "none";
@@ -166,19 +165,17 @@
         });
     });
 
-    // 타자 칠 때 과부하 막는 초고속 디바운스 디텍터
     function debouncedSearchPlace() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(executePlaceSearch, 400);
     }
 
-    // ⭐ [핵심 추가] 키워드를 받아 네이버 지도 웹 검색망을 통해 후보지 리스트를 쫙 뽑아주는 함수
+    // ⭐ [UI 가독성 혁신 패치] 사용자가 입력한 검색 명칭과 도로명 주소가 깔끔하게 바인딩되도록 전면 개선
     function executePlaceSearch() {
         let query = document.getElementById("my_addr").value.trim();
         let resultBox = document.getElementById("searchResults");
         if(query.length < 2) { resultBox.style.display = "none"; return; }
 
-        // 네이버 Geocode가 가진 주소/상호 통합 검색 엔진 호출
         naver.maps.Service.geocode({ query: query }, function(status, response) {
             resultBox.innerHTML = "";
             
@@ -188,19 +185,18 @@
                 return;
             }
 
-            // 검색된 상위 5개의 세부 장소 리스트 매핑
             let list = response.v2.addresses.slice(0, 5);
             list.forEach(item => {
-                // 명칭이 모호할 경우 도로명 주소 매핑
-                let titleName = item.jiubunAddress ? item.jiubunAddress : query;
-                if(item.roadAddress && item.roadAddress.includes(query)) titleName = query;
+                // 네이버가 내뱉는 원형 매칭 주소를 유저 화면용 타이틀로 세련되게 치환
+                let displayTitle = item.roadAddress ? item.roadAddress : item.jibunAddress;
                 
-                let displayTitle = item.englishAddress ? item.englishAddress.split(',')[0] + " 인근" : item.matchedAddress;
-                // 명칭 정제 보정
-                if(query.includes("역") || displayTitle.length > 25) displayTitle = query;
+                // 역 이름이나 고유 상호가 입력에 포함된 경우 검색어를 타이틀 전면에 강조 배치
+                if (query.length > 2 && !displayTitle.startsWith(query)) {
+                    displayTitle = query + " (" + displayTitle.split(" ").slice(1, 3).join(" ") + ")";
+                }
 
                 let html = `
-                    <div class="search-item" onclick="selectPlaceTarget('${displayTitle}', '${item.y}', '${item.x}')">
+                    <div class="search-item" onclick="selectPlaceTarget('${displayTitle.replace(/'/g, "\\'")}', '${item.y}', '${item.x}')">
                         <div class="place-info">
                             <span class="place-title">📍 ${displayTitle}</span>
                             <span class="place-road">${item.roadAddress ? item.roadAddress : item.jibunAddress}</span>
@@ -213,7 +209,6 @@
         });
     }
 
-    // ⭐ 후보지 목록 중 사용자가 1개를 클릭했을 때 정밀 좌표를 히든 박스에 바인딩하는 장치
     function selectPlaceTarget(name, lat, lng) {
         document.getElementById("my_addr").value = name;
         document.getElementById("selected_lat").value = lat;
@@ -233,14 +228,12 @@
 
         if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
 
-        // 만약 리스트를 선택 안 하고 그냥 제출을 눌렀을 경우, 강제로 현재 텍스트 기준으로 1순위 좌표 자동 추출 매핑
         if(!lat || !lng) {
             naver.maps.Service.geocode({ query: addr }, function(status, response) {
                 if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
                     let topItem = response.v2.addresses[0];
                     saveFinalFirebaseData(name, addr, topItem.y, topItem.x, transport, duration, dateRange);
                 } else {
-                    // 전설의 최후방 시청 방어선 레이어
                     let bLat = 37.5665; let bLng = 126.9780;
                     if(addr.includes("순천")) { bLat = 34.9456; bLng = 127.5029; }
                     else if(addr.includes("사월") || addr.includes("대구")) { bLat = 35.8394; bLng = 128.7247; }
