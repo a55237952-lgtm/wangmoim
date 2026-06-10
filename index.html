@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - 실시간 네이버 내비 & 핫플 정산 시스템</title>
+    <title>👑 왕모임 - 실시간 장소 선택 및 내비 조율 시스템</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -19,13 +19,24 @@
         .app-header p { margin: 8px 0 0 0; font-size: 13px; font-weight: 600; color: #f8fafc; opacity: 0.95; background: rgba(255,255,255,0.15); display: inline-block; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.25); }
         
         .app-body { padding: 15px; max-width: 650px; margin: 0 auto; }
-        .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border: 1px solid #e2e8f0; position: relative; }
         .card h3 { margin-top: 0; margin-bottom: 12px; font-size: 15px; color: #1e293b; }
         
         .grid-3 { display: grid; grid-template-columns: 1fr 1.5fr 1.2fr; gap: 8px; margin-bottom: 10px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 10px; }
         input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; }
         
+        /* 🔍 실시간 장소 검색 결과 리스트창 스타일 */
+        .search-container { position: relative; }
+        .search-results-box { display: none; position: absolute; top: 100%; left: 0; width: 100%; background: white; border: 2px solid #03c75a; border-radius: 8px; z-index: 9999; max-height: 250px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.15); margin-top: 4px; }
+        .search-item { padding: 12px; border-bottom: 1px solid #e2e8f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .search-item:last-child { border-bottom: none; }
+        .search-item:hover { background-color: #f0fdf4; }
+        .search-item .place-info { display: flex; flex-direction: column; gap: 2px; width: 80%; }
+        .search-item .place-title { font-weight: bold; color: #1e293b; }
+        .search-item .place-road { font-size: 11px; color: #64748b; }
+        .search-item .btn-select-place { background: #03c75a; color: white; border: none; padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
+
         button.btn-submit { width: 100%; background: #03c75a; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 6px rgba(3,199,90,0.2); }
         button.action-btn { width: 100%; background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(230,126,34,0.25); margin-top: 10px; }
         
@@ -68,6 +79,7 @@
             databaseURL: "https://wangmoim-default-rtdb.firebaseio.com"
         };
 
+        // 장소 플레이스 실시간 웹 검색 인프라 모듈 로드
         document.write('<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=' + NAVER_CLIENT_ID + '&submodules=geocoder"><\/script>');
     </script>
 </head>
@@ -81,11 +93,16 @@
 <div class="app-body">
     <div class="card">
         <h3>✍️ [회원용] 내 일정 및 정확한 출발지 제출</h3>
-        <p style="font-size:12px; color:#03c75a; margin:0 0 10px 0; font-weight:bold;">✨ 고유 명사 보정 완벽 적용: 전국 지하철역, 건물이름을 자유롭게 써주세요!</p>
+        <p style="font-size:12px; color:#03c75a; margin:0 0 10px 0; font-weight:bold;">🔎 검색 가이드: 키워드 입력 후 엔터를 치거나 잠시 기다리면 추천 장소가 팝업됩니다!</p>
         
         <div class="grid-3">
             <input type="text" id="my_name" placeholder="이름 (예: 홍길동)">
-            <input type="text" id="my_addr" placeholder="출발지 (예: 홍대입구역, 기흥역, 순천역)">
+            
+            <div class="search-container">
+                <input type="text" id="my_addr" placeholder="출발지 키워드 (예: 홍대, 사월역)" oninput="debouncedSearchPlace()" onkeydown="if(event.keyCode==13) executePlaceSearch()">
+                <div class="search-results-box" id="searchResults"></div>
+            </div>
+            
             <select id="my_transport">
                 <option value="자차">자차 운전</option>
                 <option value="대중">대중교통</option>
@@ -102,6 +119,10 @@
             </select>
             <input type="text" id="calendar_input" placeholder="📅 가능 날짜 모두 터치 (끊어서 지정 가능)">
         </div>
+        
+        <input type="hidden" id="selected_lat">
+        <input type="hidden" id="selected_lng">
+        
         <button class="btn-submit" onclick="sendToGoogleCloudServer()">📍 실시간 서버로 내 정보 보내기</button>
     </div>
 
@@ -117,13 +138,10 @@
     
     <div class="result-box" id="resultBox">
         <h2>📊 최종 최적 조율 가이드 결과</h2>
-        
         <div class="result-section-title">📅 1. 다중 투표 기반 최대 연박 가능 추천 일정</div>
         <div id="dateResultContent"></div>
-        
         <div class="result-section-title">📍 2. [실시간 내비] 공평성 기준 최적 장소 순위 (지역 클릭시 네이버 지도 핫플 연동)</div>
         <div id="locationResultContent"></div>
-
         <div class="result-section-title">🧾 3. [1위 장소 기준] 회원별 이동 시간 및 비용 명세서 (실시간 경로 찾기 링크 연동)</div>
         <div id="personalReceiptContent"></div>
     </div>
@@ -133,81 +151,118 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     let calendarInstance;
+    let searchTimeout = null;
 
     document.addEventListener("DOMContentLoaded", function() {
         calendarInstance = flatpickr("#calendar_input", {
             mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", "
         });
+        
+        // 검색 결과 팝업창 외의 다른 화면 터치 시 자동 닫힘 바인딩
+        document.addEventListener("click", function(e) {
+            if(!e.target.closest('.search-container')) {
+                document.getElementById("searchResults").style.display = "none";
+            }
+        });
     });
 
-    // ⭐ [완벽 해결] 네이버 보안 차단을 우회하여 주요 거점 지하철역 및 건물명 좌표를 브라우저단에서 자가 매핑하는 마스터 알고리즘
+    // 타자 칠 때 과부하 막는 초고속 디바운스 디텍터
+    function debouncedSearchPlace() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(executePlaceSearch, 400);
+    }
+
+    // ⭐ [핵심 추가] 키워드를 받아 네이버 지도 웹 검색망을 통해 후보지 리스트를 쫙 뽑아주는 함수
+    function executePlaceSearch() {
+        let query = document.getElementById("my_addr").value.trim();
+        let resultBox = document.getElementById("searchResults");
+        if(query.length < 2) { resultBox.style.display = "none"; return; }
+
+        // 네이버 Geocode가 가진 주소/상호 통합 검색 엔진 호출
+        naver.maps.Service.geocode({ query: query }, function(status, response) {
+            resultBox.innerHTML = "";
+            
+            if (status !== naver.maps.Service.Status.OK || response.v2.addresses.length === 0) {
+                resultBox.innerHTML = `<div class="search-item" style="color:#ef4444; font-weight:bold;">🔍 일치하는 네이버 장소가 없습니다.</div>`;
+                resultBox.style.display = "block";
+                return;
+            }
+
+            // 검색된 상위 5개의 세부 장소 리스트 매핑
+            let list = response.v2.addresses.slice(0, 5);
+            list.forEach(item => {
+                // 명칭이 모호할 경우 도로명 주소 매핑
+                let titleName = item.jiubunAddress ? item.jiubunAddress : query;
+                if(item.roadAddress && item.roadAddress.includes(query)) titleName = query;
+                
+                let displayTitle = item.englishAddress ? item.englishAddress.split(',')[0] + " 인근" : item.matchedAddress;
+                // 명칭 정제 보정
+                if(query.includes("역") || displayTitle.length > 25) displayTitle = query;
+
+                let html = `
+                    <div class="search-item" onclick="selectPlaceTarget('${displayTitle}', '${item.y}', '${item.x}')">
+                        <div class="place-info">
+                            <span class="place-title">📍 ${displayTitle}</span>
+                            <span class="place-road">${item.roadAddress ? item.roadAddress : item.jibunAddress}</span>
+                        </div>
+                        <button class="btn-select-place">선택</button>
+                    </div>`;
+                resultBox.innerHTML += html;
+            });
+            resultBox.style.display = "block";
+        });
+    }
+
+    // ⭐ 후보지 목록 중 사용자가 1개를 클릭했을 때 정밀 좌표를 히든 박스에 바인딩하는 장치
+    function selectPlaceTarget(name, lat, lng) {
+        document.getElementById("my_addr").value = name;
+        document.getElementById("selected_lat").value = lat;
+        document.getElementById("selected_lng").value = lng;
+        document.getElementById("searchResults").style.display = "none";
+    }
+
     function sendToGoogleCloudServer() {
         let name = document.getElementById("my_name").value.trim();
         let addr = document.getElementById("my_addr").value.trim();
         let transport = document.getElementById("my_transport").value;
         let duration = document.getElementById("my_duration").value;
         let dateRange = document.getElementById("calendar_input").value;
+        
+        let lat = document.getElementById("selected_lat").value;
+        let lng = document.getElementById("selected_lng").value;
 
         if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
 
-        // 1단계: 정석 주소 검색(Geocode)을 먼저 시도
-        naver.maps.Service.geocode({ query: addr }, function(status, response) {
-            if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
-                let item = response.v2.addresses[0];
-                saveMemberDataToFirebase(name, addr, item.y, item.x, transport, duration, dateRange);
-            } else {
-                // 2단계: 주소 인식이 막혔을 경우, 텍스트 핵심 키워드를 자가 분석해 실제 해당 주소 한복판 GPS로 강제 워프!
-                let lat = 37.5665; let lng = 126.9780; // 기본 서울시청 백업
-                let matched = false;
-
-                // 🔍 수도권 핵심 거점 정밀 파싱
-                if(addr.includes("홍대")) { lat = 37.5575; lng = 126.9244; matched = true; } // 진짜 홍대입구역 2호선 좌표
-                else if(addr.includes("강남역")) { lat = 37.4979; lng = 127.0276; matched = true; } // 진짜 강남역 좌표
-                else if(addr.includes("수원역")) { lat = 37.2656; lng = 127.0000; matched = true; }
-                else if(addr.includes("기흥")) { lat = 37.2754; lng = 127.1158; matched = true; } // 기흥역 인근
-                else if(addr.includes("신촌")) { lat = 37.5552; lng = 126.9369; matched = true; }
-                else if(addr.includes("서울역")) { lat = 37.5546; lng = 126.9706; matched = true; }
-                
-                // 🔍 영남/대구/부산 거점 정밀 파싱
-                else if(addr.includes("사월")) { lat = 35.8394; lng = 128.7247; matched = true; } // 진짜 대구 사월역 대형 핀포인트
-                else if(addr.includes("대구역")) { lat = 35.8767; lng = 128.5972; matched = true; }
-                else if(addr.includes("동대구")) { lat = 35.8799; lng = 128.6280; matched = true; }
-                else if(addr.includes("부산역")) { lat = 35.1148; lng = 129.0416; matched = true; }
-                else if(addr.includes("해운대")) { lat = 35.1631; lng = 129.1589; matched = true; }
-                else if(addr.includes("울진")) { lat = 36.9928; lng = 129.4005; matched = true; }
-                
-                // 🔍 호남/순천권 거점 정밀 파싱
-                else if(addr.includes("순천역")) { lat = 34.9456; lng = 127.5029; matched = true; } // 진짜 전라남도 순천역 광장 KTX 좌표
-                else if(addr.includes("광주역")) { lat = 35.1654; lng = 126.9092; matched = true; }
-                
-                // 🔍 충청/강원/기타 광역 방어막
-                else if(addr.includes("태백")) { lat = 37.1742; lng = 128.9880; matched = true; }
-                else if(addr.includes("강릉역")) { lat = 37.7637; lng = 128.8995; matched = true; }
-                else if(addr.includes("대전역")) { lat = 36.3323; lng = 127.4342; matched = true; }
-
-                // 3단계: 만약 위 세부 리스트에도 없는데 단어만 포함된 경우 광역 시청 보정
-                if (!matched) {
-                    if(addr.includes("순천")) { lat = 34.9506; lng = 127.4872; }
-                    else if(addr.includes("대구")) { lat = 35.8711; lng = 128.6014; }
-                    else if(addr.includes("부산")) { lat = 35.1796; lng = 129.0756; }
-                    else if(addr.includes("광주")) { lat = 35.1595; lng = 126.8526; }
-                    else if(addr.includes("강릉")) { lat = 37.7519; lng = 128.8761; }
-                    else if(addr.includes("대전")) { lat = 36.3504; lng = 127.3845; }
-                    else if(addr.includes("수원")) { lat = 37.2636; lng = 127.0286; }
+        // 만약 리스트를 선택 안 하고 그냥 제출을 눌렀을 경우, 강제로 현재 텍스트 기준으로 1순위 좌표 자동 추출 매핑
+        if(!lat || !lng) {
+            naver.maps.Service.geocode({ query: addr }, function(status, response) {
+                if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
+                    let topItem = response.v2.addresses[0];
+                    saveFinalFirebaseData(name, addr, topItem.y, topItem.x, transport, duration, dateRange);
+                } else {
+                    // 전설의 최후방 시청 방어선 레이어
+                    let bLat = 37.5665; let bLng = 126.9780;
+                    if(addr.includes("순천")) { bLat = 34.9456; bLng = 127.5029; }
+                    else if(addr.includes("사월") || addr.includes("대구")) { bLat = 35.8394; bLng = 128.7247; }
+                    else if(addr.includes("부산")) { bLat = 35.1148; bLng = 129.0416; }
+                    else if(addr.includes("광주")) { bLat = 35.1654; bLng = 126.9092; }
+                    saveFinalFirebaseData(name, addr, bLat, bLng, transport, duration, dateRange);
                 }
-                
-                saveMemberDataToFirebase(name, addr, lat, lng, transport, duration, dateRange);
-            }
-        });
+            });
+        } else {
+            saveFinalFirebaseData(name, addr, lat, lng, transport, duration, dateRange);
+        }
     }
 
-    function saveMemberDataToFirebase(name, addr, lat, lng, transport, duration, dateRange) {
+    function saveFinalFirebaseData(name, addr, lat, lng, transport, duration, dateRange) {
         database.ref('members/' + name).set({
             name: name, addr: addr, lat: parseFloat(lat), lng: parseFloat(lng), transport: transport, duration: parseInt(duration), dates: dateRange, timestamp: Date.now()
         }).then(() => {
-            alert(`🎉 [${name}]님 맞춤 주소 파싱 완료 및 서버 제출 성공!`);
+            alert(`🎉 [${name}]님 정밀 선택 장소 반영 완료 및 제출 성공!`);
             document.getElementById("my_name").value = "";
             document.getElementById("my_addr").value = "";
+            document.getElementById("selected_lat").value = "";
+            document.getElementById("selected_lng").value = "";
             calendarInstance.clear();
         });
     }
