@@ -79,8 +79,8 @@
             databaseURL: "https://wangmoim-default-rtdb.firebaseio.com"
         };
 
-        // 네이버 정식 스크립트 로더 규격 채택
-        document.write('<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?clientId=' + NAVER_CLIENT_ID + '&submodules=geocoder"><\/script>');
+        // ⭐ [치트키] submodules 파라미터에 geocoder 뿐만 아니라 상호명/POI 전용 검색 모듈인 'search'를 정식 연동 로드합니다!
+        document.write('<script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?clientId=' + NAVER_CLIENT_ID + '&submodules=geocoder,search"><\/script>');
     </script>
 </head>
 <body>
@@ -170,7 +170,7 @@
         searchTimeout = setTimeout(executePlaceSearch, 400);
     }
 
-    // ⭐ [완벽 결함 제로 패치] 응답 오브젝트의 모든 계층을 샅샅이 뒤져 단 하나의 에러도 없이 데이터를 추출해 팝업을 강제 표출합니다.
+    // ⭐ [엔진 대개조] 단순 행정 주소용 geocode 대신, 역이름/상호명을 다 찾는 통합 Local Search API 시스템으로 전환
     function executePlaceSearch() {
         let query = document.getElementById("my_addr").value.trim();
         let resultBox = document.getElementById("searchResults");
@@ -181,64 +181,61 @@
             return;
         }
 
-        naver.maps.Service.geocode({ query: query }, function(status, response) {
+        // 지오코더 대신, 역이름과 핫플 상호를 모두 찾는 네이버 정식 스마트 로컬 서치 허브 가동
+        naver.maps.Service.search({ query: query }, function(status, response) {
             resultBox.innerHTML = "";
             
-            let addresses = [];
-            
-            // 💥 어떤 포맷의 응답이 들어와도 완벽 분해하는 초정밀 융합 감지기
-            if (response) {
-                if (response.v2 && response.v2.addresses) {
-                    addresses = response.v2.addresses;
-                } else if (response.result && response.result.items) {
-                    addresses = response.result.items;
-                } else if (response.items) {
-                    addresses = response.items;
-                } else if (Array.isArray(response)) {
-                    addresses = response;
-                } else if (typeof response === 'object') {
-                    // 객체 자체에 직접 데이터 필드가 박혀 들어오는 변칙 예외 조건 방어
-                    let targetKey = Object.keys(response).find(k => Array.isArray(response[k]));
-                    if (targetKey) addresses = response[targetKey];
-                }
-            }
+            let items = [];
+            if (response && response.v2 && response.v2.items) items = response.v2.items;
+            else if (response && response.result && response.result.items) items = response.result.items;
+            else if (response && response.items) items = response.items;
 
-            if (status !== naver.maps.Service.Status.OK || !addresses || addresses.length === 0) {
-                resultBox.innerHTML = `<div class="search-item" style="color:#ef4444; font-weight:bold; text-align:center;">🔍 일치하는 네이버 장소가 없습니다.</div>`;
-                resultBox.style.display = "block";
+            // 만약 상호명 검색에 실패했다면 백업 수단으로 일반 행정 주소 검색(Geocode) 레이어 가동
+            if (status !== naver.maps.Service.Status.OK || !items || items.length === 0) {
+                naver.maps.Service.geocode({ query: query }, function(gStatus, gResponse) {
+                    let gAddrs = (gResponse && gResponse.v2 && gResponse.v2.addresses) ? gResponse.v2.addresses : [];
+                    if (gStatus === naver.maps.Service.Status.OK && gAddrs.length > 0) {
+                        renderSearchPopup(gAddrs, resultBox, query);
+                    } else {
+                        resultBox.innerHTML = `<div class="search-item" style="color:#ef4444; font-weight:bold; text-align:center;">🔍 일치하는 역이름이나 주소가 없습니다.</div>`;
+                        resultBox.style.display = "block";
+                    }
+                });
                 return;
             }
 
-            let list = addresses.slice(0, 5);
-            list.forEach(item => {
-                if (!item) return;
-                
-                // 신형/구형 프로퍼티 유연 매핑 메커니즘
-                let roadAddr = item.roadAddress || item.address || item.jibunAddress || "";
-                let jibunAddr = item.jibunAddress || item.address || "";
-                let lat = item.y || (item.point ? item.point.y : "") || "";
-                let lng = item.x || (item.point ? item.point.x : "") || "";
-                
-                let displayTitle = item.title || roadAddr || jibunAddr || query;
-                // 태그 찌꺼기 제거 제거
-                displayTitle = displayTitle.replace(/<\/?[^>]+(>|$)/g, "");
-
-                if (query.length > 2 && !displayTitle.includes(query)) {
-                    displayTitle = query + " (" + displayTitle.split(" ").slice(0, 2).join(" ") + ")";
-                }
-
-                let html = `
-                    <div class="search-item" onclick="selectPlaceTarget('${displayTitle.replace(/'/g, "\\'")}', '${lat}', '${lng}')">
-                        <div class="place-info">
-                            <span class="place-title">📍 ${displayTitle}</span>
-                            <span class="place-road">${roadAddr ? roadAddr : jibunAddr}</span>
-                        </div>
-                        <button class="btn-select-place">선택</button>
-                    </div>`;
-                resultBox.innerHTML += html;
-            });
-            resultBox.style.display = "block";
+            renderSearchPopup(items, resultBox, query);
         });
+    }
+
+    // 팝업 화면 렌더링 최적화 퓨전 모듈
+    function renderSearchPopup(list, resultBox, query) {
+        let sliceList = list.slice(0, 5);
+        sliceList.forEach(item => {
+            if (!item) return;
+            
+            // 네이버 Local Search 응답과 Geocode 응답 프로퍼티 융합 매핑
+            let displayTitle = item.title || item.roadAddress || item.jibunAddress || query;
+            displayTitle = displayTitle.replace(/<\/?[^>]+(>|$)/g, ""); // b 태그 등 문자열 노이즈 완전 박멸
+
+            let roadAddr = item.roadAddress || item.address || "";
+            let jibunAddr = item.jibunAddress || item.address || "";
+            
+            // 좌표 포맷 다중 파싱 검격 유도
+            let lat = item.y || (item.point ? item.point.y : "") || "";
+            let lng = item.x || (item.point ? item.point.x : "") || "";
+
+            let html = `
+                <div class="search-item" onclick="selectPlaceTarget('${displayTitle.replace(/'/g, "\\'")}', '${lat}', '${lng}')">
+                    <div class="place-info">
+                        <span class="place-title">📍 ${displayTitle}</span>
+                        <span class="place-road">${roadAddr ? roadAddr : jibunAddr}</span>
+                    </div>
+                    <button class="btn-select-place">선택</button>
+                </div>`;
+            resultBox.innerHTML += html;
+        });
+        resultBox.style.display = "block";
     }
 
     function selectPlaceTarget(name, lat, lng) {
@@ -261,16 +258,13 @@
         if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
 
         if(!lat || !lng) {
-            naver.maps.Service.geocode({ query: addr }, function(status, response) {
-                let addresses = [];
-                if (response) {
-                    if (response.v2 && response.v2.addresses) addresses = response.v2.addresses;
-                    else if (response.result && response.result.items) addresses = response.result.items;
-                    else if (response.items) addresses = response.items;
-                }
-
-                if (status === naver.maps.Service.Status.OK && addresses && addresses.length > 0) {
-                    let topItem = addresses[0];
+            naver.maps.Service.search({ query: addr }, function(status, response) {
+                let items = [];
+                if (response && response.v2 && response.v2.items) items = response.v2.items;
+                else if (response && response.result && response.result.items) items = response.result.items;
+                
+                if (status === naver.maps.Service.Status.OK && items && items.length > 0) {
+                    let topItem = items[0];
                     let finalLat = topItem.y || (topItem.point ? topItem.point.y : "");
                     let finalLng = topItem.x || (topItem.point ? topItem.point.x : "");
                     saveFinalFirebaseData(name, addr, finalLat, finalLng, transport, duration, dateRange);
