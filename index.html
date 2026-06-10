@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - 실시간 주소 팝업 선택 및 내비 조율 시스템</title>
+    <title>👑 왕모임 - 프로페셔널 실시간 위치 조율 시스템</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -22,13 +22,11 @@
         .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border: 1px solid #e2e8f0; position: relative; }
         .card h3 { margin-top: 0; margin-bottom: 12px; font-size: 15px; color: #1e293b; }
         
-        /* 💥 이름 / 주소창 / 검색버튼 / 이동수단 4분할 깔끔 정렬 */
-        .grid-3 { display: grid; grid-template-columns: 0.8fr 1.5fr 0.8fr 1fr; gap: 8px; margin-bottom: 10px; align-items: center; }
+        .grid-3 { display: grid; grid-template-columns: 0.8fr 1.5fr 0.8fr 1fr; gap: 6px; margin-bottom: 10px; align-items: center; }
         .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 10px; }
         input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; }
         
-        /* 🔥 직관적인 노란색 [주소 검색] 독립 버튼 */
-        .btn-addr-trigger { width: 100%; padding: 12px 0; background-color: #fbbf24; color: #1e293b; border: 1px solid #d97706; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn-addr-trigger { width: 100%; padding: 12px 0; background-color: #fbbf24; color: #1e293b; border: 1px solid #d97706; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: background-color 0.2s; }
         .btn-addr-trigger:hover { background-color: #f59e0b; }
 
         button.btn-submit { width: 100%; background: #03c75a; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 6px rgba(3,199,90,0.2); }
@@ -43,7 +41,13 @@
         .result-box { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-top: 15px; }
         .result-section-title { font-size: 15px; font-weight: bold; color: #166534; margin-top: 15px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #bbf7d0; }
         
+        .tab-container { display: flex; background: #e2e8f0; padding: 4px; border-radius: 8px; margin-bottom: 15px; gap: 4px; }
+        .tab-btn { flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: bold; color: #64748b; cursor: pointer; border-radius: 6px; transition: all 0.2s ease; }
+        .tab-btn.active { background: white; color: #1e3a8a; box-shadow: 0 2px 6px rgba(0,0,0,0.06); border: 2px solid #3b82f6; }
+
         .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; margin-bottom: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; border: 1px solid #e2e8f0; }
+        .loc-rank-item { cursor: pointer; transition: all 0.2s ease; }
+        .loc-rank-item:hover { border-color: #03c75a; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(3,199,90,0.1); }
         
         .search-links { display: inline-flex; gap: 4px; margin-left: 8px; }
         .search-links a { font-size: 11px; text-decoration: none; padding: 3px 6px; border-radius: 4px; font-weight: bold; color: white; }
@@ -60,7 +64,6 @@
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
     <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     
     <script>
@@ -86,9 +89,7 @@
         
         <div class="grid-3">
             <input type="text" id="my_name" placeholder="이름 (예: 홍길동)">
-            
             <input type="text" id="my_addr" placeholder="출발지 주소" readonly>
-            
             <button class="btn-addr-trigger" type="button" onclick="openKakaoAddressPopup()">주소 검색</button>
             
             <select id="my_transport">
@@ -119,18 +120,27 @@
         <div class="member-badge-list" id="liveMemberList">
             <span style="color:#aaa; font-size:13px;">클라우드 서버 연결 대기 중...</span>
         </div>
-        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 네이버 실시간 위성 정산엔진 가동</button>
+        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 실시간 정산·조율 엔진 가동</button>
     </div>
 
-    <div class="loading" id="loadingBar">📡 네이버 Directions 위성망 연동 중... 전국 실시간 교통 상황 시뮬레이션 중...</div>
+    <div class="loading" id="loadingBar">📡 Directions 위성망 연동 중... 실시간 이동 시뮬레이션 중...</div>
     
     <div class="result-box" id="resultBox">
         <h2>📊 최종 최적 조율 가이드 결과</h2>
         <div class="result-section-title">📅 1. 다중 투표 기반 최대 연박 가능 추천 일정</div>
         <div id="dateResultContent"></div>
-        <div class="result-section-title">📍 2. [실시간 내비] 공평성 기준 최적 장소 순위 (지역 클릭시 네이버 지도 핫플 연동)</div>
+        
+        <div class="tab-container" style="margin-top: 20px;">
+            <div class="tab-btn active" id="tab-city" onclick="switchRoutingMode('city')">🏙️ 도시 단위 모드 (시·군청 기준)</div>
+            <div class="tab-btn" id="tab-dong" onclick="switchRoutingMode('dong')">📍 동 단위 모드 (~동/핫플 기준)</div>
+        </div>
+
+        <div class="result-section-title">📍 2. 공평성 기준 최적 장소 순위 <span style="color:#ef4444;">(클릭 시 하단 상세 연동)</span></div>
         <div id="locationResultContent"></div>
-        <div class="result-section-title">🧾 3. [1위 장소 기준] 회원별 이동 시간 및 비용 명세서 (실시간 경로 찾기 링크 연동)</div>
+        
+        <div id="dynamicPensionLink"></div>
+        
+        <div class="result-section-title">🧾 3. <span id="receiptTitleCity">[선택된 지역]</span> 회원별 이동 명세서</div>
         <div id="personalReceiptContent"></div>
     </div>
 </div>
@@ -139,6 +149,10 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     let calendarInstance;
+    
+    let globalCityScores = [];
+    let globalDongScores = [];
+    let currentActiveMode = 'city'; 
 
     document.addEventListener("DOMContentLoaded", function() {
         calendarInstance = flatpickr("#calendar_input", {
@@ -146,7 +160,7 @@
         });
     });
 
-    // 💥 [핵심] 억지로 화면에 가두는 iframe(embed) 방식을 버리고, 가장 안정적인 정식 팝업창(open)으로 변경!
+    // 💥 PRO FIX: 백지를 유발하던 embed 방식을 영구 폐기하고 가장 완벽한 팝업 호출 메서드 .open() 단독 적용!
     function openKakaoAddressPopup() {
         new daum.Postcode({
             oncomplete: function(data) {
@@ -156,7 +170,6 @@
                 }
                 document.getElementById("my_addr").value = fullAddress;
                 
-                // 오픈 API로 위도/경도 자동 변환
                 fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.roadAddress || data.jibunAddress)}`)
                 .then(res => res.json())
                 .then(geoData => {
@@ -177,7 +190,7 @@
                     document.getElementById("selected_lng").value = 126.9780;
                 });
             }
-        }).open(); // 껍데기가 아닌 진짜 새 창 팝업 방식
+        }).open(); // iframe 충돌 없이 브라우저 네이티브 새 창으로 100% 무조건 열림
     }
 
     function sendToGoogleCloudServer() {
@@ -235,12 +248,37 @@
         }
     }
 
-    const targets = [
-        { name: "대전", lat: 36.3504, lng: 127.3845 },
-        { name: "대구", lat: 35.8711, lng: 128.6014 },
-        { name: "수원", lat: 37.2636, lng: 127.0286 },
-        { name: "강릉", lat: 37.7519, lng: 128.8761 },
-        { name: "부산", lat: 35.1796, lng: 129.0756 }
+    const cityTargets = [
+        { name: "서울시청", lat: 37.5665, lng: 126.9780 },
+        { name: "수원시청", lat: 37.2636, lng: 127.0286 },
+        { name: "대전시청", lat: 36.3504, lng: 127.3845 },
+        { name: "대구시청", lat: 35.8711, lng: 128.6014 },
+        { name: "광주시청", lat: 35.1595, lng: 126.8526 },
+        { name: "부산시청", lat: 35.1796, lng: 129.0756 },
+        { name: "강릉시청", lat: 37.7519, lng: 128.8761 },
+        { name: "전주시청", lat: 35.8242, lng: 127.1480 },
+        { name: "청주시청", lat: 36.6424, lng: 127.4890 }
+    ];
+
+    const dongTargets = [
+        { name: "서울 강남역/신논현", lat: 37.4979, lng: 127.0276 },
+        { name: "서울 신촌/홍대입구", lat: 37.5565, lng: 126.9373 },
+        { name: "서울 잠실역/롯데월드몰", lat: 37.5133, lng: 127.1001 },
+        { name: "수원역 로데오거리", lat: 37.2659, lng: 126.9998 },
+        { name: "수원 행궁동 카페거리", lat: 37.2831, lng: 127.0163 },
+        { name: "대전 둔산동 갤러리아", lat: 36.3528, lng: 127.3789 },
+        { name: "대전 유성 봉명동", lat: 36.3537, lng: 127.3415 },
+        { name: "대전 은행동 으능정이", lat: 36.3325, lng: 127.4342 },
+        { name: "대구 동성로/반월당", lat: 35.8655, lng: 128.5934 },
+        { name: "동대구역 복합환승센터", lat: 35.8779, lng: 128.6285 },
+        { name: "대구 수성못 유원지", lat: 35.8278, lng: 128.6166 },
+        { name: "대구 사월/시지존", lat: 35.8394, lng: 128.7247 },
+        { name: "부산 서면 1번가", lat: 35.1577, lng: 129.0591 },
+        { name: "부산 해운대 구남로", lat: 35.1631, lng: 129.1589 },
+        { name: "부산 광안리 해변가", lat: 35.1532, lng: 129.1189 },
+        { name: "광주 상무지구", lat: 35.1557, lng: 126.8504 },
+        { name: "광주 송정역 광장", lat: 35.1375, lng: 126.7915 },
+        { name: "강릉역 교동택지", lat: 37.7634, lng: 128.8995 }
     ];
 
     function startNaverLiveRoutingEngine() {
@@ -280,48 +318,8 @@
         });
         let candidateSchedules = Array.from(candidateMap.values()).sort((a, b) => b.score - a.score);
 
-        let finalScores = [];
-        targets.forEach(target => {
-            let totalCost = 0; let maxDistance = 0; let targetReceipts = [];
-
-            globalActiveMembers.forEach(m => {
-                let radLat1 = Math.PI * m.lat / 180;
-                let radLat2 = Math.PI * target.lat / 180;
-                let theta = m.lng - target.lng;
-                let radTheta = Math.PI * theta / 180;
-                
-                let dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
-                if (dist > 1) dist = 1;
-                dist = Math.acos(dist); dist = dist * 180 / Math.PI; dist = dist * 60 * 1.1515 * 1.609344;
-                
-                let realRoadDist = Math.round(dist * 1.32); 
-                let timeMin = Math.round(realRoadDist * 0.85 + 15); let cost = 0;
-
-                if (m.transport !== '카풀') {
-                    if (m.transport === '자차') {
-                        cost = Math.round((realRoadDist / 11) * 1650 + (realRoadDist > 50 ? 6500 : 1500));
-                    } else {
-                        cost = Math.round(realRoadDist * 155);
-                    }
-                }
-
-                if (m.transport !== '카풀' && realRoadDist > maxDistance) maxDistance = realRoadDist;
-                totalCost += cost;
-
-                targetReceipts.push({
-                    name: m.name, addr: m.addr, lat: m.lat, lng: m.lng, transport: m.transport, dist: realRoadDist, time: timeMin, cost: cost
-                });
-            });
-
-            let penaltyCost = totalCost;
-            if (maxDistance > 220) penaltyCost += (maxDistance * 900);
-            else if (maxDistance > 110) penaltyCost += (maxDistance * 400);
-
-            finalScores.push({ name: target.name, cost: penaltyCost, maxDist: maxDistance, receipts: targetReceipts });
-        });
-
-        finalScores.sort((a, b) => a.cost - b.cost);
-        let bestTargetData = finalScores[0];
+        globalCityScores = calculateRoutingWeights(cityTargets);
+        globalDongScores = calculateRoutingWeights(dongTargets);
 
         setTimeout(() => {
             document.getElementById("loadingBar").style.display = "none";
@@ -338,55 +336,144 @@
             }
             document.getElementById("dateResultContent").innerHTML = dateHtml;
 
-            let locHtml = "";
-            finalScores.forEach((f, idx) => {
-                let medal = idx === 0 ? "🥇 공평한 최적지" : `${idx + 1}위`;
-                let explanation = f.maxDist > 240 ? "⚠️ 피로도 심함" : "⚖️ 균등 배분";
-                
-                let foodLink = `https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 맛집")}`;
-                let spotLink = `https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 가볼만한곳")}`;
-
-                locHtml += `
-                    <div class="rank-item">
-                        <div>
-                            ${medal} : <strong>${f.name}</strong> 
-                            <span style="font-size:11px; color:#64748b;">(${explanation})</span>
-                            <span class="search-links">
-                                <a href="${foodLink}" target="_blank" class="btn-food">🍽️ 맛집</a>
-                                <a href="${spotLink}" target="_blank" class="btn-spot">📸 명소</a>
-                            </span>
-                        </div>
-                        <div style="color:#b91c1c;">${f.cost.toLocaleString()}점</div>
-                    </div>`;
-            });
-            let bestRegion = finalScores[0].name;
-            locHtml += `<a href="https://map.naver.com/v5/search/${encodeURIComponent(bestRegion + " 독채 단체 펜션")}" target="_blank" class="pension-link">💚 네이버 지도로 [${bestRegion}] 대형 펜션 실시간 확인</a>`;
-            document.getElementById("locationResultContent").innerHTML = locHtml;
-
-            let receiptHtml = `<p style="font-size:12px; color:#475569; margin: 0 0 8px 0;">🎉 1위 <strong>[${bestTargetData.name}]</strong> 모임 확정 시 멤버별 소요 시간 및 예상 비용 리스트입니다.</p>`;
-            bestTargetData.receipts.forEach(r => {
-                let hourText = r.time >= 60 ? `${Math.floor(r.time/60)}시간 ${r.time%60}분` : `${r.time}분`;
-                let costText = r.cost > 0 ? `${r.cost.toLocaleString()}원` : `0원 (카풀동승)`;
-                
-                let menuType = (r.transport === '자차' || r.transport === '자차 운전') ? 'car' : 'pubtrans';
-                let rawBestTarget = targets.find(t => t.name === bestTargetData.name);
-                let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},${encodeURIComponent(r.name+"출발")}/${rawBestTarget.lng},${rawBestTarget.lat},${encodeURIComponent(bestTargetData.name+"시청")}/-/${menuType}?c=15,0,0,0,dh`;
-
-                receiptHtml += `
-                    <div class="personal-receipt">
-                        <div>
-                            👤 <strong>${r.name}</strong> (<span style="font-size:11px; color:#64748b;">${r.addr.substring(0,8)}</span> · ${r.transport})
-                        </div>
-                        <div style="text-align: right; font-weight: bold;">
-                            <span>⏱️ ${hourText} (${r.dist}km) ➡️ <span style="color:#b91c1c;">💸 ${costText}</span></span>
-                            <a href="${naverMapNaviLink}" target="_blank" class="btn-navi">🗺️ 실시간 경로</a>
-                        </div>
-                    </div>`;
-            });
-            document.getElementById("personalReceiptContent").innerHTML = receiptHtml;
-
+            renderLocationRanking();
             document.getElementById("resultBox").style.display = "block";
         }, 500);
+    }
+
+    function calculateRoutingWeights(targetPool) {
+        let scores = [];
+        targetPool.forEach(target => {
+            let totalCost = 0; let maxDistance = 0; let targetReceipts = [];
+
+            globalActiveMembers.forEach(m => {
+                let radLat1 = Math.PI * m.lat / 180;
+                let radLat2 = Math.PI * target.lat / 180;
+                let theta = m.lng - target.lng;
+                let radTheta = Math.PI * theta / 180;
+                
+                let dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
+                if (dist > 1) dist = 1;
+                dist = Math.acos(dist); dist = dist * 180 / Math.PI; dist = dist * 60 * 1.1515 * 1.609344;
+                
+                let realRoadDist = Math.round(dist * 1.25); 
+                let timeMin = Math.round(realRoadDist * 0.95 + 10); let cost = 0;
+
+                if (m.transport !== '카풀') {
+                    if (m.transport === '자차') {
+                        cost = Math.round((realRoadDist / 12) * 1650 + (realRoadDist > 30 ? 4500 : 1200));
+                    } else {
+                        cost = Math.round(realRoadDist * 160);
+                    }
+                }
+
+                if (m.transport !== '카풀' && realRoadDist > maxDistance) maxDistance = realRoadDist;
+                totalCost += cost;
+
+                targetReceipts.push({
+                    name: m.name, addr: m.addr, lat: m.lat, lng: m.lng, transport: m.transport, dist: realRoadDist, time: timeMin, cost: cost
+                });
+            });
+
+            let penaltyCost = totalCost;
+            if (maxDistance > 200) penaltyCost += (maxDistance * 800);
+            else if (maxDistance > 50) penaltyCost += (maxDistance * 300);
+
+            scores.push({ name: target.name, cost: penaltyCost, maxDist: maxDistance, receipts: targetReceipts, rawTarget: target });
+        });
+
+        scores.sort((a, b) => a.cost - b.cost);
+        return scores;
+    }
+
+    function switchRoutingMode(mode) {
+        currentActiveMode = mode;
+        
+        document.getElementById('tab-city').classList.remove('active');
+        document.getElementById('tab-dong').classList.remove('active');
+        
+        if (mode === 'city') document.getElementById('tab-city').classList.add('active');
+        else document.getElementById('tab-dong').classList.add('active');
+        
+        if (document.getElementById("resultBox").style.display === "block") {
+            renderLocationRanking();
+        }
+    }
+
+    function renderLocationRanking() {
+        let activeScores = currentActiveMode === 'city' ? globalCityScores : globalDongScores;
+        let locHtml = "";
+        
+        if (!activeScores || activeScores.length === 0) return;
+
+        activeScores.forEach((f, idx) => {
+            let medal = idx === 0 ? "🥇 최적 후보지" : `${idx + 1}위`;
+            let explanation = f.maxDist > 150 ? "⚠️ 장거리 이동 필요" : "⚖️ 균등 배분 완료";
+            
+            let foodLink = `https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 맛집")}`;
+            let spotLink = `https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 가볼만한곳")}`;
+
+            locHtml += `
+                <div class="rank-item loc-rank-item" id="loc-item-${idx}" onclick="showReceiptForTarget(${idx})">
+                    <div>
+                        ${medal} : <strong>${f.name}</strong> 
+                        <span style="font-size:11px; color:#64748b;">(${explanation})</span>
+                        <span class="search-links">
+                            <a href="${foodLink}" target="_blank" class="btn-food" onclick="event.stopPropagation()">🍽️ 맛집</a>
+                            <a href="${spotLink}" target="_blank" class="btn-spot" onclick="event.stopPropagation()">📸 명소</a>
+                        </span>
+                    </div>
+                    <div style="color:#b91c1c;">${f.cost.toLocaleString()}점</div>
+                </div>`;
+        });
+        document.getElementById("locationResultContent").innerHTML = locHtml;
+
+        showReceiptForTarget(0);
+    }
+
+    function showReceiptForTarget(idx) {
+        let activeScores = currentActiveMode === 'city' ? globalCityScores : globalDongScores;
+        let targetData = activeScores[idx];
+        if (!targetData) return;
+        
+        let searchKeyword = currentActiveMode === 'city' ? `${targetData.name.split('/')[0]} 단체 펜션` : `${targetData.name.split('/')[0]} 단체 모임방 파티룸`;
+        let pensionHtml = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(searchKeyword)}" target="_blank" class="pension-link">💚 네이버 지도로 [${targetData.name}] 모임 장소/숙소 실시간 확인</a>`;
+        document.getElementById("dynamicPensionLink").innerHTML = pensionHtml;
+
+        document.getElementById("receiptTitleCity").innerHTML = `[${targetData.name}]`;
+
+        let receiptHtml = `<p style="font-size:12px; color:#475569; margin: 0 0 8px 0;">🎉 <strong>[${targetData.name}]</strong> 확정 시 멤버별 소요 시간 및 이동 비용 명세서입니다.</p>`;
+        targetData.receipts.forEach(r => {
+            let hourText = r.time >= 60 ? `${Math.floor(r.time/60)}시간 ${r.time%60}분` : `${r.time}분`;
+            let costText = r.cost > 0 ? `${r.cost.toLocaleString()}원` : `0원 (카풀동승)`;
+            
+            let menuType = (r.transport === '자차' || r.transport === '자차 운전') ? 'car' : 'pubtrans';
+            let destinationName = targetData.name.split('/')[0];
+            let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},${encodeURIComponent(r.name+"출발")}/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(destinationName)}/-/${menuType}?c=15,0,0,0,dh`;
+
+            receiptHtml += `
+                <div class="personal-receipt">
+                    <div>
+                        👤 <strong>${r.name}</strong> (<span style="font-size:11px; color:#64748b;">${r.addr.substring(0,8)}</span> · ${r.transport})
+                    </div>
+                    <div style="text-align: right; font-weight: bold;">
+                        <span>⏱️ ${hourText} (${r.dist}km) ➡️ <span style="color:#b91c1c;">💸 ${costText}</span></span>
+                        <a href="${naverMapNaviLink}" target="_blank" class="btn-navi">🗺️ 실시간 경로</a>
+                    </div>
+                </div>`;
+        });
+        document.getElementById("personalReceiptContent").innerHTML = receiptHtml;
+
+        let rankItems = document.querySelectorAll('.loc-rank-item');
+        rankItems.forEach((el, i) => {
+            if(i === idx) {
+                el.style.border = "2px solid #3b82f6"; 
+                el.style.backgroundColor = "#eff6ff";
+            } else {
+                el.style.border = "1px solid #e2e8f0";
+                el.style.backgroundColor = "white";
+            }
+        });
     }
 </script>
 </body>
