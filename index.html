@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - 컴팩트 UI & 날짜 토글 강화판 (v48.1)</title>
+    <title>👑 왕모임 - 보안 강화 & 데이터 Import 플랫폼 (v49.0)</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -23,9 +23,10 @@
 
         .app-body { padding: 15px; max-width: 1000px; margin: 0 auto; }
         
+        /* 💥 룸 리스트 스타일 */
         .trip-create-box { background: white; padding: 16px; border-radius: 12px; border: 2px dashed #cbd5e1; text-align: center; margin-bottom: 16px; }
-        .trip-create-box input { width: 70%; max-width: 300px; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: bold; margin-bottom: 8px; text-align: center; }
-        .trip-create-box button { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
+        .trip-create-box input { width: 70%; max-width: 300px; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: bold; margin-bottom: 8px; text-align: center; display: block; margin-left: auto; margin-right: auto; }
+        .trip-create-box button { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(59,130,246,0.2); margin-top: 5px;}
         
         .trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
         .trip-card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.02); position: relative; overflow: hidden; }
@@ -45,7 +46,6 @@
         .dashboard-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: stretch; margin-bottom: 15px; }
         .dashboard-col { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 12px; }
         
-        /* 💥 카드 내부 여백 다이어트 */
         .card { background: #fff; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.02); position: relative; }
         .card h3 { margin-top: 0; margin-bottom: 10px; font-size: 15px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         
@@ -54,10 +54,9 @@
         .card.theme-roulette { border: 2px solid #e9d5ff; background: #faf5ff; }
         .card.theme-roulette h3 { color: #7e22ce; border-bottom-color: #f3e8ff; }
 
-        /* 💥 인풋 폼 다이어트 */
         .flex-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
-        input[type="text"], input[type="number"], select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background-color: #fff; transition: 0.2s; margin-bottom: 8px !important; }
-        input[type="text"]:focus, input[type="number"]:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        input[type="text"], input[type="password"], input[type="number"], select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; background-color: #fff; transition: 0.2s; margin-bottom: 8px !important; }
+        input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
         
         .btn-addr-trigger { flex: 0.35; padding: 10px 0; background-color: #fbbf24; color: #1e293b; border: 1px solid #d97706; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
         .btn-add-addr { width: 100%; background: #f1f5f9; border: 1px dashed #94a3b8; color: #475569; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; margin-bottom: 10px; }
@@ -127,13 +126,14 @@
         .check-btn { display: inline-block; width: 22px; height: 22px; border-radius: 5px; border: 2px solid #d97706; cursor: pointer; text-align: center; line-height: 18px; font-size: 13px; font-weight: bold; background: white; color: transparent; transition: 0.2s; }
         .check-btn.checked { background: #10b981; border-color: #047857; color: white; }
 
-        /* 💥 [개선] 캘린더 툴팁/토글용 모달 직관성 강화 */
+        /* 모달 시스템 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; backdrop-filter: blur(3px); }
         .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; }
         .modal-content h3 { margin-top: 0; color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; font-size: 16px; }
-        .date-status-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; font-weight: bold; }
+        .date-status-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 10px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; font-weight: bold; transition: 0.2s; }
         
         .btn-modal-action { width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.1); margin-top: 10px; transition: 0.2s; color: white; }
+        .modal-select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; font-weight: bold; margin-bottom: 15px; background: #f8fafc; }
         .inline-postcode-wrapper { display: none; background: #fff; border: 2px solid #fbbf24; border-radius: 6px; padding: 8px; margin-bottom: 10px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
     </style>
 
@@ -165,18 +165,18 @@
             <h2 style="margin-top:0; color:#1e293b; font-size:18px;">✈️ 새로운 모임 방 만들기</h2>
             <p style="font-size:12px; color:#64748b; margin-bottom:12px;">조율할 여행 방의 이름을 지어주세요.</p>
             <input type="text" id="new_trip_name" placeholder="예: 26년 여름휴가 조율방">
-            <br>
+            <input type="password" id="new_trip_pw" placeholder="🔒 방 비밀번호 설정 (필수)">
             <button onclick="createNewTrip()">+ 새 방 개설하기</button>
         </div>
-        <h3 style="color:#1e3a8a; border-bottom:2px solid #e2e8f0; padding-bottom:8px; font-size:15px;">📂 개설된 방 목록</h3>
+        <h3 style="color:#1e3a8a; border-bottom:2px solid #e2e8f0; padding-bottom:8px; font-size:15px;">📂 개설된 방 목록 (입장 시 비밀번호 필요)</h3>
         <div id="tripGrid" class="trip-grid"><span style="color:#94a3b8; font-size:13px;">불러오는 중...</span></div>
     </div>
 
     <div id="screen_trip_planning" style="display: none;">
         
         <div style="background: #fffbeb; border: 1px dashed #f59e0b; padding: 10px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-            <span style="font-size: 12px; color: #b45309; font-weight: bold;">💡 과거의 공용 데이터(명단/출발지)를 불러올까요?</span>
-            <button onclick="importLegacyData()" style="background: #f59e0b; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:11px;">💾 기존 데이터 댕겨오기</button>
+            <span style="font-size: 12px; color: #b45309; font-weight: bold;">💡 다른 방에서 힘들게 적었던 데이터를 그대로 복사해올까요?</span>
+            <button onclick="openImportModal()" style="background: #f59e0b; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:11px;">💾 데이터 댕겨오기</button>
         </div>
 
         <div class="card" style="border: 2px solid #cbd5e1;">
@@ -232,7 +232,7 @@
                         <button class="btn-submit" onclick="sendToAI()">📍 내 데이터 저장</button>
 
                         <div>
-                            <span style="font-size: 11px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 4px;">📝 AI 모임 참가자 현황 (💡 이름 클릭 시 수정 불러오기)</span>
+                            <span style="font-size: 11px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 4px;">📝 AI 참가자 현황 (이름 클릭시 수정)</span>
                             <div id="liveMemberList" class="member-badge-list" style="border:1px dashed #93c5fd;"></div>
                         </div>
 
@@ -353,7 +353,7 @@
 <div class="modal-overlay" id="modalRoleAssign">
     <div class="modal-content">
         <h3>🎯 여행 확정 & 역할 배분</h3>
-        <p style="font-size:12px; color:#64748b; margin-bottom:12px;">이 지역으로 확정하기 전에 핵심 역할을 배분해 주세요.<br><span style="color:#ef4444; font-weight:bold;">(노란색으로 선택한 날짜에 모두 참석 가능한 인원만 뜹니다!)</span></p>
+        <p style="font-size:12px; color:#64748b; margin-bottom:12px;">이 지역으로 확정하기 전에 핵심 역할을 배분해 주세요.<br><span style="color:#ef4444; font-weight:bold;">(노란색으로 선택한 날짜에 모두 가능한 인원만 뜹니다!)</span></p>
         
         <label style="font-size: 12px; font-weight: bold; color: #1e293b;">👑 대장 (일정 계획)</label>
         <select id="assign_captain" class="modal-select"></select>
@@ -368,10 +368,25 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="modalImportData">
+    <div class="modal-content">
+        <h3>💾 다른 방 데이터 불러오기</h3>
+        <p style="font-size:12px; color:#64748b; margin-bottom:15px;">정보를 가져올 방을 선택하고 해당 방의 비밀번호를 입력하세요.</p>
+        
+        <select id="import_source_trip" class="modal-select"></select>
+        <input type="password" id="import_source_pw" placeholder="🔒 선택한 방의 비밀번호 입력" style="margin-bottom:15px !important; text-align:center;">
+
+        <button class="btn-modal-action" style="background:#f59e0b;" onclick="executeImportData()">데이터 복사해오기</button>
+        <button onclick="document.getElementById('modalImportData').style.display='none'" style="width:100%; background:transparent; border:none; color:#94a3b8; font-weight:bold; margin-top:8px; cursor:pointer;">취소</button>
+    </div>
+</div>
+
 <script>
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     
+    // 글로벌 변수
+    let globalTripsData = {}; // 전체 방 목록 저장용 (보안검증)
     let currentTripId = null; 
     let calendarInstance;
     let currentAssemblyTimeMins = 14 * 60; 
@@ -417,9 +432,11 @@
         loadTripList();
     });
 
+    // 💥 [보안 1] 방 목록을 메모리에 담아두고 비밀번호 매칭에 사용
     function loadTripList() {
         database.ref('trips').on('value', (snapshot) => {
             const data = snapshot.val();
+            globalTripsData = data || {}; 
             let html = "";
             if(data) {
                 let tripsArray = Object.keys(data).map(key => ({ id: key, ...data[key] })).sort((a,b) => b.createdAt - a.createdAt);
@@ -431,9 +448,9 @@
                     let statusBadge = trip.status === 'confirmed' ? `<span style="background:#ecfdf5; color:#10b981; padding:3px 8px; border-radius:10px; font-size:10px; font-weight:bold;">✅ 확정됨</span>` : ``;
 
                     html += `
-                        <div class="${cardClass}" onclick="openTrip('${trip.id}', '${trip.name}')">
-                            <button class="btn-delete-trip" onclick="event.stopPropagation(); deleteTrip('${trip.id}', '${trip.name}')">방 삭제</button>
-                            <h3>✈️ ${trip.name}</h3>
+                        <div class="${cardClass}" onclick="tryOpenTrip('${trip.id}')">
+                            <button class="btn-delete-trip" onclick="event.stopPropagation(); tryDeleteTrip('${trip.id}')">방 삭제</button>
+                            <h3>✈️ ${trip.name} 🔒</h3>
                             <p>생성일: ${dateStr}</p>
                             <div style="margin-top:8px; display:flex; gap:6px;">
                                 <span style="background:#eff6ff; color:#1d4ed8; padding:3px 8px; border-radius:10px; font-size:10px; font-weight:bold;">👤 AI참여: ${aiCount}명</span>
@@ -447,16 +464,47 @@
         });
     }
 
+    // 💥 [보안 2] 방 개설 시 비밀번호 저장
     function createNewTrip() {
         let tripName = document.getElementById("new_trip_name").value.trim();
-        if(!tripName) { alert("이름을 적어주세요!"); return; }
+        let tripPw = document.getElementById("new_trip_pw").value.trim();
+        if(!tripName || !tripPw) { alert("이름과 비밀번호를 모두 적어주세요!"); return; }
+        
         let tripId = "trip_" + Date.now().toString();
-        database.ref('trips/' + tripId).set({ name: tripName, status: 'planning', createdAt: Date.now() }).then(() => {
-            document.getElementById("new_trip_name").value = ""; openTrip(tripId, tripName);
+        database.ref('trips/' + tripId).set({ 
+            name: tripName, pw: tripPw, status: 'planning', createdAt: Date.now() 
+        }).then(() => {
+            document.getElementById("new_trip_name").value = ""; 
+            document.getElementById("new_trip_pw").value = ""; 
+            openTrip(tripId, tripName);
         });
     }
 
-    function deleteTrip(tripId, tripName) { if(confirm(`삭제하시겠습니까?`)) database.ref('trips/' + tripId).remove(); }
+    // 💥 [보안 3] 방 삭제 전 검증
+    window.tryDeleteTrip = function(tripId) {
+        let trip = globalTripsData[tripId];
+        if(!trip) return;
+        if(trip.pw) {
+            let inputPw = prompt(`🗑️ [${trip.name}] 방을 삭제하려면 비밀번호를 입력하세요:`);
+            if(inputPw === null) return;
+            if(inputPw !== trip.pw) { alert("❌ 비밀번호가 틀렸습니다."); return; }
+        } else {
+            if(!confirm(`[${trip.name}] 방을 정말 삭제하시겠습니까?`)) return;
+        }
+        database.ref('trips/' + tripId).remove();
+    };
+
+    // 💥 [보안 4] 방 입장 전 검증
+    window.tryOpenTrip = function(tripId) {
+        let trip = globalTripsData[tripId];
+        if(!trip) return;
+        if(trip.pw) {
+            let inputPw = prompt(`🔒 [${trip.name}] 방의 비밀번호를 입력하세요:`);
+            if(inputPw === null) return;
+            if(inputPw !== trip.pw) { alert("❌ 비밀번호가 틀렸습니다."); return; }
+        }
+        openTrip(tripId, trip.name);
+    };
 
     function openTrip(tripId, tripName) {
         currentTripId = tripId;
@@ -515,7 +563,6 @@
                     if(m.locations && m.locations.length > 0) {
                         globalActiveMembers.push(m);
                         let locText = m.locations[0].addr ? m.locations[0].addr.substring(0,6) : "주소없음";
-                        // 💥 이름 클릭 시 수정 로직 (editMemberData) 바인딩
                         badgeHtml += `<div class="member-badge" style="border-color:#bfdbfe;">
                             <span class="member-name-text" onclick="editMemberData('${m.name}')"><strong>${m.name}</strong></span> 
                             <span style="color:#64748b;">(${locText})</span> 
@@ -546,7 +593,7 @@
                     globalRoles.push({ id: key, name: data[key].name });
                     html += `<div class="member-badge" style="border-color:#c084fc; background:#f3e8ff; color:#7e22ce;">🎖️ ${data[key].name} <button class="btn-delete-badge" onclick="deleteRole('${key}')">X</button></div>`;
                 }
-            } else { html = `<span style="color:#aaa; font-size:10px;">등록된 역할이 없습니다.</span>`; }
+            } else { html = `<span style="color:#aaa; font-size:11px;">등록된 역할이 없습니다.</span>`; }
             document.getElementById("liveRoleList").innerHTML = html;
         });
 
@@ -569,14 +616,48 @@
         });
     }
 
-    function importLegacyData() {
-        if(!confirm("기존 공용 데이터를 불러오시겠습니까?")) return;
-        database.ref('members').once('value').then((snap) => { if(snap.val()) database.ref(`trips/${currentTripId}/members`).update(snap.val()); });
-        database.ref('roulette_members').once('value').then((snap) => { if(snap.val()) database.ref(`trips/${currentTripId}/roulette_members`).update(snap.val()); });
-        alert("✨ 기존 데이터 이식 완료!");
-    }
+    // 💥 [보안 5] 다른 방 데이터 불러오기 기능 (모달 방식 변경)
+    window.openImportModal = function() {
+        database.ref('trips').once('value').then(snapshot => {
+            let data = snapshot.val();
+            let selectHtml = '<option value="">데이터를 가져올 방을 선택하세요</option>';
+            if(data) {
+                for(let key in data) {
+                    if(key !== currentTripId) {
+                        selectHtml += `<option value="${key}">${data[key].name}</option>`;
+                    }
+                }
+            }
+            document.getElementById("import_source_trip").innerHTML = selectHtml;
+            document.getElementById("import_source_pw").value = "";
+            document.getElementById("modalImportData").style.display = "block";
+        });
+    };
 
-    // 💥 [내 이름 클릭 시 정보 수정 불러오기]
+    window.executeImportData = function() {
+        let srcId = document.getElementById("import_source_trip").value;
+        let srcPw = document.getElementById("import_source_pw").value;
+        
+        if(!srcId) { alert("방을 선택해주세요!"); return; }
+        
+        database.ref('trips/' + srcId).once('value').then(snapshot => {
+            let srcData = snapshot.val();
+            if(srcData.pw && srcData.pw !== srcPw) {
+                alert("❌ 선택하신 방의 비밀번호가 틀렸습니다."); return;
+            }
+            
+            // 비밀번호 일치 시 데이터 복사 진행
+            let aiPromise = null, rouPromise = null;
+            if(srcData.members) aiPromise = database.ref(`trips/${currentTripId}/members`).update(srcData.members);
+            if(srcData.roulette_members) rouPromise = database.ref(`trips/${currentTripId}/roulette_members`).update(srcData.roulette_members);
+            
+            Promise.all([aiPromise, rouPromise]).then(() => {
+                alert("✨ 성공적으로 데이터를 댕겨왔습니다!");
+                document.getElementById("modalImportData").style.display = "none";
+            });
+        });
+    };
+
     window.editMemberData = function(name) {
         let m = globalActiveMembers.find(x => x.name === name);
         if(m) {
@@ -637,7 +718,7 @@
         let name = document.getElementById("roulette_name").value.trim();
         let r1 = document.getElementById("r_dest1").value.trim(); let r2 = document.getElementById("r_dest2").value.trim();
         let arr = []; if(r1) arr.push(r1); if(r2) arr.push(r2);
-        if(!name || arr.length === 0) { alert("이름과 희망 여행지를 적어주세요!"); return; }
+        if(!name || arr.length === 0) { alert("이름과 희망 여행지를 1개 이상 적어주세요!"); return; }
 
         database.ref(`trips/${currentTripId}/roulette_members/${name}`).set({ name: name, targets: arr, timestamp: Date.now() }).then(() => {
             alert(`🎲 [${name}]님 룰렛 후보 등록 완료!`);
@@ -660,6 +741,7 @@
     
     function openInlinePostcode(targetIdx) {
         document.getElementById('postcode_layer' + targetIdx).style.display = 'block';
+        
         new daum.Postcode({
             oncomplete: function(data) {
                 let fullAddress = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
@@ -667,19 +749,27 @@
                 document.getElementById('my_addr' + targetIdx).value = fullAddress;
                 document.getElementById('selected_lat' + targetIdx).value = safeCoords.lat;
                 document.getElementById('selected_lng' + targetIdx).value = safeCoords.lng;
+                
+                if (typeof naver !== 'undefined' && naver.maps && naver.maps.Service) {
+                    try {
+                        naver.maps.Service.geocode({ query: fullAddress }, function(status, response) {
+                            if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
+                                document.getElementById('selected_lat' + targetIdx).value = response.v2.addresses[0].y;
+                                document.getElementById('selected_lng' + targetIdx).value = response.v2.addresses[0].x;
+                            }
+                        });
+                    } catch(e) {}
+                }
                 document.getElementById('postcode_layer' + targetIdx).style.display = 'none';
             }, width: '100%', height: '250px'
         }).embed(document.getElementById('postcode_embed' + targetIdx));
     }
     function closeInlinePostcode(targetIdx) { document.getElementById('postcode_layer' + targetIdx).style.display = 'none'; }
 
-    // 캘린더 관련
     function prevMonth() { displayCalMonth--; if(displayCalMonth < 0) { displayCalMonth = 11; displayCalYear--; } buildVisualCalendar(); }
     function nextMonth() { displayCalMonth++; if(displayCalMonth > 11) { displayCalMonth = 0; displayCalYear++; } buildVisualCalendar(); }
 
     let currentModalDateStr = "";
-    
-    // 💥 [개선] 모달 오픈 시 직관적인 토글 버튼 UI 렌더링
     window.openDateModal = function(dateStr) {
         currentModalDateStr = dateStr;
         let attending = []; let absent = [];
@@ -721,7 +811,7 @@
             userSelectedDates.sort(); 
         }
         closeDateModal();
-        buildVisualCalendar(); // 즉시 리렌더링하여 노란 박스 갱신
+        buildVisualCalendar(); 
     };
 
     function buildVisualCalendar() {
@@ -800,9 +890,7 @@
 
             let membersOnThisDay = dateMap[cellDateStr] || [];
 
-            // 시스템 추천(연두색)
             let optimalHtml = (topDateSchedule && topDateSchedule.dates.includes(cellDateStr)) ? `<div class="optimal-bg"></div>` : "";
-            // 유저 수동 선택(노란색)
             let selectedHtml = userSelectedDates.includes(cellDateStr) ? `<div class="selected-bg"></div>` : "";
 
             let barsHtml = "";
@@ -849,79 +937,218 @@
                         let realRoadDist = Math.round(dist * 1.28); 
                         
                         let timeMinInternal = Math.round(realRoadDist * 0.9 + 12); 
-                        let transportCost = (t === '자차') ? Math.round((realRoadDist / 11) * 1680 + (realRoadDist > 40 ? 5500 : 1200)) : (t === '대중교통' ? Math.round(realRoadDist * 160) : 0);
-                        let individualTotalCost = transportCost + (timeMinInternal * WAGE_PER_MIN);
+                        let timeMinDisplay = 0;
+                        if (t === '자차') {
+                            if(realRoadDist <= 50) timeMinDisplay = Math.round((realRoadDist / 40) * 60 + 10);
+                            else timeMinDisplay = Math.round((50 / 40) * 60 + ((realRoadDist - 50) / 95) * 60 + 15);
+                        } else if (t === '대중교통') {
+                            if(realRoadDist <= 50) timeMinDisplay = Math.round((realRoadDist / 30) * 60 + 20);
+                            else timeMinDisplay = Math.round((50 / 30) * 60 + ((realRoadDist - 50) / 105) * 60 + 35);
+                        } else { 
+                            if(realRoadDist <= 50) timeMinDisplay = Math.round((realRoadDist / 40) * 60 + 20);
+                            else timeMinDisplay = Math.round((50 / 40) * 60 + ((realRoadDist - 50) / 95) * 60 + 25);
+                        }
+
+                        let transportCost = 0;
+                        if (t === '자차') transportCost = Math.round((realRoadDist / 11) * 1680 + (realRoadDist > 40 ? 5500 : 1200));
+                        else if (t === '대중교통') transportCost = Math.round(realRoadDist * 160);
+                        else transportCost = 0;
+
+                        let timeCost = timeMinInternal * WAGE_PER_MIN;
+                        let individualTotalCost = transportCost + timeCost;
+                        let departMins = currentAssemblyTimeMins - timeMinDisplay;
+                        if (departMins < 0) departMins += 24 * 60; 
 
                         if (individualTotalCost < bestIndividualTotalCost) {
                             bestIndividualTotalCost = individualTotalCost;
-                            bestSetup = { transportCost: transportCost, timeCost: timeMinInternal * WAGE_PER_MIN };
+                            bestSetup = { loc: loc, trans: t, transportCost: transportCost, timeCost: timeCost, time: timeMinDisplay, dist: realRoadDist, departMins: departMins };
                         }
                     });
                 });
-                targetReceipts.push(bestSetup);
+
+                targetReceipts.push({
+                    name: m.name, addr: bestSetup.loc.addr || "주소 없음", lat: parseFloat(bestSetup.loc.lat), lng: parseFloat(bestSetup.loc.lng), 
+                    transport: bestSetup.trans, dist: bestSetup.dist, time: bestSetup.time, 
+                    transportCost: bestSetup.transportCost, timeCost: bestSetup.timeCost, departMins: bestSetup.departMins
+                });
             });
+
             let groupTransportCost = targetReceipts.reduce((s, r) => s + r.transportCost, 0);
             let groupTimeCost = targetReceipts.reduce((s, r) => s + r.timeCost, 0);
-            tempScores.push({ finalScore: groupTransportCost + groupTimeCost, groupTransportCost: groupTransportCost, groupTimeCost: groupTimeCost, rawTarget: target });
+            let finalScore = groupTransportCost + groupTimeCost; 
+
+            tempScores.push({ finalScore: finalScore, groupTransportCost: groupTransportCost, groupTimeCost: groupTimeCost, receipts: targetReceipts, rawTarget: target });
         });
         tempScores.sort((a, b) => a.finalScore - b.finalScore);
         return tempScores;
     }
 
+    function parseAssemblyTime(mode) {
+        let tInput = "assembly_time_ai"; 
+        let timeVal = document.getElementById(tInput).value;
+        if(timeVal && timeVal.includes(":")) {
+            let parts = timeVal.split(":");
+            currentAssemblyTimeMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        } else { currentAssemblyTimeMins = 14 * 60; }
+    }
+
     function startEngine(mode) {
+        window.currentActiveMode = mode;
+        if(mode === 'AI' && globalActiveMembers.length === 0) { alert("입력된 데이터가 없습니다!"); return; }
+        if(mode === 'ROULETTE' && globalRouletteMembers.length === 0) { alert("룰렛 후보 데이터가 없습니다!"); return; }
+        
+        parseAssemblyTime(mode);
+        document.getElementById("resultBox").style.display = "none";
+        document.getElementById("winnerBanner").style.display = "none";
+        
         if(mode === 'AI') {
-            if(globalActiveMembers.length === 0) { alert("데이터가 없습니다!"); return; }
-            document.getElementById("loadingBar").style.display = "flex"; document.getElementById("resultBox").style.display = "none";
+            document.getElementById("loadingBar").style.display = "flex";
+            document.getElementById("aiResultArea").style.display = "block";
+            document.getElementById("locationTitleText").innerHTML = `📍 AI 기회비용 최소화 지역 <span style="color:#ef4444;">(행을 클릭하세요!)</span>`;
+            document.getElementById("receiptTitleHeader").innerHTML = `🧾 <span id="receiptTitleCity">[선택된 지역]</span> 회원별 맞춤 상세 시간 명세서`;
+            
             let tempScores = runEngine(KOR_MASTER_DB);
             globalFinalScores = [];
-            for(let i=0; i < Math.min(3, tempScores.length); i++) globalFinalScores.push({ name: tempScores[i].rawTarget.n, cost: tempScores[i].finalScore, groupTransportCost: tempScores[i].groupTransportCost, groupTimeCost: tempScores[i].groupTimeCost });
-            
+            for(let i=0; i < Math.min(3, tempScores.length); i++) {
+                let node = tempScores[i];
+                globalFinalScores.push({
+                    name: node.rawTarget.n, cost: node.finalScore, groupTransportCost: node.groupTransportCost, groupTimeCost: node.groupTimeCost,
+                    receipts: node.receipts, rawTarget: node.rawTarget
+                });
+            }
             setTimeout(() => {
                 document.getElementById("loadingBar").style.display = "none";
-                let locHtml = "";
-                globalFinalScores.forEach((f, idx) => {
-                    let medal = idx === 0 ? "🥇 AI 추천 (확정은 클릭)" : `${idx + 1}위 대안`;
-                    locHtml += `
-                        <div class="rank-item loc-rank-item" onclick="confirmAITrip('${f.name}')">
-                            <div>${medal} : <strong style="font-size:14px;">${f.name}</strong></div>
-                            <button style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">이곳으로 확정</button>
-                        </div>`;
-                });
-                document.getElementById("locationResultContent").innerHTML = locHtml;
-                document.getElementById("resultBox").style.display = "block";
+                renderResults("AI");
             }, 500);
+            
         } else {
-            if(globalRouletteMembers.length === 0) { alert("룰렛 후보 데이터가 없습니다!"); return; }
-            let animBox = document.getElementById("rouletteAnimBox"); let rollingText = document.getElementById("rouletteRollingText");
-            animBox.style.display = "block"; document.getElementById("resultBox").style.display = "none";
-            let pool = []; globalRouletteMembers.forEach(m => { m.targets.forEach(t => pool.push({ submitter: m.name, dest: t })); });
-            let shuffledMembers = [...globalRouletteMembers.map(m => m.name)].sort(() => Math.random() - 0.5);
+            let animBox = document.getElementById("rouletteAnimBox");
+            let rollingText = document.getElementById("rouletteRollingText");
+            let subText = document.getElementById("rouletteSubText");
+            animBox.style.display = "block";
+
+            let destPool = [];
+            globalRouletteMembers.forEach(m => { m.targets.forEach(t => destPool.push(t)); });
+            
+            let shuffledMembers = [...globalRouletteMembers.map(m => m.name)];
+            for (let i = shuffledMembers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledMembers[i], shuffledMembers[j]] = [shuffledMembers[j], shuffledMembers[i]];
+            }
 
             let counter = 0;
             let shuffleInterval = setInterval(() => {
-                rollingText.innerText = pool[Math.floor(Math.random() * pool.length)].dest;
+                let tempIdx = Math.floor(Math.random() * destPool.length);
+                rollingText.innerText = destPool[tempIdx];
                 counter++;
                 if(counter > 20) {
                     clearInterval(shuffleInterval);
-                    let winner = pool[Math.floor(Math.random() * pool.length)];
-                    rollingText.innerText = `🎉 ${winner.dest} 당첨!!`;
-                    setTimeout(() => { animBox.style.display = "none"; saveRouletteHistory(winner.dest, shuffledMembers); }, 1500);
+                    let winnerDest = destPool[Math.floor(Math.random() * destPool.length)];
+                    rollingText.innerText = `🎉 ${winnerDest} 당첨!!`;
+                    subText.innerText = "역할 배정 완료!";
+                    
+                    setTimeout(() => {
+                        animBox.style.display = "none";
+                        subText.innerText = "역할 분담 중..."; 
+                        saveAndProcessRouletteWinner(winnerDest, shuffledMembers);
+                    }, 1500);
                 }
             }, 80);
         }
     }
 
-    function saveRouletteHistory(dest, shuffledMembers) {
+    function saveAndProcessRouletteWinner(winnerDest, shuffledMembers) {
         let historyId = "h_" + Date.now();
         let roleAssignments = [];
         if (globalRoles.length > 0) {
-            globalRoles.forEach((roleObj, idx) => { roleAssignments.push(`🎖️ ${roleObj.name} : ${shuffledMembers[idx % shuffledMembers.length]}`); });
-        } else { roleAssignments.push(`대장 : ${shuffledMembers[0] || '없음'}`); }
+            globalRoles.forEach((roleObj, idx) => {
+                let assignedMember = shuffledMembers[idx % shuffledMembers.length]; 
+                roleAssignments.push(`🎖️ ${roleObj.name} : ${assignedMember}`);
+            });
+        } else { roleAssignments.push(`설정된 역할이 없습니다.`); }
         
-        database.ref(`trips/${currentTripId}/roulette_history/${historyId}`).set({ id: historyId, dest: dest, assignmentsText: roleAssignments.join("<br>"), timestamp: Date.now() });
+        let finalData = { id: historyId, dest: winnerDest, assignmentsText: roleAssignments.join("<br>"), timestamp: Date.now() };
+
+        database.ref(`trips/${currentTripId}/roulette_history/${historyId}`).set(finalData).then(() => {
+            renderRouletteBanner(winnerDest, roleAssignments);
+        });
     }
 
-    // 💥 [실행 모드 전환 시] 날짜 검증 & 참석 가능 멤버 필터링
+    window.confirmRouletteHistory = function(historyId) {
+        if(userSelectedDates.length === 0) {
+            alert("⚠️ 캘린더에서 확정할 모임 날짜를 먼저 클릭하여 노란색으로 선택해 주세요!");
+            document.getElementById("calendarVisualBoard").scrollIntoView({behavior: "smooth"});
+            return;
+        }
+
+        let confirmedMembers = globalActiveMembers.filter(m => userSelectedDates.every(d => m.dates && m.dates.includes(d))).map(m => m.name);
+        if(confirmedMembers.length === 0) {
+            alert("⚠️ 선택하신 날짜에 모두 참석할 수 있는 멤버가 한 명도 없습니다! 캘린더에서 다른 날짜를 선택해주세요.");
+            return;
+        }
+        
+        database.ref(`trips/${currentTripId}/roulette_history/${historyId}`).once('value').then(snapshot => {
+            let data = snapshot.val();
+            let dateStr = userSelectedDates.join(", ");
+            
+            let roleDict = {};
+            data.assignmentsText.split("<br>").forEach(line => {
+                let parts = line.split(" : ");
+                if(parts.length === 2) roleDict[parts[0]] = parts[1];
+            });
+
+            let confirmedData = { dest: data.dest, dateStr: dateStr, members: confirmedMembers, roles: roleDict };
+            database.ref(`trips/${currentTripId}`).update({ status: 'confirmed', confirmedData: confirmedData }).then(() => {
+                alert("✨ 이 룰렛 결과로 방이 최종 확정되었습니다!");
+            });
+        });
+    };
+
+    function renderRouletteBanner(winnerDest, roleAssignmentsArray) {
+        document.getElementById("aiResultArea").style.display = "none";
+        let listItems = roleAssignmentsArray.map(txt => `<li><strong style="color:#7e22ce;">${txt.split(" : ")[0] || txt}</strong> : ${txt.split(" : ")[1] || ''}</li>`).join("");
+
+        let cleanName = winnerDest.split("(")[0].trim();
+        let naverMapNaviLink = `https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 가볼만한곳")}`;
+
+        document.getElementById("winnerBanner").innerHTML = `
+            <div style="font-size:28px; margin-bottom:15px;">🎉 당첨 여행지: <strong style="color:#b45309;">${winnerDest}</strong> 🎉</div>
+            <ul style="list-style:none; padding:15px; margin:0 auto; background:rgba(255,255,255,0.7); border-radius:8px; display:inline-block; text-align:left; min-width:200px;">
+                ${listItems}
+            </ul>
+            <div style="margin-top:20px;">
+                <a href="${naverMapNaviLink}" target="_blank" style="background:#03c75a; color:white; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:bold; text-decoration:none; display:inline-block; box-shadow:0 4px 10px rgba(3,199,90,0.2);">🗺️ 네이버 지도로 지역 탐색하기</a>
+            </div>
+            <div style="margin-top:15px; font-size:13px; font-weight:normal; color:#78350f;">복잡한 경로 계산은 생략합니다. 즐거운 여행 계획을 세워보세요!</div>
+        `;
+        document.getElementById("winnerBanner").style.display = "block";
+        document.getElementById("resultBox").style.display = "block";
+    }
+
+    function renderResults(mode) {
+        if(mode !== 'AI') return; 
+        
+        let locHtml = "";
+        globalFinalScores.forEach((f, idx) => {
+            let medal = idx === 0 ? "🥇 AI 강력 추천" : `${idx + 1}위 대안`;
+            let borderColor = "#e2e8f0"; let bg = "#fff";
+
+            let costHtml = `<div style="margin-top:4px;"><span class="cost-wage-text" style="color:#d97706;">💸 차비합: ${f.groupTransportCost.toLocaleString()}원 / ⏱️ 시급환산 가치합: ${f.groupTimeCost.toLocaleString()}원</span></div>`;
+
+            locHtml += `
+                <div class="rank-item loc-rank-item" data-idx="${idx}" onclick="showReceipt(${idx})" style="border-color:${borderColor}; background:${bg};">
+                    <div>
+                        ${medal} : <strong style="font-size:15px;">${f.name}</strong> 
+                        ${costHtml}
+                    </div>
+                    <button onclick="event.stopPropagation(); confirmAITrip('${f.name}')" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">이곳으로 확정</button>
+                </div>`;
+        });
+        document.getElementById("locationResultContent").innerHTML = locHtml;
+        showReceipt(0);
+        document.getElementById("resultBox").style.display = "block";
+    }
+
     window.confirmAITrip = function(destName) {
         if(userSelectedDates.length === 0) {
             alert("⚠️ 캘린더에서 확정할 모임 날짜를 먼저 클릭하여 노란색으로 선택해 주세요!");
@@ -929,7 +1156,6 @@
             return;
         }
 
-        // 선택한 모든 날짜에 참석 가능한 사람만 필터링
         let confirmedMembers = globalActiveMembers.filter(m => {
             if(!m.dates) return false;
             return userSelectedDates.every(d => m.dates.includes(d));
@@ -959,7 +1185,6 @@
         let tre = document.getElementById("assign_treasurer").value;
         let dateStr = userSelectedDates.join(", ");
 
-        // 참석 확정 멤버 명단 저장
         let confirmedMembers = globalActiveMembers.filter(m => userSelectedDates.every(d => m.dates && m.dates.includes(d))).map(m => m.name);
 
         let confirmedData = {
@@ -970,32 +1195,6 @@
         database.ref(`trips/${currentTripId}`).update({ status: 'confirmed', confirmedData: confirmedData }).then(() => {
             closeRoleModal();
             alert("✨ 성공적으로 방이 확정되어 관리 모드로 전환됩니다!");
-        });
-    };
-
-    window.confirmRouletteHistory = function(historyId) {
-        if(userSelectedDates.length === 0) {
-            alert("⚠️ 캘린더에서 확정할 모임 날짜를 먼저 클릭하여 노란색으로 선택해 주세요!");
-            document.getElementById("calendarVisualBoard").scrollIntoView({behavior: "smooth"});
-            return;
-        }
-
-        let confirmedMembers = globalActiveMembers.filter(m => userSelectedDates.every(d => m.dates && m.dates.includes(d))).map(m => m.name);
-        
-        database.ref(`trips/${currentTripId}/roulette_history/${historyId}`).once('value').then(snapshot => {
-            let data = snapshot.val();
-            let dateStr = userSelectedDates.join(", ");
-            
-            let roleDict = {};
-            data.assignmentsText.split("<br>").forEach(line => {
-                let parts = line.split(" : ");
-                if(parts.length === 2) roleDict[parts[0]] = parts[1];
-            });
-
-            let confirmedData = { dest: data.dest, dateStr: dateStr, members: confirmedMembers, roles: roleDict };
-            database.ref(`trips/${currentTripId}`).update({ status: 'confirmed', confirmedData: confirmedData }).then(() => {
-                alert("✨ 이 룰렛 결과와 선택하신 날짜로 방이 최종 확정되었습니다!");
-            });
         });
     };
 
@@ -1068,6 +1267,81 @@
         database.ref(`trips/${currentTripId}/finance/paid/${name}`).set(newStatus);
     };
 
+    function showReceipt(idx) {
+        let targetData = globalFinalScores[idx];
+        if(!targetData) return;
+        
+        let isRoulette = window.currentActiveMode === 'ROULETTE';
+        
+        let cleanName = targetData.name.split(" ")[0].trim();
+        if (cleanName.includes("(")) cleanName = cleanName.split("(")[0].trim();
+        
+        let pensionHtml = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 단체 숙소 펜션")}" target="_blank" class="pension-link">💚 네이버 지도로 [${cleanName}] 모임 장소 실시간 확인</a>`;
+        document.getElementById("dynamicPensionLink").innerHTML = pensionHtml;
+        
+        if (isRoulette) {
+            let rankItems = document.querySelectorAll('.loc-rank-item');
+            rankItems.forEach((el) => {
+                let itemIdx = parseInt(el.getAttribute('data-idx'));
+                if(itemIdx === idx) el.style.border = "2px solid #a855f7";
+                else el.style.border = "1px solid #e2e8f0";
+            });
+            return;
+        }
+
+        let titleCityEl = document.getElementById("receiptTitleCity");
+        if(titleCityEl) titleCityEl.innerHTML = `[${cleanName}]`;
+
+        // 💥 집결 목표 시간 가져오기 및 파싱
+        let tInput = "assembly_time_ai";
+        let timeVal = document.getElementById(tInput).value;
+        let cMins = 14 * 60;
+        if(timeVal && timeVal.includes(":")) {
+            let parts = timeVal.split(":");
+            cMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        }
+
+        let receiptHtml = `<p style="font-size:13px; color:#475569; margin: 0 0 10px 0;">🎉 <strong>🗺️ 네이버 지도 앱(예상)</strong> 소요 시간으로 동기화된 정밀 명세서입니다.</p>`;
+            
+        targetData.receipts.forEach(r => {
+            let hourText = r.time >= 60 ? `${Math.floor(r.time/60)}시간 ${r.time%60}분` : `${r.time}분`;
+            let tCostText = r.transportCost > 0 ? `${r.transportCost.toLocaleString()}원` : `0원`;
+            
+            // 💥 여기서 departMins를 다시 계산하여 음수 버그 해결
+            let departMins = cMins - r.time;
+            if (departMins < 0) departMins += 24 * 60;
+            
+            let dH = Math.floor(departMins / 60) % 24; let dM = departMins % 60;
+            let ampm = dH < 12 ? "오전" : "오후"; let fH = dH % 12 === 0 ? 12 : dH % 12;
+            let departTimeStr = `${ampm} ${fH}:${dM.toString().padStart(2, '0')} 출발`;
+
+            let menuType = (r.transport === '자차') ? 'car' : 'pubtrans';
+            let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},출발/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(cleanName)}/-/${menuType}?c=15,0,0,0,dh`;
+
+            receiptHtml += `
+                <div class="personal-receipt">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <div>👤 <strong style="font-size:14px;">${r.name}</strong></div>
+                        <div class="time-badge">⏱️ 역산 ${departTimeStr}</div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-size:12px; color:#64748b;">수단: <strong>${r.transport}</strong> (${r.dist}km)</div>
+                        <div style="text-align: right; font-weight: bold; font-size:13px;">
+                            <span>🗺️ 지도 예상: <span style="color:#1d4ed8;">${hourText}</span> ➡️ <span style="color:#b91c1c;">💸 ${tCostText}</span></span>
+                            <a href="${naverMapNaviLink}" target="_blank" class="btn-navi">내비 연결</a>
+                        </div>
+                    </div>
+                </div>`;
+        });
+        document.getElementById("personalReceiptContent").innerHTML = receiptHtml;
+
+        let rankItems = document.querySelectorAll('.loc-rank-item');
+        rankItems.forEach((el) => {
+            let itemIdx = parseInt(el.getAttribute('data-idx'));
+            if(itemIdx === idx) el.style.border = "2px solid #03c75a";
+            else el.style.border = "1px solid #e2e8f0";
+        });
+    }
 </script>
 </body>
 </html>
