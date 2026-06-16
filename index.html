@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - TITANIUM PRO 시공간 균등 조율 시스템</title>
+    <title>👑 왕모임 - 통합 대시보드 & 데이터 복구판 (v45.0)</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -14,66 +14,114 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; background-color: #f1f5f9; margin: 0; padding: 0; color: #334155; }
         
-        .app-header { background: linear-gradient(135deg, #1e3a8a, #0f172a); color: white; padding: 30px 15px; text-align: center; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+        .app-header { background: linear-gradient(135deg, #1e3a8a, #0f172a); color: white; padding: 30px 15px; text-align: center; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 6px 16px rgba(0,0,0,0.12); position: relative; }
         .app-header h1 { margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; color: #fbbf24; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .app-header p { margin: 8px 0 0 0; font-size: 13px; font-weight: 600; color: #f8fafc; opacity: 0.95; background: rgba(255,255,255,0.15); display: inline-block; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.25); }
+        .app-header p { margin: 8px 0 0 0; font-size: 13px; font-weight: 600; color: #f8fafc; opacity: 0.95; display: inline-block; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.25); }
         
-        .app-body { padding: 15px; max-width: 650px; margin: 0 auto; }
-        .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border: 1px solid #e2e8f0; position: relative; }
-        .card h3 { margin-top: 0; margin-bottom: 12px; font-size: 15px; color: #1e293b; }
-        
-        .flex-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
-        input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; }
-        
-        .btn-addr-trigger { flex: 0.4; padding: 12px 0; background-color: #fbbf24; color: #1e293b; border: 1px solid #d97706; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; white-space: nowrap; }
-        .btn-addr-trigger:hover { background-color: #f59e0b; }
-        
-        .btn-add-addr { width: 100%; background: #f1f5f9; border: 1px dashed #94a3b8; color: #475569; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
-        .btn-add-addr:hover { background: #e2e8f0; }
+        .btn-back { display: none; position: absolute; top: 20px; left: 15px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; backdrop-filter: blur(4px); transition: 0.2s; }
+        .btn-back:hover { background: rgba(255,255,255,0.3); }
 
+        .app-body { padding: 20px; max-width: 1000px; margin: 0 auto; }
+        
+        .trip-create-box { background: white; padding: 20px; border-radius: 12px; border: 2px dashed #cbd5e1; text-align: center; margin-bottom: 20px; }
+        .trip-create-box input { width: 70%; max-width: 300px; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 15px; font-weight: bold; margin-bottom: 10px; text-align: center; }
+        .trip-create-box button { background: #3b82f6; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
+        .trip-create-box button:hover { background: #2563eb; }
+
+        .trip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .trip-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); position: relative; overflow: hidden; }
+        .trip-card:hover { border-color: #3b82f6; transform: translateY(-3px); box-shadow: 0 8px 15px rgba(59,130,246,0.1); }
+        .trip-card::before { content: ""; position: absolute; top: 0; left: 0; width: 6px; height: 100%; background: #3b82f6; border-radius: 12px 0 0 12px; }
+        .trip-card h3 { margin: 0 0 5px 0; font-size: 18px; color: #1e293b; }
+        .trip-card p { margin: 0; font-size: 12px; color: #64748b; }
+        .btn-delete-trip { position: absolute; top: 15px; right: 15px; background: #fee2e2; color: #ef4444; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; z-index: 10; }
+
+        .global-tabs { display: flex; max-width: 1000px; margin: 20px auto 0 auto; gap: 10px; }
+        .g-tab { flex: 1; text-align: center; padding: 14px; font-size: 15px; font-weight: 900; border-radius: 12px 12px 0 0; cursor: pointer; transition: 0.3s; background: #e2e8f0; color: #64748b; border: 1px solid #cbd5e1; border-bottom: none; }
+        .g-tab.active.tab-ai { background: white; color: #1d4ed8; border-color: #3b82f6; border-top: 4px solid #3b82f6; }
+        .g-tab.active.tab-roulette { background: white; color: #7e22ce; border-color: #a855f7; border-top: 4px solid #a855f7; }
+
+        .dashboard-wrapper { background: white; padding: 20px; border-radius: 0 0 12px 12px; border: 1px solid #e2e8f0; border-top: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .dashboard-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: stretch; margin-bottom: 20px; }
+        .dashboard-col { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 15px; }
+        
+        .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .card h3 { margin-top: 0; margin-bottom: 15px; font-size: 16px; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        
+        .card.theme-ai { border: 2px solid #bfdbfe; background: #f8fafc; }
+        .card.theme-ai h3 { color: #1d4ed8; border-bottom-color: #dbeafe; }
+        .card.theme-roulette { border: 2px solid #e9d5ff; background: #faf5ff; }
+        .card.theme-roulette h3 { color: #7e22ce; border-bottom-color: #f3e8ff; }
+
+        .flex-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; transition: 0.2s; }
+        input[type="text"]:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        
+        .btn-addr-trigger { flex: 0.4; padding: 12px 0; background-color: #fbbf24; color: #1e293b; border: 1px solid #d97706; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; }
+        .btn-add-addr { width: 100%; background: #f1f5f9; border: 1px dashed #94a3b8; color: #475569; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; margin-bottom: 12px; }
+        
         .checkbox-group { display: flex; gap: 15px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; flex-wrap: wrap; }
         .checkbox-group label { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: bold; cursor: pointer; }
-        .checkbox-group input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
-
+        
         button.btn-submit { width: 100%; background: #03c75a; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 6px rgba(3,199,90,0.2); }
-        button.action-btn { width: 100%; background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(230,126,34,0.25); margin-top: 10px; }
-        
+        button.action-btn { width: 100%; background: linear-gradient(135deg, #2563eb, #1e3a8a); color: white; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.25); }
+        button.roulette-btn { width: 100%; background: linear-gradient(135deg, #9333ea, #6b21a8); color: white; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(147,51,234,0.25); }
+
         .member-badge-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-        .member-badge { display: inline-flex; align-items: center; gap: 6px; background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #cbd5e1; }
-        .btn-delete-badge { background: #ef4444; color: white; border: none; width: 16px; height: 16px; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        
-        .loading { display: none; flex-direction: column; align-items: center; padding: 35px 10px; font-weight: bold; color: #1e3a8a; font-size: 14px; background: #eff6ff; border-radius: 12px; border: 2px dashed #bfdbfe; margin-top: 15px; }
-        .loading-spinner { border: 4px solid #f3f4f6; border-top: 4px solid #3b82f6; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-bottom: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .member-badge { display: inline-flex; align-items: center; gap: 6px; background: #fff; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #cbd5e1; }
+        .btn-delete-badge { background: #ef4444; color: white; border: none; width: 16px; height: 16px; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        .result-box { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-top: 15px; }
-        .result-section-title { font-size: 15px; font-weight: bold; color: #166534; margin-top: 15px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #bbf7d0; }
-        
-        .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; margin-bottom: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; border: 1px solid #e2e8f0; }
-        .loc-rank-item { cursor: pointer; transition: all 0.2s ease; border: 2px solid #e2e8f0; }
-        .loc-rank-item:hover { border-color: #03c75a; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(3,199,90,0.1); }
-        
-        .search-links { display: inline-flex; gap: 4px; margin-left: 8px; }
-        .search-links a { font-size: 11px; text-decoration: none; padding: 3px 6px; border-radius: 4px; font-weight: bold; color: white; }
-        .btn-food { background-color: #ea4335; }
-        .btn-spot { background-color: #4285f4; }
-        .btn-navi { background-color: #03c75a; color: white; font-size: 11px; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; margin-top: 4px; box-shadow: 0 2px 4px rgba(3,199,90,0.15); }
-        
-        .personal-receipt { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 8px; font-size: 12px; margin-bottom: 6px; }
-        .pension-link { display: block; text-align: center; background-color: #2c3e50; color: white; padding: 14px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 12px; }
-        .badge-fail { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: normal; }
-        .time-badge { background: #e0e7ff; color: #1d4ed8; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid #bfdbfe; display: inline-block; margin-bottom: 4px; }
-        .deviation-badge { background: #fef2f2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 11px; border: 1px solid #fee2e2; font-weight: normal; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .cal-nav-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 16px; cursor: pointer; border-radius: 6px; font-weight: bold; color: #475569; transition: 0.2s; }
+        .cal-nav-btn:hover { background: #e2e8f0; color: #0f172a; }
+        .cal-month-title { font-weight: 900; color: #1e3a8a; font-size: 18px; }
 
-        /* 모바일 팝업 차단 우회 내장 레이어 */
-        .inline-postcode-wrapper { display: none; background: #fff; border: 2px solid #fbbf24; border-radius: 8px; padding: 8px; margin-bottom: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .cal-legend-box { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px dashed #cbd5e1; }
+        .cal-legend-item { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: bold; }
+        .cal-color-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+        
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e2e8f0; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+        .cal-header-cell { background: #f1f5f9; font-size: 12px; font-weight: bold; color: #64748b; padding: 8px 0; text-align: center; }
+        .cal-cell { background: #fff; min-height: 70px; padding: 6px 0; display: flex; flex-direction: column; align-items: center; position: relative; cursor: pointer; transition: background 0.15s; }
+        .cal-cell:hover { background: #f8fafc; }
+        .cal-date-num { font-size: 13px; font-weight: bold; color: #475569; margin-bottom: 6px; z-index: 2; position: relative; }
+        
+        .optimal-bg { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(16, 185, 129, 0.15); border-top: 3px solid #10b981; border-bottom: 3px solid #10b981; z-index: 1; }
+        .cal-bars-wrap { display: flex; flex-direction: column; gap: 2px; width: 100%; z-index: 2; position: relative; padding: 0 4px; }
+        .cal-bar { height: 6px; width: 100%; opacity: 0.9; }
+        .cal-bar.start { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
+        .cal-bar.end { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+        .cal-bar.single { border-radius: 4px; }
+
+        .loading { display: none; flex-direction: column; align-items: center; padding: 40px 10px; font-weight: bold; color: #1e3a8a; font-size: 15px; background: #eff6ff; border-radius: 12px; border: 2px dashed #bfdbfe; margin-bottom: 20px; }
+        .loading-spinner { border: 4px solid #e2e8f0; border-top: 4px solid #3b82f6; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin-bottom: 12px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .result-box { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .result-section-title { font-size: 16px; font-weight: bold; color: #166534; margin-top: 15px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px dashed #bbf7d0; }
+        
+        .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: white; margin-bottom: 8px; border-radius: 8px; font-size: 14px; font-weight: bold; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
+        .rank-item:hover { border-color: #03c75a; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(3,199,90,0.1); }
+        
+        .btn-navi { background-color: #03c75a; color: white; font-size: 12px; text-decoration: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; display: inline-block; margin-top: 6px; box-shadow: 0 2px 4px rgba(3,199,90,0.15); transition: 0.2s; }
+        .btn-navi:hover { background-color: #028a3e; }
+        
+        .personal-receipt { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 14px; border-radius: 8px; font-size: 13px; margin-bottom: 8px; }
+        .cost-wage-text { color: #d97706; font-size: 12px; display: block; margin-top: 4px; font-weight: bold; }
+        .time-badge { background: #e0e7ff; color: #1d4ed8; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; border: 1px solid #bfdbfe; display: inline-block; margin-bottom: 6px; }
+        
+        .roulette-anim-box { display: none; font-size: 28px; font-weight: 900; text-align: center; padding: 40px; background: #f3e8ff; color: #6d28d9; border-radius: 12px; border: 2px dashed #a78bfa; margin-bottom: 20px; }
+        .winner-banner { background: linear-gradient(135deg, #fcd34d, #fbbf24); color: #78350f; padding: 25px 20px; text-align: center; font-size: 18px; font-weight: 900; border-radius: 10px; margin-bottom: 0; border: 2px solid #b45309; display: none; box-shadow: 0 4px 15px rgba(245,158,11,0.2); }
+        .winner-banner ul { list-style: none; padding: 0; margin: 15px 0 0 0; background: rgba(255,255,255,0.6); border-radius: 8px; padding: 10px; display: inline-block; text-align: left; }
+        .winner-banner li { padding: 4px 0; font-size: 16px; }
+        
+        .inline-postcode-wrapper { display: none; background: #fff; border: 2px solid #fbbf24; border-radius: 8px; padding: 10px; margin-bottom: 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
     </style>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    
-    <script type="text/javascript" src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=n3o9fho7nl&submodules=geocoder"></script>
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=n3o9fho7nl&submodules=geocoder"></script>
     
     <script>
         const firebaseConfig = {
@@ -87,347 +135,518 @@
 <body>
 
 <div class="app-header">
-    <h1>👑 왕모임 (WangMoim)</h1>
-    <p>무적 오프라인 매핑 & 시공간 균등 조율 시스템</p>
+    <button class="btn-back" id="btnBack" onclick="goBackToTrips()">🔙 다른 방으로 이동</button>
+    <h1 id="mainTitle">👑 왕모임 (WangMoim)</h1>
+    <p id="mainDesc">다같이 모이는 가장 완벽한 방법</p>
 </div>
 
 <div class="app-body">
-    <div class="card">
-        <h3>✍️ [회원용] 내 유동적 출발지 및 이동수단 제출</h3>
-        <p style="font-size:11px; color:#64748b; margin:0 0 10px 0;">* 출발 가능한 주소나 수단이 여러 개라면 모두 등록하세요.</p>
-        
-        <input type="text" id="my_name" placeholder="이름 (예: 양지현)" style="margin-bottom: 10px;">
-        
-        <div class="flex-row">
-            <input type="text" id="my_addr1" placeholder="출발지 1 (필수)" readonly>
-            <button class="btn-addr-trigger" type="button" onclick="openInlinePostcode(1)">주소 검색</button>
-            <input type="hidden" id="selected_lat1">
-            <input type="hidden" id="selected_lng1">
-        </div>
-        <div id="postcode_layer1" class="inline-postcode-wrapper">
-            <div style="text-align:right; margin-bottom:5px;"><button onclick="closeInlinePostcode(1)" style="background:#ef4444; color:#fff; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">닫기 X</button></div>
-            <div id="postcode_embed1" style="width:100%; height:360px;"></div>
+    <div id="screen_trip_list">
+        <div class="trip-create-box">
+            <h2 style="margin-top:0; color:#1e293b;">✈️ 새로운 모임/여행 방 만들기</h2>
+            <p style="font-size:13px; color:#64748b; margin-bottom:15px;">친구들과 조율할 여행 방의 이름을 지어주세요.</p>
+            <input type="text" id="new_trip_name" placeholder="예: 25년 여름휴가 조율방">
+            <br>
+            <button onclick="createNewTrip()">+ 새 방 개설하기</button>
         </div>
         
-        <button id="btn_toggle_addr2" class="btn-add-addr" type="button" onclick="toggleAddr2()">+ 출발 가능한 두 번째 주소 추가</button>
-        <div class="flex-row" id="wrap_addr2" style="display: none;">
-            <input type="text" id="my_addr2" placeholder="출발지 2 (선택)" readonly>
-            <button class="btn-addr-trigger" type="button" onclick="openInlinePostcode(2)">주소 검색</button>
-            <input type="hidden" id="selected_lat2">
-            <input type="hidden" id="selected_lng2">
-            <button class="btn-addr-trigger" style="flex:0.2; background:#ef4444; color:white; border:none;" onclick="clearAddr2()">X</button>
+        <h3 style="color:#1e3a8a; border-bottom:2px solid #e2e8f0; padding-bottom:10px;">📂 개설된 방 목록</h3>
+        <div id="tripGrid" class="trip-grid">
+            <span style="color:#94a3b8; font-size:14px;">불러오는 중...</span>
         </div>
-        <div id="postcode_layer2" class="inline-postcode-wrapper">
-            <div style="text-align:right; margin-bottom:5px;"><button onclick="closeInlinePostcode(2)" style="background:#ef4444; color:#fff; border:none; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:11px; font-weight:bold;">닫기 X</button></div>
-            <div id="postcode_embed2" style="width:100%; height:360px;"></div>
-        </div>
+    </div>
+
+    <div id="screen_trip_detail" style="display: none;">
         
-        <div style="margin-bottom: 10px;">
-            <span style="font-size: 12px; font-weight: bold; color: #1e293b; display: block; margin-bottom: 6px;">교통 수단 (중복 선택 가능)</span>
-            <div class="checkbox-group">
-                <label><input type="checkbox" name="my_trans" value="자차"> 자차 운전</label>
-                <label><input type="checkbox" name="my_trans" value="대중교통" checked> 대중교통</label>
-                <label><input type="checkbox" name="my_trans" value="카풀"> 동승(카풀)</label>
+        <div style="background: #fffbeb; border: 1px dashed #f59e0b; padding: 12px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <span style="font-size: 13px; color: #b45309; font-weight: bold;">💡 지난번 방에서 힘들게 입력했던 멤버들의 데이터를 그대로 가져올까요?</span>
+            <button onclick="importLegacyData()" style="background: #f59e0b; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(245,158,11,0.2);">
+                💾 기존 취합 데이터 댕겨오기
+            </button>
+        </div>
+
+        <div class="card" style="border: 2px solid #cbd5e1;">
+            <h3>📅 1. 모임 일정 시각화 캘린더 <span style="font-size:12px; color:#64748b; font-weight:normal; margin-left:auto;">(💡 날짜를 누르면 불참자를 보여줍니다!)</span></h3>
+            <div id="calLegend" class="cal-legend-box"><span style="color:#aaa; font-size:12px;">데이터를 입력해주세요...</span></div>
+            <div id="calendarVisualBoard"></div>
+        </div>
+
+        <div class="global-tabs" style="margin-top:0; max-width:100%;">
+            <div class="g-tab active tab-ai" id="gTab1" onclick="switchGlobalTab(1)">💡 AI 모임 조율</div>
+            <div class="g-tab tab-roulette" id="gTab2" onclick="switchGlobalTab(2)">🎲 복불복 룰렛</div>
+        </div>
+
+        <div class="dashboard-wrapper">
+            <div class="dashboard-row">
+                
+                <div class="dashboard-col" id="view_ai">
+                    <div class="card theme-ai">
+                        <h3>💡 2. AI 예산 최적화 (기본 모드)</h3>
+                        <p style="font-size:12px; color:#64748b; margin-bottom:15px;">출발지와 날짜를 입력하면 가장 공평한 곳을 찾습니다.</p>
+                        
+                        <input type="text" id="ai_name" placeholder="이름 (예: 양지현)" style="margin-bottom: 10px;">
+                        <input type="text" id="calendar_input" placeholder="📅 참여 가능 날짜 (여러 개 선택 가능)" style="margin-bottom: 10px;">
+                        
+                        <div class="flex-row">
+                            <input type="text" id="my_addr1" placeholder="출발지 1 (필수)" readonly>
+                            <button class="btn-addr-trigger" type="button" onclick="openInlinePostcode(1)">검색</button>
+                            <input type="hidden" id="selected_lat1"><input type="hidden" id="selected_lng1">
+                        </div>
+                        <div id="postcode_layer1" class="inline-postcode-wrapper">
+                            <div style="text-align:right;"><button onclick="closeInlinePostcode(1)" style="background:#ef4444;color:#fff;border:none;border-radius:4px;padding:4px 10px;font-weight:bold;cursor:pointer;">닫기 X</button></div>
+                            <div id="postcode_embed1" style="width:100%; height:300px;"></div>
+                        </div>
+                        
+                        <button id="btn_toggle_addr2" class="btn-add-addr" type="button" onclick="toggleAddr2()">+ 두 번째 출발지 추가 (자취방 등)</button>
+                        <div class="flex-row" id="wrap_addr2" style="display: none;">
+                            <input type="text" id="my_addr2" placeholder="출발지 2 (선택)" readonly>
+                            <button class="btn-addr-trigger" type="button" onclick="openInlinePostcode(2)">검색</button>
+                            <input type="hidden" id="selected_lat2"><input type="hidden" id="selected_lng2">
+                        </div>
+                        <div id="postcode_layer2" class="inline-postcode-wrapper">
+                            <div style="text-align:right;"><button onclick="closeInlinePostcode(2)" style="background:#ef4444;color:#fff;border:none;border-radius:4px;padding:4px 10px;font-weight:bold;cursor:pointer;">닫기 X</button></div>
+                            <div id="postcode_embed2" style="width:100%; height:300px;"></div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 12px; font-weight: bold; color: #1e293b; display: block; margin-bottom: 6px;">🚗 이용 가능한 교통 수단 (중복 가능)</span>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="my_trans" value="자차" checked> 자차</label>
+                                <label><input type="checkbox" name="my_trans" value="대중교통" checked> 대중교통</label>
+                                <label><input type="checkbox" name="my_trans" value="카풀" checked> 동승(카풀)</label>
+                            </div>
+                        </div>
+                        <button class="btn-submit" onclick="sendToAI()" style="margin-bottom: 25px;">📍 내 데이터 방에 전송</button>
+
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 12px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 6px;">📝 AI 모임 참가자 현황 (클릭 삭제)</span>
+                            <div id="liveMemberList" class="member-badge-list" style="min-height:40px; background:#fff; padding:10px; border-radius:8px; border:1px dashed #93c5fd;"><span style="color:#aaa; font-size:13px;">데이터 대기 중...</span></div>
+                        </div>
+
+                        <div style="border-top: 1px dashed #cbd5e1; padding-top: 15px;">
+                            <label style="font-size: 12px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 6px;">⏰ 목표 집결 시간 (역산용)</label>
+                            <input type="text" id="assembly_time_ai" placeholder="예: 14:00" style="margin-bottom: 10px; border-color:#bfdbfe;">
+                            <button class="action-btn" onclick="startEngine('AI')">💡 AI 최적화 지역 스캔 시작</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-col" id="view_roulette" style="display: none;">
+                    <div class="card theme-roulette">
+                        <h3>🎲 3. 여행장 및 역할 복불복 룰렛 모드</h3>
+                        <p style="font-size:12px; color:#64748b; margin-bottom:15px;">경로/비용 계산 없이 <strong>'여행지'</strong>와 <strong>'역할'</strong>만 통쾌하게 뽑는 예능 모드입니다.</p>
+                        
+                        <div style="margin-bottom: 15px; border-bottom: 1px dashed #e9d5ff; padding-bottom: 15px;">
+                            <span style="font-size: 12px; font-weight: bold; color: #7e22ce; display: block; margin-bottom: 6px;">🛠️ [공통] 룰렛 역할 설정 (예: 대장, 총무)</span>
+                            <div class="flex-row">
+                                <input type="text" id="new_role_input" placeholder="추가할 역할 입력" style="border-color:#d8b4fe;">
+                                <button class="btn-addr-trigger" style="background:#c084fc; color:white; border:none;" onclick="addRole()">추가</button>
+                            </div>
+                            <div id="liveRoleList" class="member-badge-list" style="margin-top:5px; min-height:30px;"><span style="color:#aaa; font-size:11px;">등록된 역할이 없습니다.</span></div>
+                        </div>
+
+                        <input type="text" id="roulette_name" placeholder="참가자 이름 (예: 홍길동)" style="margin-bottom: 10px; border-color:#d8b4fe;">
+                        <div class="flex-row">
+                            <input type="text" id="r_dest1" placeholder="희망지 1 (예: 해운대)" style="border-color:#d8b4fe;">
+                            <input type="text" id="r_dest2" placeholder="희망지 2 (선택)" style="border-color:#d8b4fe;">
+                        </div>
+                        <button class="btn-submit" style="background:#9333ea; margin-bottom: 25px;" onclick="sendToRoulette()">🎲 내 룰렛 후보 등록</button>
+
+                        <div style="margin-bottom: 15px;">
+                            <span style="font-size: 12px; font-weight: bold; color: #7e22ce; display: block; margin-bottom: 6px;">📝 룰렛 참가자 목록 (클릭 삭제)</span>
+                            <div id="liveRouletteList" class="member-badge-list" style="min-height:40px; background:#fff; padding:10px; border-radius:8px; border:1px dashed #d8b4fe;"><span style="color:#aaa; font-size:13px;">후보 대기 중...</span></div>
+                        </div>
+
+                        <div style="border-top: 1px dashed #e9d5ff; padding-top: 15px;">
+                            <button class="roulette-btn" onclick="startEngine('ROULETTE')">🎯 여행지 & 역할 복불복 돌리기!</button>
+                        </div>
+                    </div>
+                </div>
+                
+            </div> <div class="loading" id="loadingBar">
+                <div class="loading-spinner"></div>
+                <div id="loadingText">고속도로 및 KTX 가속 로직을 적용하여 연산 중입니다...</div>
             </div>
-        </div>
-
-        <input type="text" id="calendar_input" placeholder="📅 참여 가능 날짜 모두 터치" style="margin-bottom: 10px;">
-        <button class="btn-submit" onclick="sendToGoogleCloudServer()">📍 내 데이터 서버로 전송</button>
-    </div>
-
-    <div class="card">
-        <h3>📊 [총무용] 균등 이동시간 정산 엔진 가동</h3>
-        <div class="member-badge-list" id="liveMemberList" style="margin-bottom: 15px;">
-            <span style="color:#aaa; font-size:13px;">서버 데이터 동기화 중...</span>
-        </div>
-        
-        <div style="margin-bottom: 15px;">
-            <label style="font-size: 12px; font-weight: bold; color: #e67e22; display: block; margin-bottom: 6px;">⏰ 목표 집결 시간 (24시간제 입력, 예: 14:00)</label>
-            <input type="text" id="assembly_time" placeholder="시간 지정 (예: 14:00)">
-        </div>
-
-        <div style="margin-bottom: 15px;">
-            <label style="font-size: 12px; font-weight: bold; color: #1e3a8a; display: block; margin-bottom: 8px;">⚙️ 행정구역 탐색 스케일</label>
-            <div style="display: flex; gap: 8px;">
-                <label style="flex: 1; background: #eff6ff; padding: 12px; border: 2px solid #3b82f6; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; font-size: 12px; display: block;" id="label-mode-city">
-                    <input type="radio" name="routing_mode_preset" value="city" checked onchange="updatePresetLabelStyle()" style="margin-right: 4px;"> 🏙️ 시·군·구 단위
-                </label>
-                <label style="flex: 1; background: white; padding: 12px; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer; text-align: center; font-weight: bold; font-size: 12px; display: block;" id="label-mode-dong">
-                    <input type="radio" name="routing_mode_preset" value="dong" onchange="updatePresetLabelStyle()" style="margin-right: 4px;"> 📍 읍·면·동 단위
-                </label>
+            
+            <div class="roulette-anim-box" id="rouletteAnimBox">
+                🎲 룰렛 회전 중...<br>
+                <span id="rouletteRollingText" style="color:#1e3a8a; font-size:32px; display:block; margin-top:10px;">-</span>
+                <span id="rouletteSubText" style="color:#9333ea; font-size:16px; display:block; margin-top:10px;">역할 분담 중...</span>
             </div>
-        </div>
-        
-        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 시공간 균등 조율 엔진 가동</button>
-    </div>
+            
+            <div class="result-box" id="resultBox">
+                <div id="winnerBanner" class="winner-banner"></div>
+                
+                <div id="aiResultArea">
+                    <div style="font-size: 14px; font-weight: bold; color: #e67e22; background: #fff7ed; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed #fdba74;" id="display_assembly_time"></div>
 
-    <div class="loading" id="loadingBar">
-        <div class="loading-spinner"></div>
-        <div id="loadingText">시간 편차를 최소화하는 무결점 좌표를 연산 중입니다...</div>
-    </div>
-    
-    <div class="result-box" id="resultBox">
-        <h2>📊 최종 최적 조율 가이드 결과</h2>
-        <div class="result-section-title">📅 1. 추천 일정 및 목표 집결 시간</div>
-        <div id="dateResultContent"></div>
-        <div style="font-size: 13px; font-weight: bold; color: #e67e22; background: #fff7ed; padding: 8px; border-radius: 6px; margin-top: 8px; border: 1px dashed #fdba74;" id="display_assembly_time"></div>
+                    <div class="result-section-title" id="locationTitleText">📍 조율 결과 지역 <span style="color:#ef4444; font-weight: bold;">(행을 클릭하세요!)</span></div>
+                    <div id="locationResultContent"></div>
+                    
+                    <div id="dynamicPensionLink" style="margin-bottom: 15px;"></div>
+                    
+                    <div class="result-section-title" id="receiptTitleHeader">🧾 <span id="receiptTitleCity">[선택된 지역]</span> 회원별 맞춤 상세 시간 명세서</div>
+                    <div id="personalReceiptContent"></div>
+                </div>
+            </div>
 
-        <div class="result-section-title">📍 2. 시간 편차 최소화 정밀 순위 <span style="color:#ef4444; font-weight: bold;">(순위를 터치하면 명세서가 바뀝니다!)</span></div>
-        <div id="locationResultContent"></div>
-        
-        <div id="dynamicPensionLink"></div>
-        
-        <div class="result-section-title">🧾 3. <span id="receiptTitleCity">[선택된 지역]</span> 개인별 역산 출발 시간표 및 명세서</div>
-        <div id="personalReceiptContent"></div>
-    </div>
-</div>
+        </div> </div> </div>
 
 <script>
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
+    
+    // 글로벌 변수
+    let currentTripId = null; 
     let calendarInstance;
-    let timePickerInstance;
-    let globalFinalScores = []; 
     let currentAssemblyTimeMins = 14 * 60; 
+    let topDateSchedule = null; 
+    const WAGE_PER_MIN = 167; 
+    window.currentActiveMode = "AI";
+    let displayCalYear = new Date().getFullYear();
+    let displayCalMonth = new Date().getMonth();
+    
+    let globalActiveMembers = [];
+    let globalRouletteMembers = [];
+    let globalRoles = []; 
+    let globalFinalScores = []; 
 
-    // 💥 [PRO 완전 무결점 오프라인 좌표 사전] API가 죽어도 100% 정확하게 꽂히는 전국 단위 매핑 테이블
-    const offlineKORGeoDict = [
-        { key: "강남", lat: 37.4979, lng: 127.0276, fullName: "서울 강남구" },
-        { key: "마포", lat: 37.5663, lng: 126.9016, fullName: "서울 마포구" },
-        { key: "송파", lat: 37.5145, lng: 127.1058, fullName: "서울 송파구" },
-        { key: "용산", lat: 37.5326, lng: 126.9900, fullName: "서울 용산구" },
-        { key: "종로", lat: 37.5700, lng: 126.9796, fullName: "서울 종로구" },
-        { key: "서초", lat: 37.4837, lng: 127.0324, fullName: "서울 서초구" },
-        { key: "영등포", lat: 37.5264, lng: 126.8962, fullName: "서울 영등포구" },
-        { key: "서울", lat: 37.5665, lng: 126.9780, fullName: "서울특별시 중심" },
-        { key: "수원", lat: 37.2636, lng: 127.0286, fullName: "경기 수원시" },
-        { key: "성남", lat: 37.4200, lng: 127.1265, fullName: "경기 성남시" },
-        { key: "인천", lat: 37.4563, lng: 126.7052, fullName: "인천광역시" },
-        { key: "해운대", lat: 35.1631, lng: 129.1636, fullName: "부산 해운대구" },
-        { key: "서면", lat: 35.1577, lng: 129.0591, fullName: "부산 부산진구" },
-        { key: "부산", lat: 35.1796, lng: 129.0756, fullName: "부산광역시 중심" },
-        { key: "동성로", lat: 35.8655, lng: 128.5934, fullName: "대구 중구" },
-        { key: "수성", lat: 35.8278, lng: 128.6166, fullName: "대구 수성구" },
-        { key: "대구", lat: 35.8711, lng: 128.6014, fullName: "대구광역시 중심" },
-        { key: "둔산", lat: 36.3528, lng: 127.3789, fullName: "대전 서구" },
-        { key: "유성", lat: 36.3537, lng: 127.3415, fullName: "대전 유성구" },
-        { key: "대전", lat: 36.3504, lng: 127.3845, fullName: "대전광역시 중심" },
-        { key: "광주", lat: 35.1595, lng: 126.8526, fullName: "광주광역시 중심" },
-        { key: "전주", lat: 35.8242, lng: 127.1480, fullName: "전북 전주시" },
-        { key: "강릉", lat: 37.7519, lng: 128.8761, fullName: "강원 강릉시" },
-        { key: "춘천", lat: 37.8813, lng: 127.7298, fullName: "강원 춘천시" },
-        { key: "산청", lat: 35.4141, lng: 127.8791, fullName: "경남 산청군" },
-        { key: "무주", lat: 36.0068, lng: 127.6607, fullName: "전북 무주군" }
+    const DOT_COLORS = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
+    let memberColorMap = {};
+
+    const KOR_MASTER_DB = [
+        { n: "서울특별시", lat: 37.5665, lng: 126.9780 }, { n: "부산광역시", lat: 35.1796, lng: 129.0756 },
+        { n: "대구광역시", lat: 35.8711, lng: 128.6014 }, { n: "인천광역시", lat: 37.4563, lng: 126.7052 },
+        { n: "광주광역시", lat: 35.1595, lng: 126.8526 }, { n: "대전광역시", lat: 36.3504, lng: 127.3845 },
+        { n: "울산광역시", lat: 35.5384, lng: 129.3114 }, { n: "세종특별자치시", lat: 36.4800, lng: 127.2890 },
+        { n: "경기 수원시", lat: 37.2636, lng: 127.0286 }, { n: "경기 성남시", lat: 37.4200, lng: 127.1265 },
+        { n: "경기 가평군", lat: 37.8315, lng: 127.5095 }, { n: "강원 춘천시", lat: 37.8813, lng: 127.7298 },
+        { n: "강원 강릉시", lat: 37.7519, lng: 128.8761 }, { n: "강원 속초시", lat: 38.2070, lng: 128.5918 },
+        { n: "충북 청주시", lat: 36.6424, lng: 127.4890 }, { n: "충북 단양군", lat: 36.9845, lng: 128.3648 },
+        { n: "충남 천안시", lat: 36.8151, lng: 127.1138 }, { n: "전북 전주시", lat: 35.8242, lng: 127.1480 },
+        { n: "전북 무주군", lat: 36.0068, lng: 127.6607 }, { n: "전남 여수시", lat: 34.7603, lng: 127.6622 },
+        { n: "경북 포항시", lat: 36.0190, lng: 129.3434 }, { n: "경북 경주시", lat: 35.8562, lng: 129.2247 },
+        { n: "경남 창원시", lat: 35.2279, lng: 128.6811 }, { n: "경남 산청군", lat: 35.4141, lng: 127.8791 },
+        { n: "제주 제주시", lat: 33.4996, lng: 126.5311 }
     ];
 
-    function getFallbackCoordinates(addrStr) {
-        for (let i = 0; i < offlineKORGeoDict.length; i++) {
-            if (addrStr.includes(offlineKORGeoDict[i].key)) {
-                return { lat: offlineKORGeoDict[i].lat, lng: offlineKORGeoDict[i].lng, name: offlineKORGeoDict[i].fullName };
+    function getCityLevelCoords(address) {
+        if(address.includes("서울") || address.match(/강남|마포|송파|용산|종로|서초/)) return { lat: 37.5665, lng: 126.9780, name: "서울특별시" };
+        if(address.includes("부산") || address.match(/해운대|서면|동래/)) return { lat: 35.1796, lng: 129.0756, name: "부산광역시" };
+        if(address.includes("대구") || address.match(/수성|동성로/)) return { lat: 35.8711, lng: 128.6014, name: "대구광역시" };
+        if(address.includes("인천")) return { lat: 37.4563, lng: 126.7052, name: "인천광역시" };
+        if(address.includes("광주")) return { lat: 35.1595, lng: 126.8526, name: "광주광역시" };
+        if(address.includes("대전") || address.match(/유성|둔산/)) return { lat: 36.3504, lng: 127.3845, name: "대전광역시" };
+        
+        for (let i = 0; i < KOR_MASTER_DB.length; i++) {
+            let parts = KOR_MASTER_DB[i].n.split(" ");
+            let cityKeyword = parts[parts.length - 1].replace(/[시군구]$/, ""); 
+            if (address.includes(cityKeyword)) {
+                return { lat: KOR_MASTER_DB[i].lat, lng: KOR_MASTER_DB[i].lng, name: KOR_MASTER_DB[i].n };
             }
         }
-        return { lat: 36.3504, lng: 127.3845, name: "대한민국 거점 (대전)" }; // 매칭 불가 시 최후 보루
+        return { lat: 36.3504, lng: 127.3845, name: "대전광역시" }; 
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        calendarInstance = flatpickr("#calendar_input", {
-            mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", "
-        });
-        timePickerInstance = flatpickr("#assembly_time", {
-            enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "14:00"
-        });
-        updatePresetLabelStyle();
+        calendarInstance = flatpickr("#calendar_input", { mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", " });
+        flatpickr("#assembly_time_ai", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "14:00" });
+        
+        loadTripList();
     });
 
-    function toggleAddr2() {
-        document.getElementById('wrap_addr2').style.display = 'flex';
-        document.getElementById('btn_toggle_addr2').style.display = 'none';
-    }
-    
-    function clearAddr2() {
-        document.getElementById('my_addr2').value = '';
-        document.getElementById('selected_lat2').value = '';
-        document.getElementById('selected_lng2').value = '';
-        document.getElementById('wrap_addr2').style.display = 'none';
-        document.getElementById('btn_toggle_addr2').style.display = 'block';
+    function loadTripList() {
+        database.ref('trips').on('value', (snapshot) => {
+            const data = snapshot.val();
+            let html = "";
+            if(data) {
+                let tripsArray = Object.keys(data).map(key => ({ id: key, ...data[key] })).sort((a,b) => b.createdAt - a.createdAt);
+                
+                tripsArray.forEach(trip => {
+                    let aiCount = trip.members ? Object.keys(trip.members).length : 0;
+                    let rouCount = trip.roulette_members ? Object.keys(trip.roulette_members).length : 0;
+                    
+                    let dateStr = new Date(trip.createdAt).toLocaleDateString();
+                    html += `
+                        <div class="trip-card" onclick="openTrip('${trip.id}', '${trip.name}')">
+                            <button class="btn-delete-trip" onclick="event.stopPropagation(); deleteTrip('${trip.id}', '${trip.name}')">방 삭제</button>
+                            <h3>✈️ ${trip.name}</h3>
+                            <p>생성일: ${dateStr}</p>
+                            <div style="margin-top:10px; display:flex; gap:8px;">
+                                <span style="background:#eff6ff; color:#1d4ed8; padding:3px 8px; border-radius:10px; font-size:11px; font-weight:bold;">👤 AI참여: ${aiCount}명</span>
+                                <span style="background:#faf5ff; color:#7e22ce; padding:3px 8px; border-radius:10px; font-size:11px; font-weight:bold;">🎲 룰렛: ${rouCount}명</span>
+                            </div>
+                        </div>`;
+                });
+            } else {
+                html = `<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:#94a3b8; font-weight:bold;">아직 만들어진 여행 방이 없습니다! 위에 이름을 적고 개설해보세요.</div>`;
+            }
+            document.getElementById('tripGrid').innerHTML = html;
+        });
     }
 
-    function updatePresetLabelStyle() {
-        const selectedMode = document.querySelector('input[name="routing_mode_preset"]:checked').value;
-        const cityLabel = document.getElementById('label-mode-city');
-        const dongLabel = document.getElementById('label-mode-dong');
-        if(selectedMode === 'city') {
-            cityLabel.style.borderColor = '#3b82f6'; cityLabel.style.backgroundColor = '#eff6ff';
-            dongLabel.style.borderColor = '#cbd5e1'; dongLabel.style.backgroundColor = 'white';
-        } else {
-            dongLabel.style.borderColor = '#3b82f6'; dongLabel.style.backgroundColor = '#eff6ff';
-            cityLabel.style.borderColor = '#cbd5e1'; cityLabel.style.backgroundColor = 'white';
+    function createNewTrip() {
+        let tripName = document.getElementById("new_trip_name").value.trim();
+        if(!tripName) { alert("여행 방 이름을 적어주세요!"); return; }
+        
+        let tripId = "trip_" + Date.now().toString();
+        database.ref('trips/' + tripId).set({
+            name: tripName,
+            createdAt: Date.now()
+        }).then(() => {
+            document.getElementById("new_trip_name").value = "";
+            openTrip(tripId, tripName);
+        });
+    }
+
+    function deleteTrip(tripId, tripName) {
+        if(confirm(`[${tripName}] 방을 정말 삭제하시겠습니까? 모든 데이터가 날아갑니다.`)) {
+            database.ref('trips/' + tripId).remove();
         }
     }
 
+    function openTrip(tripId, tripName) {
+        currentTripId = tripId;
+        
+        document.getElementById('screen_trip_list').style.display = 'none';
+        document.getElementById('screen_trip_detail').style.display = 'block';
+        document.getElementById('btnBack').style.display = 'block';
+        
+        document.getElementById('mainTitle').innerText = "👑 " + tripName;
+        document.getElementById('mainDesc').innerText = "여행 일정 및 장소 조율 대시보드";
+
+        database.ref('trips').off();
+        attachRoomListeners();
+    }
+
+    function goBackToTrips() {
+        if(currentTripId) {
+            database.ref(`trips/${currentTripId}/members`).off();
+            database.ref(`trips/${currentTripId}/roulette_members`).off();
+            database.ref(`trips/${currentTripId}/roles`).off();
+        }
+        currentTripId = null;
+        globalActiveMembers = []; globalRouletteMembers = []; globalRoles = [];
+        
+        document.getElementById("resultBox").style.display = "none";
+        document.getElementById("ai_name").value = "";
+        document.getElementById("roulette_name").value = "";
+        if(calendarInstance) calendarInstance.clear();
+        
+        document.getElementById('screen_trip_list').style.display = 'block';
+        document.getElementById('screen_trip_detail').style.display = 'none';
+        document.getElementById('btnBack').style.display = 'none';
+        document.getElementById('mainTitle').innerText = "👑 왕모임 (WangMoim)";
+        document.getElementById('mainDesc').innerText = "다같이 모이는 가장 완벽한 방법";
+
+        loadTripList();
+    }
+
+    // 💥 [데이터 마이그레이션 모듈] 구버전 멤버/룰렛 데이터를 클릭 한방에 당겨옴!
+    function importLegacyData() {
+        if(!confirm("과거에 취합했던 모든 기존 멤버 데이터를 이 방으로 불러오시겠습니까?")) return;
+        
+        let aiPromise = database.ref('members').once('value').then((snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                return database.ref(`trips/${currentTripId}/members`).update(data);
+            }
+        });
+
+        let roulettePromise = database.ref('roulette_members').once('value').then((snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                return database.ref(`trips/${currentTripId}/roulette_members`).update(data);
+            }
+        });
+
+        Promise.all([aiPromise, roulettePromise]).then(() => {
+            alert("✨ 성공적으로 기존 데이터를 모두 당겨왔습니다!");
+        }).catch(err => {
+            alert("데이터를 불러오는 중 문제가 발생했습니다.");
+        });
+    }
+
+    function addRole() {
+        let rName = document.getElementById("new_role_input").value.trim();
+        if(!rName) return;
+        let roleId = "r_" + Date.now();
+        database.ref(`trips/${currentTripId}/roles/${roleId}`).set({ name: rName });
+        document.getElementById("new_role_input").value = "";
+    }
+    function deleteRole(roleId) {
+        database.ref(`trips/${currentTripId}/roles/${roleId}`).remove();
+    }
+
+    function attachRoomListeners() {
+        database.ref(`trips/${currentTripId}/members`).on('value', (snapshot) => {
+            globalActiveMembers = [];
+            const data = snapshot.val();
+            let badgeHtml = "";
+            if(data) {
+                for(let key in data) {
+                    let m = data[key]; 
+                    if(!m.locations && m.lat && m.lng) m.locations = [{ addr: m.addr || "주소 없음", lat: parseFloat(m.lat), lng: parseFloat(m.lng) }];
+                    if(!m.transports && m.transport) m.transports = [m.transport];
+                    
+                    if(m.locations && m.locations.length > 0) {
+                        globalActiveMembers.push(m);
+                        let locText = m.locations[0].addr ? m.locations[0].addr.substring(0,6) : "주소없음";
+                        badgeHtml += `<div class="member-badge" style="border-color:#bfdbfe; color:#1d4ed8;"><strong>${m.name}</strong> (${locText}) <button class="btn-delete-badge" onclick="deleteServerData('${m.name}')">X</button></div>`;
+                    }
+                }
+                
+                let minD = "9999-12-31";
+                globalActiveMembers.forEach(m => {
+                    if(m.dates) {
+                        m.dates.split(", ").forEach(d => { let td = d.trim(); if(td && td < minD) minD = td; });
+                    }
+                });
+                if(minD !== "9999-12-31") {
+                    displayCalYear = new Date(minD).getFullYear();
+                    displayCalMonth = new Date(minD).getMonth();
+                }
+            } else { badgeHtml = `<span style="color:#aaa; font-size:13px;">데이터 대기 중...</span>`; }
+            
+            document.getElementById("liveMemberList").innerHTML = badgeHtml;
+            buildVisualCalendar();
+        });
+
+        database.ref(`trips/${currentTripId}/roulette_members`).on('value', (snapshot) => {
+            globalRouletteMembers = []; const data = snapshot.val(); let html = "";
+            if(data) {
+                for(let key in data) {
+                    let m = data[key]; globalRouletteMembers.push(m);
+                    html += `<div class="member-badge" style="border-color:#d8b4fe; background:#faf5ff; color:#6b21a8;"><strong>${m.name}</strong> (${m.targets.join(', ')}) <button class="btn-delete-badge" onclick="deleteRoulette('${m.name}')">X</button></div>`;
+                }
+            } else { html = `<span style="color:#aaa; font-size:13px;">후보 대기 중...</span>`; }
+            document.getElementById("liveRouletteList").innerHTML = html;
+        });
+
+        database.ref(`trips/${currentTripId}/roles`).on('value', (snapshot) => {
+            globalRoles = []; const data = snapshot.val(); let html = "";
+            if(data) {
+                for(let key in data) {
+                    globalRoles.push({ id: key, name: data[key].name });
+                    html += `<div class="member-badge" style="border-color:#c084fc; background:#f3e8ff; color:#7e22ce;">🎖️ ${data[key].name} <button class="btn-delete-badge" onclick="deleteRole('${key}')">X</button></div>`;
+                }
+            } else { html = `<span style="color:#aaa; font-size:11px;">등록된 역할이 없습니다.</span>`; }
+            document.getElementById("liveRoleList").innerHTML = html;
+        });
+    }
+
+    function sendToAI() {
+        let name = document.getElementById("ai_name").value.trim();
+        let dateRange = document.getElementById("calendar_input").value;
+        let addr1 = document.getElementById("my_addr1").value.trim();
+        let lat1 = document.getElementById("selected_lat1").value; let lng1 = document.getElementById("selected_lng1").value;
+        let addr2 = document.getElementById("my_addr2").value.trim();
+        let lat2 = document.getElementById("selected_lat2").value; let lng2 = document.getElementById("selected_lng2").value;
+        let transCheckboxes = document.querySelectorAll('input[name="my_trans"]:checked');
+        let transports = Array.from(transCheckboxes).map(cb => cb.value);
+
+        if(!name || !lat1 || !dateRange || transports.length === 0) { alert("입력 정보를 확인해 주세요!"); return; }
+        
+        let locations = [{ addr: addr1, lat: parseFloat(lat1), lng: parseFloat(lng1) }];
+        if(lat2) locations.push({ addr: addr2, lat: parseFloat(lat2), lng: parseFloat(lng2) });
+
+        database.ref(`trips/${currentTripId}/members/${name}`).set({
+            name: name, locations: locations, transports: transports, dates: dateRange, timestamp: Date.now()
+        }).then(() => {
+            alert(`🎉 [${name}]님 AI 조율 정보 전송 완료!`);
+            document.getElementById("ai_name").value = ""; document.getElementById("my_addr1").value = ""; clearAddr2(); calendarInstance.clear();
+        });
+    }
+
+    function sendToRoulette() {
+        let name = document.getElementById("roulette_name").value.trim();
+        let r1 = document.getElementById("r_dest1").value.trim(); let r2 = document.getElementById("r_dest2").value.trim();
+        let arr = []; if(r1) arr.push(r1); if(r2) arr.push(r2);
+        if(!name || arr.length === 0) { alert("이름과 희망 여행지를 1개 이상 적어주세요!"); return; }
+
+        database.ref(`trips/${currentTripId}/roulette_members/${name}`).set({ name: name, targets: arr, timestamp: Date.now() }).then(() => {
+            alert(`🎲 [${name}]님 룰렛 후보 등록 완료!`);
+            document.getElementById("roulette_name").value = ""; document.getElementById("r_dest1").value = ""; document.getElementById("r_dest2").value = "";
+        });
+    }
+
+    function deleteServerData(name) { if(confirm(`삭제할까요?`)) database.ref(`trips/${currentTripId}/members/${name}`).remove(); }
+    function deleteRoulette(name) { if(confirm(`삭제할까요?`)) database.ref(`trips/${currentTripId}/roulette_members/${name}`).remove(); }
+
+
+    function switchGlobalTab(mode) {
+        document.getElementById('gTab1').classList.remove('active'); document.getElementById('gTab2').classList.remove('active');
+        if(mode === 1) {
+            document.getElementById('gTab1').classList.add('active');
+            document.getElementById('view_ai').style.display = 'block'; document.getElementById('view_roulette').style.display = 'none';
+        } else {
+            document.getElementById('gTab2').classList.add('active');
+            document.getElementById('view_ai').style.display = 'none'; document.getElementById('view_roulette').style.display = 'block';
+        }
+        document.getElementById("resultBox").style.display = "none";
+    }
+
+    function toggleAddr2() { document.getElementById('wrap_addr2').style.display = 'flex'; document.getElementById('btn_toggle_addr2').style.display = 'none'; }
+    function clearAddr2() { document.getElementById('my_addr2').value = ''; document.getElementById('wrap_addr2').style.display = 'none'; document.getElementById('btn_toggle_addr2').style.display = 'block'; }
+    
     function openInlinePostcode(targetIdx) {
         document.getElementById('postcode_layer' + targetIdx).style.display = 'block';
         let embedContainer = document.getElementById('postcode_embed' + targetIdx);
         embedContainer.innerHTML = "";
-
         new daum.Postcode({
             oncomplete: function(data) {
                 let fullAddress = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
                 if(data.buildingName) fullAddress += " (" + data.buildingName + ")";
-                
-                // 1순위: 오프라인 사전으로 즉각 좌표 매핑 (네이버 차단 100% 무시)
-                let safeCoords = getFallbackCoordinates(fullAddress);
+                let safeCoords = getCityLevelCoords(fullAddress);
                 document.getElementById('my_addr' + targetIdx).value = fullAddress;
                 document.getElementById('selected_lat' + targetIdx).value = safeCoords.lat;
                 document.getElementById('selected_lng' + targetIdx).value = safeCoords.lng;
-
-                // 2순위: 네이버 API가 살아있다면 덮어쓰기로 보정 시도 (실패해도 아무 타격 없음)
-                if (typeof naver !== 'undefined' && naver.maps && naver.maps.Service) {
-                    try {
-                        naver.maps.Service.geocode({ query: fullAddress }, function(status, response) {
-                            if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
-                                document.getElementById('selected_lat' + targetIdx).value = response.v2.addresses[0].y;
-                                document.getElementById('selected_lng' + targetIdx).value = response.v2.addresses[0].x;
-                            }
-                        });
-                    } catch(e) {}
-                }
-
                 closeInlinePostcode(targetIdx);
-            },
-            width: '100%',
-            height: '100%'
+            }, width: '100%', height: '100%'
         }).embed(embedContainer);
     }
+    function closeInlinePostcode(targetIdx) { document.getElementById('postcode_layer' + targetIdx).style.display = 'none'; }
 
-    function closeInlinePostcode(targetIdx) {
-        document.getElementById('postcode_layer' + targetIdx).style.display = 'none';
-        document.getElementById('postcode_embed' + targetIdx).innerHTML = "";
-    }
+    function prevMonth() { displayCalMonth--; if(displayCalMonth < 0) { displayCalMonth = 11; displayCalYear--; } buildVisualCalendar(); }
+    function nextMonth() { displayCalMonth++; if(displayCalMonth > 11) { displayCalMonth = 0; displayCalYear++; } buildVisualCalendar(); }
 
-    function sendToGoogleCloudServer() {
-        let name = document.getElementById("my_name").value.trim();
-        let dateRange = document.getElementById("calendar_input").value;
-        
-        let addr1 = document.getElementById("my_addr1").value.trim();
-        let lat1 = document.getElementById("selected_lat1").value;
-        let lng1 = document.getElementById("selected_lng1").value;
-        
-        let addr2 = document.getElementById("my_addr2").value.trim();
-        let lat2 = document.getElementById("selected_lat2").value;
-        let lng2 = document.getElementById("selected_lng2").value;
+    window.showAbsents = function(dateStr, absentListStr) {
+        if(!dateStr) return;
+        let absents = absentListStr ? absentListStr.split(",") : [];
+        if(absents.length === 0 || absentListStr === "") {
+            alert(`📅 ${dateStr}\n🎉 전원 참석 가능한 황금 일정입니다!`);
+        } else {
+            alert(`📅 ${dateStr}\n❌ 해당 일자 불참자 (${absents.length}명):\n────────────────\n• ${absents.join('\n• ')}`);
+        }
+    };
 
-        let transCheckboxes = document.querySelectorAll('input[name="my_trans"]:checked');
-        let transports = Array.from(transCheckboxes).map(cb => cb.value);
-
-        if(!name || !addr1 || !dateRange || transports.length === 0) { 
-            alert("이름, 출발지 1, 이동수단, 날짜를 확인해 주세요!"); return; 
+    function buildVisualCalendar() {
+        if(globalActiveMembers.length === 0) {
+            document.getElementById("calLegend").innerHTML = `<span style="color:#aaa; font-size:12px;">데이터를 입력해주세요...</span>`;
+            document.getElementById("calendarVisualBoard").innerHTML = "";
+            return;
         }
 
-        let locations = [];
-        if(lat1 && lng1) locations.push({ addr: addr1, lat: parseFloat(lat1), lng: parseFloat(lng1) });
-        if(addr2 && lat2 && lng2) locations.push({ addr: addr2, lat: parseFloat(lat2), lng: parseFloat(lng2) });
-
-        database.ref('members/' + name).set({
-            name: name, locations: locations, transports: transports, dates: dateRange, timestamp: Date.now()
-        }).then(() => {
-            alert(`🎉 [${name}]님 유동적 데이터 전송 완료!`);
-            document.getElementById("my_name").value = "";
-            document.getElementById("my_addr1").value = "";
-            clearAddr2();
-            calendarInstance.clear();
+        let legendHtml = "";
+        globalActiveMembers.forEach((m, idx) => {
+            let color = DOT_COLORS[idx % DOT_COLORS.length];
+            memberColorMap[m.name] = color;
+            legendHtml += `<div class="cal-legend-item"><span class="cal-color-dot" style="background:${color};"></span>${m.name}</div>`;
         });
-    }
+        document.getElementById("calLegend").innerHTML = legendHtml;
 
-    let globalActiveMembers = [];
-    database.ref('members').on('value', (snapshot) => {
-        const data = snapshot.val();
-        const badgeList = document.getElementById("liveMemberList");
-        badgeList.innerHTML = ""; globalActiveMembers = [];
-        if(!data) { badgeList.innerHTML = `<span style="color:#aaa; font-size:13px;">대기 데이터 없음</span>`; return; }
-        
-        for(let key in data) {
-            let m = data[key]; 
-            // 구형 데이터 무적 방어막
-            if(!m.locations && m.lat && m.lng) {
-                m.locations = [{ addr: m.addr || "기존 주소", lat: parseFloat(m.lat), lng: parseFloat(m.lng) }];
-            }
-            if(!m.transports && m.transport) m.transports = [m.transport];
-            
-            if(m.locations && m.locations.length > 0) {
-                globalActiveMembers.push(m);
-                let locText = m.locations[0].addr.substring(0,6);
-                badgeList.innerHTML += `
-                    <div class="member-badge">
-                        <strong>${m.name}</strong> (${locText} 외)
-                        <button class="btn-delete-badge" onclick="deleteServerData('${m.name}')">X</button>
-                    </div>`;
-            }
-        }
-    });
-
-    function deleteServerData(targetName) {
-        if(confirm(`[${targetName}] 님의 데이터를 삭제하시겠습니까?`)) {
-            database.ref('members/' + targetName).remove();
-        }
-    }
-
-    // 💥 [PRO 역지오코더 엔진] 네이버가 죽든 말든 무조건 한글 지역명을 뱉어내는 수학적 근접 탐색기
-    function getReverseGeoNameSafe(lat, lng) {
-        return new Promise((resolve) => {
-            let resolved = false;
-
-            // 1순위: 네이버 통신 시도
-            if (typeof naver !== 'undefined' && naver.maps && naver.maps.Service) {
-                try {
-                    naver.maps.Service.reverseGeocode({
-                        coords: new naver.maps.LatLng(lat, lng)
-                    }, function(status, response) {
-                        if (status === naver.maps.Service.Status.OK && response.v2 && response.v2.results.length > 0) {
-                            let r = response.v2.results[0].region;
-                            let addr = `${r.area1 ? r.area1.name : ""} ${r.area2 ? r.area2.name : ""} ${r.area3 ? r.area3.name : ""}`.trim();
-                            if(addr) { resolved = true; resolve(addr); }
-                        }
-                    });
-                } catch(e) {}
-            }
-
-            // 2순위: 0.5초 경과 시, 로컬 사전에서 가장 가까운 도시 이름을 100% 보장하여 반환
-            setTimeout(() => {
-                if(resolved) return;
-                let minDist = Infinity;
-                let closestName = "대한민국 최적지";
-                for (let i = 0; i < offlineKORGeoDict.length; i++) {
-                    let d = Math.abs(offlineKORGeoDict[i].lat - lat) + Math.abs(offlineKORGeoDict[i].lng - lng);
-                    if (d < minDist) { minDist = d; closestName = offlineKORGeoDict[i].fullName + " 인근"; }
-                }
-                resolve(closestName);
-            }, 500);
-        });
-    }
-
-    async function startNaverLiveRoutingEngine() {
-        if(globalActiveMembers.length === 0) { alert("데이터가 없습니다!"); return; }
-        
-        let timeVal = document.getElementById("assembly_time").value;
-        if(timeVal && timeVal.includes(":")) {
-            let parts = timeVal.split(":");
-            currentAssemblyTimeMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-        } else { currentAssemblyTimeMins = 14 * 60; }
-
-        document.getElementById("loadingBar").style.display = "flex";
-        document.getElementById("resultBox").style.display = "none";
-
-        let dateScores = {};
+        let dateMap = {};
         globalActiveMembers.forEach(m => {
-            if(!m.dates) return;
-            m.dates.split(", ").forEach(dStr => {
-                let d = dStr.trim(); if(!d) return;
-                if(!dateScores[d]) dateScores[d] = { count: 0, members: new Set() };
-                dateScores[d].count += 1; dateScores[d].members.add(m.name);
-            });
+            if(m.dates) {
+                m.dates.split(", ").forEach(d => {
+                    let trimD = d.trim(); if(!trimD) return;
+                    if(!dateMap[trimD]) dateMap[trimD] = [];
+                    dateMap[trimD].push(m.name);
+                });
+            }
         });
-        let uniqueDates = Object.keys(dateScores).sort();
+
+        let uniqueDates = Object.keys(dateMap).sort();
         let candidateMap = new Map();
         uniqueDates.forEach(baseDate => {
             for(let block = 1; block <= 4; block++) {
@@ -435,51 +654,90 @@
                 for(let j = 0; j <= block; j++) {
                     let d = new Date(baseDate); d.setDate(d.getDate() + j);
                     let dStr = d.toISOString().split('T')[0]; currentBlockDates.push(dStr);
-                    if(dateScores[dStr]) {
-                        if(commonMembers === null) commonMembers = new Set(dateScores[dStr].members);
-                        else commonMembers = new Set([...commonMembers].filter(x => dateScores[dStr].members.has(x)));
+                    if(dateMap[dStr]) {
+                        if(commonMembers === null) commonMembers = new Set(dateMap[dStr]);
+                        else commonMembers = new Set([...commonMembers].filter(x => dateMap[dStr].includes(x)));
                     } else { match = false; break; }
                 }
                 if(match && commonMembers && commonMembers.size > 0) {
-                    let key = `${currentBlockDates[0]} ~ ${currentBlockDates[currentBlockDates.length-1]} (${block}박 ${block+1}일)`;
+                    let key = currentBlockDates.join(",");
                     if(!candidateMap.has(key) || candidateMap.get(key).score < commonMembers.size) {
-                        candidateMap.set(key, { text: key, score: commonMembers.size, attendees: Array.from(commonMembers) });
+                        candidateMap.set(key, { dates: currentBlockDates, score: commonMembers.size, attendees: Array.from(commonMembers) });
                     }
                 }
             }
         });
-        let candidateSchedules = Array.from(candidateMap.values()).sort((a, b) => b.score - a.score);
+        let cSchedules = Array.from(candidateMap.values()).sort((a, b) => b.score - a.score);
+        topDateSchedule = cSchedules.length > 0 ? cSchedules[0] : null;
 
-        const selectedMode = document.querySelector('input[name="routing_mode_preset"]:checked').value;
-        
-        let sumLat = 0, sumLng = 0, count = 0;
-        globalActiveMembers.forEach(m => {
-            let latVal = parseFloat(m.locations[0].lat);
-            let lngVal = parseFloat(m.locations[0].lng);
-            if(!isNaN(latVal) && !isNaN(lngVal)) {
-                sumLat += latVal; sumLng += lngVal; count++;
-            }
-        });
-        let avgLat = count > 0 ? (sumLat / count) : 36.3504;
-        let avgLng = count > 0 ? (sumLng / count) : 127.3845;
+        let boardHtml = `
+            <div class="cal-header">
+                <button class="cal-nav-btn" onclick="prevMonth()">&lt; 이전달</button>
+                <div class="cal-month-title">${displayCalYear}년 ${displayCalMonth + 1}월</div>
+                <button class="cal-nav-btn" onclick="nextMonth()">다음달 &gt;</button>
+            </div>
+            <div class="cal-grid">
+        `;
+        ['일', '월', '화', '수', '목', '금', '토'].forEach(d => boardHtml += `<div class="cal-header-cell">${d}</div>`);
 
-        // 동적 영토 스캔 그리드
-        let localScanPool = [];
-        let step = selectedMode === 'city' ? 0.1 : 0.02; 
-        for (let i = -3; i <= 3; i++) {
-            for (let j = -3; j <= 3; j++) {
-                localScanPool.push({ lat: avgLat + (i * step), lng: avgLng + (j * step) });
+        let firstDay = new Date(displayCalYear, displayCalMonth, 1).getDay();
+        let daysInMonth = new Date(displayCalYear, displayCalMonth + 1, 0).getDate();
+
+        for(let i=0; i<firstDay; i++) boardHtml += `<div class="cal-cell" style="background:transparent; cursor:default;"></div>`;
+
+        for(let i=1; i<=daysInMonth; i++) {
+            let cellD = new Date(displayCalYear, displayCalMonth, i);
+            let cellDateStr = `${cellD.getFullYear()}-${String(cellD.getMonth()+1).padStart(2,'0')}-${String(cellD.getDate()).padStart(2,'0')}`;
+            
+            let prevD = new Date(cellD); prevD.setDate(cellD.getDate() - 1); 
+            let prevStr = `${prevD.getFullYear()}-${String(prevD.getMonth()+1).padStart(2,'0')}-${String(prevD.getDate()).padStart(2,'0')}`;
+            let nextD = new Date(cellD); nextD.setDate(cellD.getDate() + 1); 
+            let nextStr = `${nextD.getFullYear()}-${String(nextD.getMonth()+1).padStart(2,'0')}-${String(nextD.getDate()).padStart(2,'0')}`;
+
+            let membersOnThisDay = dateMap[cellDateStr] || [];
+            let absentMembers = globalActiveMembers.filter(m => !membersOnThisDay.includes(m.name)).map(m => m.name);
+
+            let optimalHtml = "";
+            if(topDateSchedule && topDateSchedule.dates.includes(cellDateStr)) {
+                optimalHtml = `<div class="optimal-bg"></div>`;
             }
+
+            let barsHtml = "";
+            globalActiveMembers.forEach(m => {
+                let isHere = membersOnThisDay.includes(m.name);
+                let isPrevHere = (dateMap[prevStr] || []).includes(m.name);
+                let isNextHere = (dateMap[nextStr] || []).includes(m.name);
+
+                if(isHere) {
+                    let barClass = "cal-bar";
+                    if(!isPrevHere && !isNextHere) barClass += " single";
+                    else if(!isPrevHere && isNextHere) barClass += " start";
+                    else if(isPrevHere && !isNextHere) barClass += " end";
+                    barsHtml += `<div class="${barClass}" style="background-color:${memberColorMap[m.name]};"></div>`;
+                } else {
+                    barsHtml += `<div class="cal-bar" style="background:transparent;"></div>`;
+                }
+            });
+
+            boardHtml += `
+                <div class="cal-cell" onclick="showAbsents('${cellDateStr}', '${absentMembers.join(',')}')">
+                    ${optimalHtml}
+                    <div class="cal-date-num">${i}</div>
+                    <div class="cal-bars-wrap">${barsHtml}</div>
+                </div>`;
         }
+        boardHtml += `</div>`;
+        document.getElementById("calendarVisualBoard").innerHTML = boardHtml;
+    }
 
+    function runEngine(targetPool) {
         let tempScores = [];
-        localScanPool.forEach(target => {
-            let totalCost = 0; let maxDistance = 0; let targetReceipts = [];
-
+        targetPool.forEach(target => {
+            let targetReceipts = [];
             globalActiveMembers.forEach(m => {
                 let locs = m.locations;
                 let trans = m.transports;
-                let bestComboScore = Infinity;
+                let bestIndividualTotalCost = Infinity;
                 let bestSetup = null;
 
                 locs.forEach(loc => {
@@ -494,134 +752,253 @@
                         dist = Math.acos(dist) * 180 / Math.PI * 60 * 1.1515 * 1.609344;
                         
                         let realRoadDist = Math.round(dist * 1.28); 
-                        let timeMin = Math.round(realRoadDist * 0.9 + 12); let cost = 0;
+                        
+                        let timeMinInternal = Math.round(realRoadDist * 0.9 + 12); 
+                        
+                        let timeMinDisplay = 0;
+                        if (t === '자차') {
+                            if(realRoadDist <= 50) timeMinDisplay = Math.round((realRoadDist / 40) * 60 + 10);
+                            else timeMinDisplay = Math.round((50 / 40) * 60 + ((realRoadDist - 50) / 95) * 60 + 15);
+                        } else if (t === '대중교통') {
+                            if(realRoadDist <= 50) timeMinDisplay = Math.round((realRoadDist / 30) * 60 + 20);
+                            else timeMinDisplay = Math.round((50 / 30) * 60 + ((realRoadDist - 50) / 105) * 60 + 35);
+                        } else { 
+                            if(realRoadDist <= 50) timeMinDisplay = Math.round((realRoadDist / 40) * 60 + 20);
+                            else timeMinDisplay = Math.round((50 / 40) * 60 + ((realRoadDist - 50) / 95) * 60 + 25);
+                        }
 
-                        if (t === '자차') cost = Math.round((realRoadDist / 11) * 1680 + (realRoadDist > 40 ? 5500 : 1200));
-                        else if (t === '대중교통') cost = Math.round(realRoadDist * 160);
-                        else cost = 0;
+                        let transportCost = 0;
+                        if (t === '자차') transportCost = Math.round((realRoadDist / 11) * 1680 + (realRoadDist > 40 ? 5500 : 1200));
+                        else if (t === '대중교통') transportCost = Math.round(realRoadDist * 160);
+                        else transportCost = 0;
 
-                        let departMins = currentAssemblyTimeMins - timeMin;
+                        let timeCost = timeMinInternal * WAGE_PER_MIN;
+                        let individualTotalCost = transportCost + timeCost;
+
+                        let departMins = currentAssemblyTimeMins - timeMinDisplay;
                         if (departMins < 0) departMins += 24 * 60; 
 
-                        let comboScore = cost + (timeMin * 200); 
-                        if (comboScore < bestComboScore) {
-                            bestComboScore = comboScore;
-                            bestSetup = { loc: loc, trans: t, cost: cost, time: timeMin, dist: realRoadDist, departMins: departMins };
+                        if (individualTotalCost < bestIndividualTotalCost) {
+                            bestIndividualTotalCost = individualTotalCost;
+                            bestSetup = { 
+                                loc: loc, trans: t, transportCost: transportCost, timeCost: timeCost, 
+                                time: timeMinDisplay, 
+                                dist: realRoadDist, departMins: departMins 
+                            };
                         }
                     });
                 });
 
-                if (bestSetup.dist > maxDistance && bestSetup.trans !== '카풀') maxDistance = bestSetup.dist;
-                totalCost += bestSetup.cost;
-
                 targetReceipts.push({
-                    name: m.name, addr: bestSetup.loc.addr, lat: parseFloat(bestSetup.loc.lat), lng: parseFloat(bestSetup.loc.lng), transport: bestSetup.trans, dist: bestSetup.dist, time: bestSetup.time, cost: bestSetup.cost, departMins: bestSetup.departMins
+                    name: m.name, addr: bestSetup.loc.addr || "주소 없음", lat: parseFloat(bestSetup.loc.lat), lng: parseFloat(bestSetup.loc.lng), 
+                    transport: bestSetup.trans, dist: bestSetup.dist, time: bestSetup.time, 
+                    transportCost: bestSetup.transportCost, timeCost: bestSetup.timeCost, departMins: bestSetup.departMins
                 });
             });
 
-            let travelTimes = targetReceipts.map(r => r.time);
-            let timeGap = travelTimes.length > 0 ? (Math.max(...travelTimes) - Math.min(...travelTimes)) : 0;
-            let finalScore = totalCost + (timeGap * 250); 
+            let groupTransportCost = targetReceipts.reduce((s, r) => s + r.transportCost, 0);
+            let groupTimeCost = targetReceipts.reduce((s, r) => s + r.timeCost, 0);
+            let finalScore = groupTransportCost + groupTimeCost; 
 
-            tempScores.push({ finalScore: finalScore, maxDist: maxDistance, receipts: targetReceipts, rawTarget: target });
+            tempScores.push({ finalScore: finalScore, groupTransportCost: groupTransportCost, groupTimeCost: groupTimeCost, receipts: targetReceipts, rawTarget: target });
         });
 
         tempScores.sort((a, b) => a.finalScore - b.finalScore);
-        let top3Points = tempScores.slice(0, 3);
+        return tempScores;
+    }
 
-        globalFinalScores = [];
-        let usedNames = new Set();
-
-        for(let i=0; i<top3Points.length; i++) {
-            let node = top3Points[i];
-            let resolvedName = await getReverseGeoNameSafe(node.rawTarget.lat, node.rawTarget.lng);
-            
-            let finalName = resolvedName;
-            let counter = 1;
-            while(usedNames.has(finalName)) { finalName = `${resolvedName} (${counter++})`; }
-            usedNames.add(finalName);
-
-            globalFinalScores.push({
-                name: finalName, cost: node.finalScore, maxDist: node.maxDist, receipts: node.receipts, rawTarget: node.rawTarget
-            });
-        }
-
-        document.getElementById("loadingBar").style.display = "none";
-        
-        let dateHtml = "";
-        if(candidateSchedules.length === 0) { dateHtml = "<div>겹치는 일정이 없습니다.</div>"; } 
-        else {
-            candidateSchedules.slice(0, 3).forEach((s, idx) => {
-                let medal = idx === 0 ? "🥇 최다 인원 가능" : `${idx + 1}순위`;
-                let absents = globalActiveMembers.filter(m => !s.attendees.includes(m.name)).map(m => m.name);
-                let absentText = absents.length > 0 ? `<span class="badge-fail">❌ 미참: ${absents.join(', ')}</span>` : `<span style='color:#166534; font-size:11px;'>🎉 전원 참석!</span>`;
-                dateHtml += `<div class="rank-item"><div><strong>${medal} : ${s.text}</strong> (${s.score}명)</div><div>${absentText}</div></div>`;
-            });
-        }
-        document.getElementById("dateResultContent").innerHTML = dateHtml;
+    function parseAssemblyTime(mode) {
+        let tInput = "assembly_time_ai";
+        let timeVal = document.getElementById(tInput).value;
+        if(timeVal && timeVal.includes(":")) {
+            let parts = timeVal.split(":");
+            currentAssemblyTimeMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+        } else { currentAssemblyTimeMins = 14 * 60; }
 
         let aH = Math.floor(currentAssemblyTimeMins / 60); let aM = currentAssemblyTimeMins % 60;
         let ampm = aH < 12 ? "오전" : "오후"; let fH = aH % 12 === 0 ? 12 : aH % 12;
-        document.getElementById("display_assembly_time").innerHTML = `⏰ 목표 집결 시간: <strong>${ampm} ${fH}시 ${aM.toString().padStart(2, '0')}분</strong>`;
+        
+        if (mode === 'ROULETTE') {
+            document.getElementById("display_assembly_time").style.display = "none";
+        } else {
+            document.getElementById("display_assembly_time").style.display = "block";
+            document.getElementById("display_assembly_time").innerHTML = `⏰ 집결 목표: <strong>${ampm} ${fH}시 ${aM.toString().padStart(2, '0')}분</strong>`;
+        }
+    }
 
-        let locHtml = "";
-        globalFinalScores.forEach((f, idx) => {
-            let medal = idx === 0 ? "🥇 예산 최소 중심지" : `${idx + 1}위 대안 구역`;
-            let explanation = f.maxDist > 160 ? "⚠️ 이동 편차 다소 있음" : "⚖️ 저비용 균등 구역";
-            let cleanName = f.name.replace(/\([0-9]+\)/g, "").trim();
+    function startEngine(mode) {
+        window.currentActiveMode = mode;
 
-            locHtml += `
-                <div class="rank-item loc-rank-item" data-idx="${idx}" onclick="showReceiptForCity(${idx})">
-                    <div>
-                        ${medal} : <strong>${f.name}</strong> 
-                        <span style="font-size:11px; color:#64748b;">(${explanation})</span>
-                        <span class="search-links">
-                            <a href="https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 맛집")}" target="_blank" class="btn-food" onclick="event.stopPropagation()">🍽️ 맛집</a>
-                            <a href="https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 가볼만한곳")}" target="_blank" class="btn-spot" onclick="event.stopPropagation()">📸 명소</a>
-                        </span>
-                    </div>
-                    <div style="color:#b91c1c;">통합 가중치: ${Math.round(f.cost).toLocaleString()}점</div>
-                </div>`;
-        });
-        document.getElementById("locationResultContent").innerHTML = locHtml;
+        if(mode === 'AI' && globalActiveMembers.length === 0) { alert("입력된 데이터가 없습니다!"); return; }
+        if(mode === 'ROULETTE' && globalRouletteMembers.length === 0) { alert("룰렛 후보 데이터가 없습니다!"); return; }
+        
+        parseAssemblyTime(mode);
+        document.getElementById("resultBox").style.display = "none";
+        document.getElementById("winnerBanner").style.display = "none";
+        
+        if(mode === 'AI') {
+            document.getElementById("loadingBar").style.display = "flex";
+            
+            document.getElementById("aiResultArea").style.display = "block";
+            document.getElementById("locationTitleText").innerHTML = `📍 AI 기회비용 최소화 지역 <span style="color:#ef4444;">(행을 클릭하세요!)</span>`;
+            document.getElementById("receiptTitleHeader").innerHTML = `🧾 <span id="receiptTitleCity">[선택된 지역]</span> 회원별 맞춤 상세 시간 명세서`;
+            
+            let tempScores = runEngine(KOR_MASTER_DB);
+            globalFinalScores = [];
+            for(let i=0; i < Math.min(3, tempScores.length); i++) {
+                let node = tempScores[i];
+                globalFinalScores.push({
+                    name: node.rawTarget.n, cost: node.finalScore, groupTransportCost: node.groupTransportCost, groupTimeCost: node.groupTimeCost,
+                    receipts: node.receipts, rawTarget: node.rawTarget
+                });
+            }
+            setTimeout(() => {
+                document.getElementById("loadingBar").style.display = "none";
+                renderResults("AI");
+            }, 500);
+            
+        } else {
+            let animBox = document.getElementById("rouletteAnimBox");
+            let rollingText = document.getElementById("rouletteRollingText");
+            let subText = document.getElementById("rouletteSubText");
+            animBox.style.display = "block";
 
-        showReceiptForCity(0);
+            let destPool = [];
+            globalRouletteMembers.forEach(m => { m.targets.forEach(t => destPool.push(t)); });
+            
+            let shuffledMembers = [...globalRouletteMembers.map(m => m.name)];
+            for (let i = shuffledMembers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledMembers[i], shuffledMembers[j]] = [shuffledMembers[j], shuffledMembers[i]];
+            }
+
+            let counter = 0;
+            let shuffleInterval = setInterval(() => {
+                let tempIdx = Math.floor(Math.random() * destPool.length);
+                rollingText.innerText = destPool[tempIdx];
+                counter++;
+                if(counter > 20) {
+                    clearInterval(shuffleInterval);
+                    let winnerDest = destPool[Math.floor(Math.random() * destPool.length)];
+                    rollingText.innerText = `🎉 ${winnerDest} 당첨!!`;
+                    subText.innerText = "역할 배정 완료!";
+                    
+                    setTimeout(() => {
+                        animBox.style.display = "none";
+                        subText.innerText = "역할 분담 중..."; 
+                        processRouletteWinner(winnerDest, shuffledMembers);
+                    }, 1500);
+                }
+            }, 80);
+        }
+    }
+
+    function processRouletteWinner(winnerDest, shuffledMembers) {
+        document.getElementById("aiResultArea").style.display = "none";
+        
+        let banner = document.getElementById("winnerBanner");
+        
+        let roleAssignments = [];
+        if (globalRoles.length > 0) {
+            globalRoles.forEach((roleObj, idx) => {
+                let assignedMember = shuffledMembers[idx % shuffledMembers.length]; 
+                roleAssignments.push(`<li><strong style="color:#7e22ce;">🎖️ ${roleObj.name}</strong> : ${assignedMember}</li>`);
+            });
+        } else {
+            roleAssignments.push(`<li style="color:#94a3b8; font-size:14px;">설정된 역할이 없습니다.</li>`);
+        }
+
+        let cleanName = winnerDest.split("(")[0].trim();
+        let naverMapNaviLink = `https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 가볼만한곳")}`;
+
+        banner.innerHTML = `
+            <div style="font-size:28px; margin-bottom:15px;">🎉 당첨 여행지: <strong style="color:#b45309;">${winnerDest}</strong> 🎉</div>
+            <ul style="list-style:none; padding:15px; margin:0 auto; background:rgba(255,255,255,0.7); border-radius:8px; display:inline-block; text-align:left; min-width:200px;">
+                ${roleAssignments.join("")}
+            </ul>
+            <div style="margin-top:20px;">
+                <a href="${naverMapNaviLink}" target="_blank" style="background:#03c75a; color:white; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:bold; text-decoration:none; display:inline-block; box-shadow:0 4px 10px rgba(3,199,90,0.2);">🗺️ 네이버 지도로 지역 탐색하기</a>
+            </div>
+            <div style="margin-top:15px; font-size:13px; font-weight:normal; color:#78350f;">복잡한 경로 계산은 생략합니다. 즐거운 여행 계획을 세워보세요!</div>
+        `;
+        banner.style.display = "block";
         document.getElementById("resultBox").style.display = "block";
     }
 
-    function showReceiptForCity(idx) {
+    function renderResults(mode) {
+        if(mode !== 'AI') return; 
+        
+        let locHtml = "";
+        globalFinalScores.forEach((f, idx) => {
+            let medal = idx === 0 ? "🥇 AI 강력 추천" : `${idx + 1}위 대안`;
+            let borderColor = "#e2e8f0";
+            let bg = "#fff";
+
+            let costHtml = `<div style="margin-top:4px;"><span class="cost-wage-text" style="color:#d97706;">💸 차비합: ${f.groupTransportCost.toLocaleString()}원 / ⏱️ 시급환산 가치합: ${f.groupTimeCost.toLocaleString()}원</span></div>`;
+
+            locHtml += `
+                <div class="rank-item loc-rank-item" data-idx="${idx}" onclick="showReceipt(${idx})" style="border-color:${borderColor}; background:${bg};">
+                    <div>
+                        ${medal} : <strong style="font-size:15px;">${f.name}</strong> 
+                        ${costHtml}
+                    </div>
+                    <div style="color:#b91c1c; text-align:right;">통합<br><strong>${Math.round(f.cost).toLocaleString()}점</strong></div>
+                </div>`;
+        });
+        document.getElementById("locationResultContent").innerHTML = locHtml;
+        showReceipt(0);
+        document.getElementById("resultBox").style.display = "block";
+    }
+
+    function showReceipt(idx) {
         let targetData = globalFinalScores[idx];
         if(!targetData) return;
         
-        let cleanName = targetData.name.replace(/\([0-9]+\)/g, "").trim();
-        let pensionHtml = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 단체 숙소 펜션")}" target="_blank" class="pension-link">💚 네이버 지도로 [${cleanName}] 모임 장소/숙소 실시간 확인</a>`;
+        let isRoulette = window.currentActiveMode === 'ROULETTE';
+        
+        let cleanName = targetData.name.split(" ")[0].trim();
+        if (cleanName.includes("(")) cleanName = cleanName.split("(")[0].trim();
+        
+        let pensionHtml = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 단체 숙소 펜션")}" target="_blank" class="pension-link">💚 네이버 지도로 [${cleanName}] 모임 장소 실시간 확인</a>`;
         document.getElementById("dynamicPensionLink").innerHTML = pensionHtml;
-        document.getElementById("receiptTitleCity").innerHTML = `[${targetData.name}]`;
+        
+        if (isRoulette) {
+            let rankItems = document.querySelectorAll('.loc-rank-item');
+            rankItems.forEach((el) => {
+                let itemIdx = parseInt(el.getAttribute('data-idx'));
+                if(itemIdx === idx) el.style.border = "2px solid #a855f7";
+                else el.style.border = "1px solid #e2e8f0";
+            });
+            return;
+        }
 
-        let receiptHtml = `<p style="font-size:12px; color:#475569; margin: 0 0 8px 0;">🎉 시스템이 역산한 <strong>[${targetData.name}]</strong> 기준 멤버별 맞춤 시간표 및 비용 명세 리스트입니다.</p>`;
+        let titleCityEl = document.getElementById("receiptTitleCity");
+        if(titleCityEl) titleCityEl.innerHTML = `[${cleanName}]`;
+
+        let receiptHtml = `<p style="font-size:13px; color:#475569; margin: 0 0 10px 0;">🎉 <strong>🗺️ 네이버 지도 앱(예상)</strong> 소요 시간으로 동기화된 정밀 명세서입니다.</p>`;
+            
         targetData.receipts.forEach(r => {
             let hourText = r.time >= 60 ? `${Math.floor(r.time/60)}시간 ${r.time%60}분` : `${r.time}분`;
-            let costText = r.cost > 0 ? `${r.cost.toLocaleString()}원` : `0원 (카풀동승)`;
+            let tCostText = r.transportCost > 0 ? `${r.transportCost.toLocaleString()}원` : `0원`;
             
-            let dH = Math.floor(r.departMins / 60) % 24;
-            let dM = r.departMins % 60;
+            let dH = Math.floor(r.departMins / 60) % 24; let dM = r.departMins % 60;
             let ampm = dH < 12 ? "오전" : "오후"; let fH = dH % 12 === 0 ? 12 : dH % 12;
             let departTimeStr = `${ampm} ${fH}:${dM.toString().padStart(2, '0')} 출발`;
 
-            let menuType = (r.transport === '자차' || r.transport === '자차 운전') ? 'car' : 'pubtrans';
-            let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},${encodeURIComponent(r.name+"출발")}/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(cleanName)}/-/${menuType}?c=15,0,0,0,dh`;
+            let menuType = (r.transport === '자차') ? 'car' : 'pubtrans';
+            let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},출발/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(cleanName)}/-/${menuType}?c=15,0,0,0,dh`;
 
             receiptHtml += `
-                <div class="personal-receipt" style="display:flex; flex-direction:column; gap:6px;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <div>👤 <strong>${r.name}</strong> (<span style="font-size:11px; color:#64748b;">${r.addr.substring(0,8)}</span>)</div>
+                <div class="personal-receipt">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <div>👤 <strong style="font-size:14px;">${r.name}</strong></div>
                         <div class="time-badge">⏱️ 역산 ${departTimeStr}</div>
                     </div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="font-size:11px; color:#64748b;">이동 수단: <strong>${r.transport}</strong> (${r.dist}km)</div>
-                        <div style="text-align: right; font-weight: bold;">
-                            <span>⏱️ 예상: ${hourText} ➡️ <span style="color:#b91c1c;">💸 ${costText}</span></span>
-                            <a href="${naverMapNaviLink}" target="_blank" class="btn-navi" style="margin-left:6px;">🗺️ 배차/내비 연동</a>
+                        <div style="font-size:12px; color:#64748b;">수단: <strong>${r.transport}</strong> (${r.dist}km)</div>
+                        <div style="text-align: right; font-weight: bold; font-size:13px;">
+                            <span>🗺️ 지도 예상: <span style="color:#1d4ed8;">${hourText}</span> ➡️ <span style="color:#b91c1c;">💸 ${tCostText}</span></span>
+                            <a href="${naverMapNaviLink}" target="_blank" class="btn-navi">내비 연결</a>
                         </div>
                     </div>
                 </div>`;
@@ -631,11 +1008,8 @@
         let rankItems = document.querySelectorAll('.loc-rank-item');
         rankItems.forEach((el) => {
             let itemIdx = parseInt(el.getAttribute('data-idx'));
-            if(itemIdx === idx) {
-                el.style.border = "2px solid #03c75a"; el.style.backgroundColor = "#f0fdf4";
-            } else {
-                el.style.border = "2px solid #e2e8f0"; el.style.backgroundColor = "white";
-            }
+            if(itemIdx === idx) el.style.border = "2px solid #03c75a";
+            else el.style.border = "1px solid #e2e8f0";
         });
     }
 </script>
