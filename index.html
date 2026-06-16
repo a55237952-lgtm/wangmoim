@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - PRO 경비 최소화 영토 조율 시스템</title>
+    <title>👑 왕모임 - PRO 시공간 균등 조율 시스템 (무결점 버전)</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -37,7 +37,7 @@
         .member-badge.car { border: 1px solid #03c75a; color: #028a3e; background: #e8f8f5; }
         .btn-delete-badge { background: #ef4444; color: white; border: none; width: 16px; height: 16px; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
         
-        .loading { display: none; text-align: center; padding: 20px; font-weight: bold; color: #1e3a8a; font-size: 14px; }
+        .loading { display: none; text-align: center; padding: 20px; font-weight: bold; color: #e67e22; font-size: 14px; }
         .result-box { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-top: 15px; }
         .result-section-title { font-size: 15px; font-weight: bold; color: #166534; margin-top: 15px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #bbf7d0; }
         
@@ -77,7 +77,7 @@
 
 <div class="app-header">
     <h1>👑 왕모임 (WangMoim)</h1>
-    <p>전국 무제한 영토 조율 및 다이내믹 경비 최적화 엔진</p>
+    <p>PRO 전국 스캔 & 경비/시간 최소화 조율 엔진</p>
 </div>
 
 <div class="app-body">
@@ -86,7 +86,7 @@
         <p style="font-size:12px; color:#1e3a8a; margin:0 0 10px 0; font-weight:bold;">🔎 검색 가이드: [주소 검색] 버튼을 누르면 우체국 팝업창이 안전하게 로드됩니다!</p>
         
         <div class="grid-3">
-            <input type="text" id="my_name" placeholder="이름 (예: 홍길동)">
+            <input type="text" id="my_name" placeholder="이름 (예: 양지현)">
             <input type="text" id="my_addr" placeholder="출발지 주소" readonly>
             <button class="btn-addr-trigger" type="button" onclick="openKakaoAddressPopup()">주소 검색</button>
             
@@ -149,29 +149,60 @@
         });
     });
 
+    // 💥 3중 좌표 방어막 (마포구가 대전으로 가는 현상 원천 차단)
+    function getFallbackCoordsByText(addr) {
+        if(addr.includes("마포")) return { lat: 37.5663, lng: 126.9016 };
+        if(addr.includes("강남")) return { lat: 37.4979, lng: 127.0276 };
+        if(addr.includes("서울") || addr.includes("경기") || addr.includes("인천")) return { lat: 37.5665, lng: 126.9780 };
+        if(addr.includes("부산") || addr.includes("해운대") || addr.includes("서면")) return { lat: 35.1796, lng: 129.0756 };
+        if(addr.includes("대구") || addr.includes("동성로") || addr.includes("수성")) return { lat: 35.8711, lng: 128.6014 };
+        if(addr.includes("광주") || addr.includes("전남")) return { lat: 35.1595, lng: 126.8526 };
+        if(addr.includes("대전") || addr.includes("충남")) return { lat: 36.3504, lng: 127.3845 };
+        return { lat: 36.3504, lng: 127.3845 }; // 최후의 보루
+    }
+
     function openKakaoAddressPopup() {
         new daum.Postcode({
             oncomplete: function(data) {
                 let fullAddress = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
-                if(data.buildingName) {
-                    fullAddress += " (" + data.buildingName + ")";
-                }
+                if(data.buildingName) fullAddress += " (" + data.buildingName + ")";
                 document.getElementById("my_addr").value = fullAddress;
-                
-                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.roadAddress || data.jibunAddress)}`)
-                .then(res => res.json())
-                .then(geoData => {
-                    if(geoData && geoData.length > 0) {
-                        document.getElementById("selected_lat").value = geoData[0].lat;
-                        document.getElementById("selected_lng").value = geoData[0].lon;
-                    } else {
-                        document.getElementById("selected_lat").value = 36.3504;
-                        document.getElementById("selected_lng").value = 127.3845;
-                    }
-                }).catch(err => {
-                    document.getElementById("selected_lat").value = 36.3504;
-                    document.getElementById("selected_lng").value = 127.3845;
-                });
+
+                let resolved = false;
+
+                // 1순위: 네이버 API 
+                if (typeof naver !== 'undefined' && naver.maps && naver.maps.Service) {
+                    naver.maps.Service.geocode({ query: fullAddress }, function(status, response) {
+                        if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
+                            document.getElementById("selected_lat").value = response.v2.addresses[0].y;
+                            document.getElementById("selected_lng").value = response.v2.addresses[0].x;
+                            resolved = true;
+                        }
+                    });
+                }
+
+                // 2순위: 0.4초 후에도 네이버가 막혀있다면 오픈소스 위성(Nominatim)으로 즉각 우회
+                setTimeout(() => {
+                    if(resolved) return;
+                    let simpleQuery = data.sido + " " + data.sigungu + " " + data.bname; // "서울특별시 마포구 서교동"
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(simpleQuery)}`)
+                    .then(res => res.json())
+                    .then(geoData => {
+                        if(geoData && geoData.length > 0) {
+                            document.getElementById("selected_lat").value = geoData[0].lat;
+                            document.getElementById("selected_lng").value = geoData[0].lon;
+                        } else {
+                            // 3순위: 위성도 터지면 글자 분석으로 지역 좌표 강제 할당 (마포구 완벽 대응)
+                            let coords = getFallbackCoordsByText(fullAddress);
+                            document.getElementById("selected_lat").value = coords.lat;
+                            document.getElementById("selected_lng").value = coords.lng;
+                        }
+                    }).catch(e => {
+                        let coords = getFallbackCoordsByText(fullAddress);
+                        document.getElementById("selected_lat").value = coords.lat;
+                        document.getElementById("selected_lng").value = coords.lng;
+                    });
+                }, 400);
             }
         }).open(); 
     }
@@ -187,7 +218,11 @@
         let lng = document.getElementById("selected_lng").value;
 
         if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
-        if(!lat || !lng) { lat = 36.3504; lng = 127.3845; }
+        
+        if(!lat || !lng) {
+            let coords = getFallbackCoordsByText(addr);
+            lat = coords.lat; lng = coords.lng;
+        }
 
         database.ref('members/' + name).set({
             name: name, addr: addr, lat: parseFloat(lat), lng: parseFloat(lng), transport: transport, duration: parseInt(duration), dates: dateRange, timestamp: Date.now()
@@ -228,34 +263,44 @@
         }
     }
 
-    // 💥 [PRO 듀얼 매핑 허브] coords와 location을 동시에 주입하여 네이버 geocoder 모듈의 차단 에러를 완전히 파괴
+    // 💥 [PRO 동네 이름 추출 엔진] 좌표 대신 무조건 지역 이름을 뽑아내는 강력한 하이브리드 로직
     function getAddressFromCoordsSafe(lat, lng) {
-        let fLat = parseFloat(lat);
-        let fLng = parseFloat(lng);
-        if(isNaN(fLat) || isNaN(fLng)) { fLat = 36.3504; fLng = 127.3845; }
-
         return new Promise((resolve) => {
-            if (typeof naver === 'undefined' || !naver.maps || !naver.maps.Service) {
-                resolve(`중심 구역 (${fLat.toFixed(3)}, ${fLng.toFixed(3)})`);
-                return;
+            let resolved = false;
+
+            // 1순위: 네이버 API
+            if (typeof naver !== 'undefined' && naver.maps && naver.maps.Service) {
+                try {
+                    naver.maps.Service.reverseGeocode({
+                        coords: new naver.maps.LatLng(lat, lng),
+                    }, function(status, response) {
+                        if (status === naver.maps.Service.Status.OK && response.v2 && response.v2.results.length > 0) {
+                            let r = response.v2.results[0].region;
+                            let addr = `${r.area1 ? r.area1.name : ""} ${r.area2 ? r.area2.name : ""} ${r.area3 ? r.area3.name : ""}`.trim();
+                            if(addr) { resolved = true; resolve(addr); }
+                        }
+                    });
+                } catch(e) {}
             }
-            
-            // 💥 어떤 내부 벨트 검증문이 돌더라도 100% 매칭되도록 듀얼 키 바인딩 설계
-            naver.maps.Service.reverseGeocode({
-                coords: new naver.maps.LatLng(fLat, fLng),
-                location: new naver.maps.LatLng(fLat, fLng)
-            }, function(status, response) {
-                if (status !== naver.maps.Service.Status.OK || !response.v2 || response.v2.results.length === 0) {
-                    resolve(`중심 구역 (${fLat.toFixed(3)}, ${fLng.toFixed(3)})`);
-                    return;
-                }
-                let r = response.v2.results[0].region;
-                let p1 = r.area1 ? r.area1.name : "";
-                let p2 = r.area2 ? r.area2.name : "";
-                let p3 = r.area3 ? r.area3.name : "";
-                let addr = `${p1} ${p2} ${p3}`.replace(/\s+/g, ' ').trim();
-                resolve(addr || "최적 조율 지점");
-            });
+
+            // 2순위: 네이버가 0.4초 동안 응답 안 하면 Nominatim 오픈소스로 강제 우회
+            setTimeout(async () => {
+                if(resolved) return;
+                try {
+                    let res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=ko`);
+                    let data = await res.json();
+                    if(data && data.address) {
+                        let addr = data.address;
+                        let p1 = addr.province || addr.state || addr.city || "";
+                        let p2 = addr.county || addr.town || addr.borough || addr.city_district || "";
+                        let p3 = addr.suburb || addr.village || addr.neighbourhood || "";
+                        let full = `${p1} ${p2} ${p3}`.replace(/\s+/g, ' ').trim();
+                        if(full) { resolved = true; resolve(full); return; }
+                    }
+                } catch(e) {}
+                
+                if(!resolved) resolve(`조율된 중심 구역`);
+            }, 400);
         });
     }
 
@@ -298,19 +343,15 @@
 
         let sumLat = 0, sumLng = 0, count = 0;
         globalActiveMembers.forEach(m => {
-            let latVal = parseFloat(m.lat);
-            let lngVal = parseFloat(m.lng);
-            if(!isNaN(latVal) && !isNaN(lngVal)) {
-                sumLat += latVal; sumLng += lngVal; count++;
-            }
+            sumLat += m.lat; sumLng += m.lng; count++;
         });
-        let avgLat = count > 0 ? (sumLat / count) : 36.3504;
-        let avgLng = count > 0 ? (sumLng / count) : 127.3845;
+        let avgLat = sumLat / count;
+        let avgLng = sumLng / count;
 
-        let lats = globalActiveMembers.map(m => parseFloat(m.lat)).filter(v => !isNaN(v));
-        let lngs = globalActiveMembers.map(m => parseFloat(m.lng)).filter(v => !isNaN(v));
-        let maxLatGap = lats.length > 0 ? (Math.max(...lats) - Math.min(...lats)) : 0.5;
-        let maxLngGap = lngs.length > 0 ? (Math.max(...lngs) - Math.min(...lngs)) : 0.5;
+        let lats = globalActiveMembers.map(m => m.lat);
+        let lngs = globalActiveMembers.map(m => m.lng);
+        let maxLatGap = Math.max(...lats) - Math.min(...lats);
+        let maxLngGap = Math.max(...lngs) - Math.min(...lngs);
         let latStep = Math.max(0.03, maxLatGap / 5);
         let lngStep = Math.max(0.04, maxLngGap / 5);
 
@@ -326,13 +367,13 @@
             let totalCost = 0; let maxDistance = 0; let targetReceipts = [];
 
             globalActiveMembers.forEach(m => {
-                let radLat1 = Math.PI * parseFloat(m.lat) / 180;
+                let radLat1 = Math.PI * m.lat / 180;
                 let radLat2 = Math.PI * target.lat / 180;
-                let theta = parseFloat(m.lng) - target.lng;
+                let theta = m.lng - target.lng;
                 let radTheta = Math.PI * theta / 180;
                 
                 let dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
-                if (dist > 1) dist = 1; if (dist < -1) dist = -1;
+                if (dist > 1) dist = 1;
                 dist = Math.acos(dist) * 180 / Math.PI * 60 * 1.1515 * 1.609344;
                 
                 let realRoadDist = Math.round(dist * 1.28); 
@@ -350,12 +391,12 @@
                 totalCost += cost;
 
                 targetReceipts.push({
-                    name: m.name, addr: m.addr, lat: parseFloat(m.lat), lng: parseFloat(m.lng), transport: m.transport, dist: realRoadDist, time: timeMin, cost: cost
+                    name: m.name, addr: m.addr, lat: m.lat, lng: m.lng, transport: m.transport, dist: realRoadDist, time: timeMin, cost: cost
                 });
             });
 
             let travelTimes = targetReceipts.map(r => r.time);
-            let timeGap = travelTimes.length > 0 ? (Math.max(...travelTimes) - Math.min(...travelTimes)) : 0;
+            let timeGap = Math.max(...travelTimes) - Math.min(...travelTimes);
             let finalScore = totalCost + (timeGap * 250); 
 
             tempScores.push({ finalScore: finalScore, maxDist: maxDistance, receipts: targetReceipts, rawTarget: target });
@@ -365,11 +406,21 @@
         let top3Points = tempScores.slice(0, 3);
 
         globalFinalScores = [];
+        let usedNames = new Set();
+
         for(let i=0; i<top3Points.length; i++) {
             let node = top3Points[i];
             let resolvedName = await getAddressFromCoordsSafe(node.rawTarget.lat, node.rawTarget.lng);
+            
+            let finalName = resolvedName;
+            let counter = 1;
+            while(usedNames.has(finalName)) {
+                finalName = `${resolvedName} (${counter++})`;
+            }
+            usedNames.add(finalName);
+
             globalFinalScores.push({
-                name: resolvedName, cost: node.finalScore, maxDist: node.maxDist, receipts: node.receipts, rawTarget: node.rawTarget
+                name: finalName, cost: node.finalScore, maxDist: node.maxDist, receipts: node.receipts, rawTarget: node.rawTarget
             });
         }
 
@@ -415,7 +466,8 @@
         let targetData = globalFinalScores[idx];
         if(!targetData) return;
         
-        let pensionHtml = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(targetData.name + " 단체 숙소 펜션")}" target="_blank" class="pension-link">💚 네이버 지도로 [${targetData.name}] 모임 장소/숙소 실시간 확인</a>`;
+        let cleanName = targetData.name.replace(/\([0-9]+\)/g, "").trim();
+        let pensionHtml = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 단체 숙소 펜션")}" target="_blank" class="pension-link">💚 네이버 지도로 [${cleanName}] 모임 장소/숙소 실시간 확인</a>`;
         document.getElementById("dynamicPensionLink").innerHTML = pensionHtml;
         document.getElementById("receiptTitleCity").innerHTML = `[${targetData.name}]`;
 
@@ -425,7 +477,7 @@
             let costText = r.cost > 0 ? `${r.cost.toLocaleString()}원` : `0원 (카풀동승)`;
             
             let menuType = (r.transport === '자차' || r.transport === '자차 운전') ? 'car' : 'pubtrans';
-            let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},${encodeURIComponent(r.name+"출발")}/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(targetData.name)}/-/${menuType}?c=15,0,0,0,dh`;
+            let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},${encodeURIComponent(r.name+"출발")}/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(cleanName)}/-/${menuType}?c=15,0,0,0,dh`;
 
             receiptHtml += `
                 <div class="personal-receipt">
@@ -446,7 +498,7 @@
             if(itemIdx === idx) {
                 el.style.border = "2px solid #03c75a"; el.style.backgroundColor = "#f0fdf4";
             } else {
-                el.style.border = "2px solid #e2e8f0"; el.style.backgroundColor = "white";
+                el.style.border = "1px solid #e2e8f0"; el.style.backgroundColor = "white";
             }
         });
     }
