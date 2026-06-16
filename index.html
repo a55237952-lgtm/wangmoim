@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - 보안 강화 & 데이터 Import 플랫폼 (v49.0)</title>
+    <title>👑 왕모임 - 무결점 엔진 복구판 (v50.0)</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -23,7 +23,6 @@
 
         .app-body { padding: 15px; max-width: 1000px; margin: 0 auto; }
         
-        /* 💥 룸 리스트 스타일 */
         .trip-create-box { background: white; padding: 16px; border-radius: 12px; border: 2px dashed #cbd5e1; text-align: center; margin-bottom: 16px; }
         .trip-create-box input { width: 70%; max-width: 300px; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: bold; margin-bottom: 8px; text-align: center; display: block; margin-left: auto; margin-right: auto; }
         .trip-create-box button { background: #3b82f6; color: white; padding: 10px 20px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 4px 10px rgba(59,130,246,0.2); margin-top: 5px;}
@@ -62,7 +61,7 @@
         .btn-add-addr { width: 100%; background: #f1f5f9; border: 1px dashed #94a3b8; color: #475569; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: bold; margin-bottom: 10px; }
         
         .checkbox-group { display: flex; gap: 10px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; flex-wrap: wrap; margin-bottom: 12px !important; }
-        .checkbox-group label { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .checkbox-group label { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: bold; cursor: pointer; }
         
         button.btn-submit { width: 100%; background: #03c75a; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(3,199,90,0.2); margin-bottom: 10px !important; }
         button.action-btn { width: 100%; background: linear-gradient(135deg, #2563eb, #1e3a8a); color: white; padding: 12px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 8px rgba(37,99,235,0.25); margin-top: 4px; }
@@ -75,7 +74,6 @@
         .member-name-text:hover { color: #1e3a8a; }
         .btn-delete-badge { background: #ef4444; color: white; border: none; width: 14px; height: 14px; border-radius: 50%; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* 캘린더 스타일 */
         .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; }
         .cal-nav-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; cursor: pointer; border-radius: 6px; font-weight: bold; color: #475569; transition: 0.2s; font-size: 12px; }
         .cal-nav-btn:hover { background: #e2e8f0; color: #0f172a; }
@@ -102,6 +100,7 @@
         .loading-spinner { border: 4px solid #e2e8f0; border-top: 4px solid #3b82f6; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-bottom: 10px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
+        /* 💥 결과창 스타일 복구 */
         .result-box { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .result-section-title { font-size: 15px; font-weight: bold; color: #166534; margin-top: 10px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 2px dashed #bbf7d0; }
         .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; margin-bottom: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
@@ -112,6 +111,9 @@
         .time-badge { background: #e0e7ff; color: #1d4ed8; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid #bfdbfe; display: inline-block; margin-bottom: 4px; }
         
         .roulette-anim-box { display: none; font-size: 24px; font-weight: 900; text-align: center; padding: 30px; background: #f3e8ff; color: #6d28d9; border-radius: 10px; border: 2px dashed #a78bfa; margin-bottom: 15px; }
+        .winner-banner { background: linear-gradient(135deg, #fcd34d, #fbbf24); color: #78350f; padding: 20px 15px; text-align: center; font-size: 18px; font-weight: 900; border-radius: 10px; margin-bottom: 0; border: 2px solid #b45309; display: none; box-shadow: 0 4px 15px rgba(245,158,11,0.2); }
+        .winner-banner ul { list-style: none; padding: 0; margin: 15px 0 0 0; background: rgba(255,255,255,0.6); border-radius: 8px; padding: 10px; display: inline-block; text-align: left; }
+        .winner-banner li { padding: 4px 0; font-size: 14px; }
         
         .exec-banner { background: #0f172a; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
         .exec-banner h2 { margin: 0 0 5px 0; font-size: 24px; color: #fbbf24; font-weight: 900; }
@@ -126,7 +128,6 @@
         .check-btn { display: inline-block; width: 22px; height: 22px; border-radius: 5px; border: 2px solid #d97706; cursor: pointer; text-align: center; line-height: 18px; font-size: 13px; font-weight: bold; background: white; color: transparent; transition: 0.2s; }
         .check-btn.checked { background: #10b981; border-color: #047857; color: white; }
 
-        /* 모달 시스템 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; backdrop-filter: blur(3px); }
         .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; }
         .modal-content h3 { margin-top: 0; color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; font-size: 16px; }
@@ -175,7 +176,7 @@
     <div id="screen_trip_planning" style="display: none;">
         
         <div style="background: #fffbeb; border: 1px dashed #f59e0b; padding: 10px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-            <span style="font-size: 12px; color: #b45309; font-weight: bold;">💡 다른 방에서 힘들게 적었던 데이터를 그대로 복사해올까요?</span>
+            <span style="font-size: 12px; color: #b45309; font-weight: bold;">💡 다른 방에서 데이터를 그대로 복사해올까요?</span>
             <button onclick="openImportModal()" style="background: #f59e0b; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:11px;">💾 데이터 댕겨오기</button>
         </div>
 
@@ -229,7 +230,7 @@
                             <label><input type="checkbox" name="my_trans" value="대중교통" checked> 대중교통</label>
                             <label><input type="checkbox" name="my_trans" value="카풀" checked> 동승(카풀)</label>
                         </div>
-                        <button class="btn-submit" onclick="sendToAI()">📍 내 데이터 저장</button>
+                        <button class="btn-submit" onclick="sendToAI()">📍 내 데이터 방에 저장</button>
 
                         <div>
                             <span style="font-size: 11px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 4px;">📝 AI 참가자 현황 (이름 클릭시 수정)</span>
@@ -237,6 +238,8 @@
                         </div>
 
                         <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px; margin-top: 12px;">
+                            <label style="font-size: 11px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 6px;">⏰ 목표 집결 시간 (역산용)</label>
+                            <input type="text" id="assembly_time_ai" placeholder="예: 14:00" style="margin-bottom: 8px; border-color:#bfdbfe;">
                             <button class="action-btn" onclick="startEngine('AI')">💡 AI 최적화 지역 스캔 시작</button>
                         </div>
                     </div>
@@ -278,12 +281,21 @@
                     </div>
                 </div>
             </div> <div class="loading" id="loadingBar"><div class="loading-spinner"></div><div id="loadingText">연산 중입니다...</div></div>
-            <div class="roulette-anim-box" id="rouletteAnimBox">🎲 룰렛 회전 중...<br><span id="rouletteRollingText" style="color:#1e3a8a; font-size:26px; display:block; margin-top:8px;">-</span></div>
+            <div class="roulette-anim-box" id="rouletteAnimBox">🎲 룰렛 회전 중...<br><span id="rouletteRollingText" style="color:#1e3a8a; font-size:26px; display:block; margin-top:8px;">-</span><span id="rouletteSubText" style="color:#9333ea; font-size:16px; display:block; margin-top:10px;">역할 분담 중...</span></div>
             
             <div class="result-box" id="resultBox">
+                <div id="winnerBanner" class="winner-banner"></div>
+                
                 <div id="aiResultArea">
+                    <div style="font-size: 13px; font-weight: bold; color: #e67e22; background: #fff7ed; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #fdba74;" id="display_assembly_time"></div>
+
                     <div class="result-section-title" id="locationTitleText">📍 조율 결과 지역 <span style="color:#ef4444; font-weight: bold;">(원하는 곳을 확정하세요!)</span></div>
                     <div id="locationResultContent"></div>
+                    
+                    <div id="dynamicPensionLink" style="margin-bottom: 15px;"></div>
+                    
+                    <div class="result-section-title" id="receiptTitleHeader">🧾 <span id="receiptTitleCity">[선택된 지역]</span> 회원별 맞춤 상세 시간 명세서</div>
+                    <div id="personalReceiptContent"></div>
                 </div>
             </div>
 
@@ -385,8 +397,7 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
     
-    // 글로벌 변수
-    let globalTripsData = {}; // 전체 방 목록 저장용 (보안검증)
+    let globalTripsData = {}; 
     let currentTripId = null; 
     let calendarInstance;
     let currentAssemblyTimeMins = 14 * 60; 
@@ -429,10 +440,11 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         calendarInstance = flatpickr("#calendar_input", { mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", " });
+        let timeInput = document.getElementById("assembly_time_ai");
+        if(timeInput) flatpickr(timeInput, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "14:00" });
         loadTripList();
     });
 
-    // 💥 [보안 1] 방 목록을 메모리에 담아두고 비밀번호 매칭에 사용
     function loadTripList() {
         database.ref('trips').on('value', (snapshot) => {
             const data = snapshot.val();
@@ -464,7 +476,6 @@
         });
     }
 
-    // 💥 [보안 2] 방 개설 시 비밀번호 저장
     function createNewTrip() {
         let tripName = document.getElementById("new_trip_name").value.trim();
         let tripPw = document.getElementById("new_trip_pw").value.trim();
@@ -480,7 +491,6 @@
         });
     }
 
-    // 💥 [보안 3] 방 삭제 전 검증
     window.tryDeleteTrip = function(tripId) {
         let trip = globalTripsData[tripId];
         if(!trip) return;
@@ -494,7 +504,6 @@
         database.ref('trips/' + tripId).remove();
     };
 
-    // 💥 [보안 4] 방 입장 전 검증
     window.tryOpenTrip = function(tripId) {
         let trip = globalTripsData[tripId];
         if(!trip) return;
@@ -530,7 +539,9 @@
         currentTripId = null;
         globalActiveMembers = []; globalRouletteMembers = []; globalRoles = []; userSelectedDates = [];
         
-        document.getElementById("resultBox").style.display = "none";
+        let resBox = document.getElementById("resultBox");
+        if(resBox) resBox.style.display = "none";
+        
         document.getElementById("screen_trip_planning").style.display = 'none';
         document.getElementById("screen_trip_confirmed").style.display = 'none';
         document.getElementById('screen_trip_list').style.display = 'block';
@@ -582,7 +593,7 @@
                     let m = data[key]; globalRouletteMembers.push(m);
                     html += `<div class="member-badge" style="border-color:#d8b4fe; background:#faf5ff; color:#6b21a8;"><strong>${m.name}</strong> (${m.targets.join(', ')}) <button class="btn-delete-badge" onclick="deleteRoulette('${m.name}')">X</button></div>`;
                 }
-            } else { html = `<span style="color:#aaa; font-size:11px;">후보 대기 중...</span>`; }
+            } else { html = `<span style="color:#aaa; font-size:13px;">후보 대기 중...</span>`; }
             document.getElementById("liveRouletteList").innerHTML = html;
         });
 
@@ -616,7 +627,6 @@
         });
     }
 
-    // 💥 [보안 5] 다른 방 데이터 불러오기 기능 (모달 방식 변경)
     window.openImportModal = function() {
         database.ref('trips').once('value').then(snapshot => {
             let data = snapshot.val();
@@ -646,7 +656,6 @@
                 alert("❌ 선택하신 방의 비밀번호가 틀렸습니다."); return;
             }
             
-            // 비밀번호 일치 시 데이터 복사 진행
             let aiPromise = null, rouPromise = null;
             if(srcData.members) aiPromise = database.ref(`trips/${currentTripId}/members`).update(srcData.members);
             if(srcData.roulette_members) rouPromise = database.ref(`trips/${currentTripId}/roulette_members`).update(srcData.roulette_members);
@@ -733,7 +742,9 @@
         document.getElementById('gTab1').classList.remove('active'); document.getElementById('gTab2').classList.remove('active');
         if(mode === 1) { document.getElementById('gTab1').classList.add('active'); document.getElementById('view_ai').style.display = 'block'; document.getElementById('view_roulette').style.display = 'none'; } 
         else { document.getElementById('gTab2').classList.add('active'); document.getElementById('view_ai').style.display = 'none'; document.getElementById('view_roulette').style.display = 'block'; }
-        document.getElementById("resultBox").style.display = "none";
+        
+        let resBox = document.getElementById("resultBox");
+        if(resBox) resBox.style.display = "none";
     }
 
     function toggleAddr2() { document.getElementById('wrap_addr2').style.display = 'flex'; document.getElementById('btn_toggle_addr2').style.display = 'none'; }
@@ -985,11 +996,21 @@
 
     function parseAssemblyTime(mode) {
         let tInput = "assembly_time_ai"; 
-        let timeVal = document.getElementById(tInput).value;
+        let timeEl = document.getElementById(tInput);
+        let timeVal = timeEl ? timeEl.value : "14:00";
         if(timeVal && timeVal.includes(":")) {
             let parts = timeVal.split(":");
             currentAssemblyTimeMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
         } else { currentAssemblyTimeMins = 14 * 60; }
+
+        let aH = Math.floor(currentAssemblyTimeMins / 60); let aM = currentAssemblyTimeMins % 60;
+        let ampm = aH < 12 ? "오전" : "오후"; let fH = aH % 12 === 0 ? 12 : aH % 12;
+        
+        let dispEl = document.getElementById("display_assembly_time");
+        if(dispEl) {
+            if (mode === 'ROULETTE') dispEl.style.display = "none";
+            else { dispEl.style.display = "block"; dispEl.innerHTML = `⏰ 집결 목표: <strong>${ampm} ${fH}시 ${aM.toString().padStart(2, '0')}분</strong>`; }
+        }
     }
 
     function startEngine(mode) {
@@ -998,14 +1019,25 @@
         if(mode === 'ROULETTE' && globalRouletteMembers.length === 0) { alert("룰렛 후보 데이터가 없습니다!"); return; }
         
         parseAssemblyTime(mode);
-        document.getElementById("resultBox").style.display = "none";
-        document.getElementById("winnerBanner").style.display = "none";
+        
+        let resBox = document.getElementById("resultBox");
+        if(resBox) resBox.style.display = "none";
+        let wBanner = document.getElementById("winnerBanner");
+        if(wBanner) wBanner.style.display = "none";
         
         if(mode === 'AI') {
             document.getElementById("loadingBar").style.display = "flex";
-            document.getElementById("aiResultArea").style.display = "block";
+            
+            let aiResArea = document.getElementById("aiResultArea");
+            if(aiResArea) aiResArea.style.display = "block";
+            
             document.getElementById("locationTitleText").innerHTML = `📍 AI 기회비용 최소화 지역 <span style="color:#ef4444;">(행을 클릭하세요!)</span>`;
-            document.getElementById("receiptTitleHeader").innerHTML = `🧾 <span id="receiptTitleCity">[선택된 지역]</span> 회원별 맞춤 상세 시간 명세서`;
+            
+            let rh = document.getElementById("receiptTitleHeader");
+            if(rh) { rh.style.display = "block"; rh.innerHTML = `🧾 <span id="receiptTitleCity">[선택된 지역]</span> 회원별 맞춤 상세 시간 명세서`; }
+            
+            let pRec = document.getElementById("personalReceiptContent");
+            if(pRec) pRec.style.display = "block";
             
             let tempScores = runEngine(KOR_MASTER_DB);
             globalFinalScores = [];
@@ -1025,7 +1057,7 @@
             let animBox = document.getElementById("rouletteAnimBox");
             let rollingText = document.getElementById("rouletteRollingText");
             let subText = document.getElementById("rouletteSubText");
-            animBox.style.display = "block";
+            if(animBox) animBox.style.display = "block";
 
             let destPool = [];
             globalRouletteMembers.forEach(m => { m.targets.forEach(t => destPool.push(t)); });
@@ -1039,17 +1071,17 @@
             let counter = 0;
             let shuffleInterval = setInterval(() => {
                 let tempIdx = Math.floor(Math.random() * destPool.length);
-                rollingText.innerText = destPool[tempIdx];
+                if(rollingText) rollingText.innerText = destPool[tempIdx];
                 counter++;
                 if(counter > 20) {
                     clearInterval(shuffleInterval);
                     let winnerDest = destPool[Math.floor(Math.random() * destPool.length)];
-                    rollingText.innerText = `🎉 ${winnerDest} 당첨!!`;
-                    subText.innerText = "역할 배정 완료!";
+                    if(rollingText) rollingText.innerText = `🎉 ${winnerDest} 당첨!!`;
+                    if(subText) subText.innerText = "역할 배정 완료!";
                     
                     setTimeout(() => {
-                        animBox.style.display = "none";
-                        subText.innerText = "역할 분담 중..."; 
+                        if(animBox) animBox.style.display = "none";
+                        if(subText) subText.innerText = "역할 분담 중..."; 
                         saveAndProcessRouletteWinner(winnerDest, shuffledMembers);
                     }, 1500);
                 }
@@ -1105,24 +1137,31 @@
     };
 
     function renderRouletteBanner(winnerDest, roleAssignmentsArray) {
-        document.getElementById("aiResultArea").style.display = "none";
+        let aiArea = document.getElementById("aiResultArea");
+        if(aiArea) aiArea.style.display = "none";
+        
         let listItems = roleAssignmentsArray.map(txt => `<li><strong style="color:#7e22ce;">${txt.split(" : ")[0] || txt}</strong> : ${txt.split(" : ")[1] || ''}</li>`).join("");
 
         let cleanName = winnerDest.split("(")[0].trim();
         let naverMapNaviLink = `https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 가볼만한곳")}`;
 
-        document.getElementById("winnerBanner").innerHTML = `
-            <div style="font-size:28px; margin-bottom:15px;">🎉 당첨 여행지: <strong style="color:#b45309;">${winnerDest}</strong> 🎉</div>
-            <ul style="list-style:none; padding:15px; margin:0 auto; background:rgba(255,255,255,0.7); border-radius:8px; display:inline-block; text-align:left; min-width:200px;">
-                ${listItems}
-            </ul>
-            <div style="margin-top:20px;">
-                <a href="${naverMapNaviLink}" target="_blank" style="background:#03c75a; color:white; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:bold; text-decoration:none; display:inline-block; box-shadow:0 4px 10px rgba(3,199,90,0.2);">🗺️ 네이버 지도로 지역 탐색하기</a>
-            </div>
-            <div style="margin-top:15px; font-size:13px; font-weight:normal; color:#78350f;">복잡한 경로 계산은 생략합니다. 즐거운 여행 계획을 세워보세요!</div>
-        `;
-        document.getElementById("winnerBanner").style.display = "block";
-        document.getElementById("resultBox").style.display = "block";
+        let wBanner = document.getElementById("winnerBanner");
+        if(wBanner) {
+            wBanner.innerHTML = `
+                <div style="font-size:28px; margin-bottom:15px;">🎉 당첨 여행지: <strong style="color:#b45309;">${winnerDest}</strong> 🎉</div>
+                <ul style="list-style:none; padding:15px; margin:0 auto; background:rgba(255,255,255,0.7); border-radius:8px; display:inline-block; text-align:left; min-width:200px;">
+                    ${listItems}
+                </ul>
+                <div style="margin-top:20px;">
+                    <a href="${naverMapNaviLink}" target="_blank" style="background:#03c75a; color:white; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:bold; text-decoration:none; display:inline-block; box-shadow:0 4px 10px rgba(3,199,90,0.2);">🗺️ 네이버 지도로 지역 탐색하기</a>
+                </div>
+                <div style="margin-top:15px; font-size:13px; font-weight:normal; color:#78350f;">복잡한 경로 계산은 생략합니다. 즐거운 여행 계획을 세워보세요!</div>
+            `;
+            wBanner.style.display = "block";
+        }
+        
+        let resBox = document.getElementById("resultBox");
+        if(resBox) resBox.style.display = "block";
     }
 
     function renderResults(mode) {
@@ -1130,7 +1169,7 @@
         
         let locHtml = "";
         globalFinalScores.forEach((f, idx) => {
-            let medal = idx === 0 ? "🥇 AI 강력 추천" : `${idx + 1}위 대안`;
+            let medal = idx === 0 ? "🥇 AI 강력 추천 (확정은 클릭)" : `${idx + 1}위 대안`;
             let borderColor = "#e2e8f0"; let bg = "#fff";
 
             let costHtml = `<div style="margin-top:4px;"><span class="cost-wage-text" style="color:#d97706;">💸 차비합: ${f.groupTransportCost.toLocaleString()}원 / ⏱️ 시급환산 가치합: ${f.groupTimeCost.toLocaleString()}원</span></div>`;
@@ -1146,7 +1185,9 @@
         });
         document.getElementById("locationResultContent").innerHTML = locHtml;
         showReceipt(0);
-        document.getElementById("resultBox").style.display = "block";
+        
+        let resBox = document.getElementById("resultBox");
+        if(resBox) resBox.style.display = "block";
     }
 
     window.confirmAITrip = function(destName) {
@@ -1276,8 +1317,10 @@
         let cleanName = targetData.name.split(" ")[0].trim();
         if (cleanName.includes("(")) cleanName = cleanName.split("(")[0].trim();
         
-        let pensionHtml = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 단체 숙소 펜션")}" target="_blank" class="pension-link">💚 네이버 지도로 [${cleanName}] 모임 장소 실시간 확인</a>`;
-        document.getElementById("dynamicPensionLink").innerHTML = pensionHtml;
+        let dpLink = document.getElementById("dynamicPensionLink");
+        if(dpLink) {
+            dpLink.innerHTML = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 단체 숙소 펜션")}" target="_blank" class="pension-link" style="display:block; text-align:center; background-color:#2c3e50; color:white; padding:14px; text-decoration:none; border-radius:8px; font-weight:bold; font-size:14px; margin-top:12px;">💚 네이버 지도로 [${cleanName}] 모임 장소 실시간 확인</a>`;
+        }
         
         if (isRoulette) {
             let rankItems = document.querySelectorAll('.loc-rank-item');
@@ -1292,9 +1335,9 @@
         let titleCityEl = document.getElementById("receiptTitleCity");
         if(titleCityEl) titleCityEl.innerHTML = `[${cleanName}]`;
 
-        // 💥 집결 목표 시간 가져오기 및 파싱
         let tInput = "assembly_time_ai";
-        let timeVal = document.getElementById(tInput).value;
+        let timeEl = document.getElementById(tInput);
+        let timeVal = timeEl ? timeEl.value : "14:00"; 
         let cMins = 14 * 60;
         if(timeVal && timeVal.includes(":")) {
             let parts = timeVal.split(":");
@@ -1307,7 +1350,6 @@
             let hourText = r.time >= 60 ? `${Math.floor(r.time/60)}시간 ${r.time%60}분` : `${r.time}분`;
             let tCostText = r.transportCost > 0 ? `${r.transportCost.toLocaleString()}원` : `0원`;
             
-            // 💥 여기서 departMins를 다시 계산하여 음수 버그 해결
             let departMins = cMins - r.time;
             if (departMins < 0) departMins += 24 * 60;
             
@@ -1328,12 +1370,14 @@
                         <div style="font-size:12px; color:#64748b;">수단: <strong>${r.transport}</strong> (${r.dist}km)</div>
                         <div style="text-align: right; font-weight: bold; font-size:13px;">
                             <span>🗺️ 지도 예상: <span style="color:#1d4ed8;">${hourText}</span> ➡️ <span style="color:#b91c1c;">💸 ${tCostText}</span></span>
-                            <a href="${naverMapNaviLink}" target="_blank" class="btn-navi">내비 연결</a>
+                            <a href="${naverMapNaviLink}" target="_blank" class="btn-navi" style="background-color:#03c75a; color:white; font-size:12px; text-decoration:none; padding:6px 10px; border-radius:6px; font-weight:bold; display:inline-block; margin-top:6px; box-shadow:0 2px 4px rgba(3,199,90,0.15);">내비 연결</a>
                         </div>
                     </div>
                 </div>`;
         });
-        document.getElementById("personalReceiptContent").innerHTML = receiptHtml;
+        
+        let prc = document.getElementById("personalReceiptContent");
+        if(prc) prc.innerHTML = receiptHtml;
 
         let rankItems = document.querySelectorAll('.loc-rank-item');
         rankItems.forEach((el) => {
