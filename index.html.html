@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>👑 왕모임 - PRO 경비 최소화 영토 조율 시스템</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; background-color: #f1f5f9; margin: 0; padding: 0; color: #334155; }
+        
+        .app-header { background: linear-gradient(135deg, #1e3a8a, #0f172a); color: white; padding: 30px 15px; text-align: center; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+        .app-header h1 { margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; color: #fbbf24; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .app-header p { margin: 8px 0 0 0; font-size: 13px; font-weight: 600; color: #f8fafc; opacity: 0.95; background: rgba(255,255,255,0.15); display: inline-block; padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.25); }
+        
+        .app-body { padding: 15px; max-width: 650px; margin: 0 auto; }
+        .card { background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 15px; border: 1px solid #e2e8f0; position: relative; }
+        .card h3 { margin-top: 0; margin-bottom: 12px; font-size: 15px; color: #1e293b; }
+        
+        .grid-3 { display: grid; grid-template-columns: 0.8fr 1.5fr 0.8fr 1fr; gap: 8px; margin-bottom: 10px; align-items: center; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 10px; }
+        input[type="text"], select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background-color: #fff; }
+        
+        .btn-addr-trigger { width: 100%; padding: 12px 0; background-color: #fbbf24; color: #1e293b; border: 1px solid #d97706; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn-addr-trigger:hover { background-color: #f59e0b; }
+
+        button.btn-submit { width: 100%; background: #03c75a; color: white; padding: 14px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 3px 6px rgba(3,199,90,0.2); }
+        button.action-btn { width: 100%; background: linear-gradient(135deg, #e67e22, #d35400); color: white; padding: 16px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(230,126,34,0.25); margin-top: 10px; }
+        
+        .member-badge-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .member-badge { display: inline-flex; align-items: center; gap: 6px; background: #e2e8f0; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #cbd5e1; }
+        .member-badge.car { border: 1px solid #03c75a; color: #028a3e; background: #e8f8f5; }
+        .btn-delete-badge { background: #ef4444; color: white; border: none; width: 16px; height: 16px; border-radius: 50%; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        
+        .loading { display: none; text-align: center; padding: 20px; font-weight: bold; color: #1e3a8a; font-size: 14px; }
+        .result-box { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-top: 15px; }
+        .result-section-title { font-size: 15px; font-weight: bold; color: #166534; margin-top: 15px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px dashed #bbf7d0; }
+        
+        .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; margin-bottom: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; border: 1px solid #e2e8f0; }
+        .loc-rank-item { cursor: pointer; transition: all 0.2s ease; border: 2px solid #e2e8f0; }
+        .loc-rank-item:hover { border-color: #03c75a; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(3,199,90,0.1); }
+        
+        .search-links { display: inline-flex; gap: 4px; margin-left: 8px; }
+        .search-links a { font-size: 11px; text-decoration: none; padding: 3px 6px; border-radius: 4px; font-weight: bold; color: white; }
+        .btn-food { background-color: #ea4335; }
+        .btn-spot { background-color: #4285f4; }
+        
+        .btn-navi { background-color: #03c75a; color: white; font-size: 11px; text-decoration: none; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; margin-left: 8px; box-shadow: 0 2px 4px rgba(3,199,90,0.15); }
+        .btn-navi:hover { opacity: 0.9; }
+
+        .personal-receipt { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 8px; font-size: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+        .pension-link { display: block; text-align: center; background-color: #2c3e50; color: white; padding: 14px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; margin-top: 12px; }
+        .badge-fail { background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: normal; }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?clientId=n3o9fho7nl&submodules=geocoder"></script>
+    
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwuMMvo8VUSYsLyUoUTx_LFbyuYiFwzeo",
+            authDomain: "wangmoim.firebaseapp.com",
+            projectId: "wangmoim",
+            databaseURL: "https://wangmoim-default-rtdb.firebaseio.com"
+        };
+    </script>
+</head>
+<body>
+
+<div class="app-header">
+    <h1>👑 왕모임 (WangMoim)</h1>
+    <p>전국 무제한 영토 조율 및 다이내믹 경비 최적화 엔진</p>
+</div>
+
+<div class="app-body">
+    <div class="card">
+        <h3>✍️ [회원용] 내 일정 및 정확한 출발지 제출</h3>
+        <p style="font-size:12px; color:#1e3a8a; margin:0 0 10px 0; font-weight:bold;">🔎 검색 가이드: [주소 검색] 버튼을 누르면 우체국 팝업창이 안전하게 로드됩니다!</p>
+        
+        <div class="grid-3">
+            <input type="text" id="my_name" placeholder="이름 (예: 홍길동)">
+            <input type="text" id="my_addr" placeholder="출발지 주소" readonly>
+            <button class="btn-addr-trigger" type="button" onclick="openKakaoAddressPopup()">주소 검색</button>
+            
+            <select id="my_transport">
+                <option value="자차">자차 운전</option>
+                <option value="대중">대중교통</option>
+                <option value="카풀">차량 동승</option>
+            </select>
+        </div>
+        
+        <div class="grid-2">
+            <select id="my_duration">
+                <option value="1">1박 2일 희망</option>
+                <option value="2">2박 3일 희망</option>
+                <option value="3">3박 4일 희망</option>
+                <option value="4">4박 5일 희망</option>
+            </select>
+            <input type="text" id="calendar_input" placeholder="📅 가능 날짜 모두 터치 (끊어서 지정 가능)">
+        </div>
+        
+        <input type="hidden" id="selected_lat">
+        <input type="hidden" id="selected_lng">
+        
+        <button class="btn-submit" onclick="sendToGoogleCloudServer()">📍 실시간 서버로 내 정보 보내기</button>
+    </div>
+
+    <div class="card">
+        <h3>📊 [총무용] 라이브 데이터 취합 현황판</h3>
+        <div class="member-badge-list" id="liveMemberList">
+            <span style="color:#aaa; font-size:13px;">클라우드 서버 연결 대기 중...</span>
+        </div>
+        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 대한민국 영토 다이내믹 경비 스캔 시작</button>
+    </div>
+
+    <div class="loading" id="loadingBar">📡 예산 최소화 및 시간 분산을 위해 대한민국 전역 격자 좌표 연산 중...</div>
+    
+    <div class="result-box" id="resultBox">
+        <h2>📊 최종 최적 조율 가이드 결과</h2>
+        <div class="result-section-title">📅 1. 다중 투표 기반 최대 연박 가능 추천 일정</div>
+        <div id="dateResultContent"></div>
+        <div class="result-section-title">📍 2. 모임 통합 경비 최소화 중심지 <span style="color:#ef4444;">(원하는 순위를 누르면 명세서가 바뀝니다!)</span></div>
+        <div id="locationResultContent"></div>
+        
+        <div id="dynamicPensionLink"></div>
+        
+        <div class="result-section-title">🧾 3. <span id="receiptTitleCity">[선택된 장소]</span> 회원별 이동 시간 및 비용 명세서</div>
+        <div id="personalReceiptContent"></div>
+    </div>
+</div>
+
+<script>
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    let calendarInstance;
+    let globalFinalScores = []; 
+
+    document.addEventListener("DOMContentLoaded", function() {
+        calendarInstance = flatpickr("#calendar_input", {
+            mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", "
+        });
+    });
+
+    function openKakaoAddressPopup() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                let fullAddress = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+                if(data.buildingName) {
+                    fullAddress += " (" + data.buildingName + ")";
+                }
+                document.getElementById("my_addr").value = fullAddress;
+                
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(data.roadAddress || data.jibunAddress)}`)
+                .then(res => res.json())
+                .then(geoData => {
+                    if(geoData && geoData.length > 0) {
+                        document.getElementById("selected_lat").value = geoData[0].lat;
+                        document.getElementById("selected_lng").value = geoData[0].lon;
+                    } else {
+                        document.getElementById("selected_lat").value = 36.3504;
+                        document.getElementById("selected_lng").value = 127.3845;
+                    }
+                }).catch(err => {
+                    document.getElementById("selected_lat").value = 36.3504;
+                    document.getElementById("selected_lng").value = 127.3845;
+                });
+            }
+        }).open(); 
+    }
+
+    function sendToGoogleCloudServer() {
+        let name = document.getElementById("my_name").value.trim();
+        let addr = document.getElementById("my_addr").value.trim();
+        let transport = document.getElementById("my_transport").value;
+        let duration = document.getElementById("my_duration").value;
+        let dateRange = document.getElementById("calendar_input").value;
+        
+        let lat = document.getElementById("selected_lat").value;
+        let lng = document.getElementById("selected_lng").value;
+
+        if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
+        if(!lat || !lng) { lat = 36.3504; lng = 127.3845; }
+
+        database.ref('members/' + name).set({
+            name: name, addr: addr, lat: parseFloat(lat), lng: parseFloat(lng), transport: transport, duration: parseInt(duration), dates: dateRange, timestamp: Date.now()
+        }).then(() => {
+            alert(`🎉 [${name}]님 데이터 반영 완료!`);
+            document.getElementById("my_name").value = "";
+            document.getElementById("my_addr").value = "";
+            document.getElementById("selected_lat").value = "";
+            document.getElementById("selected_lng").value = "";
+            calendarInstance.clear();
+        });
+    }
+
+    let globalActiveMembers = [];
+    database.ref('members').on('value', (snapshot) => {
+        const data = snapshot.val();
+        const badgeList = document.getElementById("liveMemberList");
+        badgeList.innerHTML = ""; globalActiveMembers = [];
+        if(!data) { badgeList.innerHTML = `<span style="color:#aaa; font-size:13px;">대기 데이터 없음</span>`; return; }
+        
+        for(let key in data) {
+            let m = data[key]; 
+            if(m.addr && m.lat && m.lng) {
+                globalActiveMembers.push(m);
+                let carClass = m.transport === '자차' ? 'member-badge car' : 'member-badge';
+                badgeList.innerHTML += `
+                    <div class="${carClass}">
+                        <strong>${m.name}</strong> (${m.addr.substring(0,6)})
+                        <button class="btn-delete-badge" onclick="deleteServerData('${m.name}')">X</button>
+                    </div>`;
+            }
+        }
+    });
+
+    function deleteServerData(targetName) {
+        if(confirm(`[${targetName}] 님의 입력 데이터를 삭제하시겠습니까?`)) {
+            database.ref('members/' + targetName).remove();
+        }
+    }
+
+    // 핀셋 역지오코딩 통신
+    function getAddressFromCoordsSafe(lat, lng) {
+        return new Promise((resolve) => {
+            if (typeof naver === 'undefined' || !naver.maps || !naver.maps.Service) {
+                resolve(`중심 구역 (${lat.toFixed(3)}, ${lng.toFixed(3)})`);
+                return;
+            }
+            naver.maps.Service.reverseGeocode({
+                coords: new naver.maps.LatLng(lng, lat),
+            }, function(status, response) {
+                if (status !== naver.maps.Service.Status.OK || !response.v2 || response.v2.results.length === 0) {
+                    resolve(`중심 구역 (${lat.toFixed(3)}, ${lng.toFixed(3)})`);
+                    return;
+                }
+                let r = response.v2.results[0].region;
+                let p1 = r.area1 ? r.area1.name : "";
+                let p2 = r.area2 ? r.area2.name : "";
+                let p3 = r.area3 ? r.area3.name : "";
+                let addr = `${p1} ${p2} ${p3}`.replace(/\s+/g, ' ').trim();
+                resolve(addr || "최적 조율 지점");
+            });
+        });
+    }
+
+    async function startNaverLiveRoutingEngine() {
+        if(globalActiveMembers.length === 0) { alert("데이터가 없습니다!"); return; }
+        document.getElementById("loadingBar").style.display = "block";
+        document.getElementById("resultBox").style.display = "none";
+
+        let dateScores = {};
+        globalActiveMembers.forEach(m => {
+            if(!m.dates) return;
+            m.dates.split(", ").forEach(dStr => {
+                let d = dStr.trim(); if(!d) return;
+                if(!dateScores[d]) dateScores[d] = { count: 0, members: new Set() };
+                dateScores[d].count += 1; dateScores[d].members.add(m.name);
+            });
+        });
+        let uniqueDates = Object.keys(dateScores).sort();
+        let candidateMap = new Map();
+        uniqueDates.forEach(baseDate => {
+            for(let block = 1; block <= 4; block++) {
+                let currentBlockDates = []; let match = true; let commonMembers = null;
+                for(let j = 0; j <= block; j++) {
+                    let d = new Date(baseDate); d.setDate(d.getDate() + j);
+                    let dStr = d.toISOString().split('T')[0]; currentBlockDates.push(dStr);
+                    if(dateScores[dStr]) {
+                        if(commonMembers === null) commonMembers = new Set(dateScores[dStr].members);
+                        else commonMembers = new Set([...commonMembers].filter(x => dateScores[dStr].members.has(x)));
+                    } else { match = false; break; }
+                }
+                if(match && commonMembers && commonMembers.size > 0) {
+                    let key = `${currentBlockDates[0]} ~ ${currentBlockDates[currentBlockDates.length-1]} (${block}박 ${block+1}일)`;
+                    if(!candidateMap.has(key) || candidateMap.get(key).score < commonMembers.size) {
+                        candidateMap.set(key, { text: key, score: commonMembers.size, attendees: Array.from(commonMembers) });
+                    }
+                }
+            }
+        });
+        let candidateSchedules = Array.from(candidateMap.values()).sort((a, b) => b.score - a.score);
+
+        // 💥 [핵심 기능 개혁 1] 가입자 정보 기반 중앙 무게 중심 연산
+        let sumLat = 0, sumLng = 0, count = 0;
+        globalActiveMembers.forEach(m => {
+            sumLat += m.lat; sumLng += m.lng; count++;
+        });
+        let avgLat = sumLat / count;
+        let avgLng = sumLng / count;
+
+        // 💥 [핵심 기능 개혁 2] 멤버 간 최대 거리를 역산하여 스캔 반경(Step)을 유동적으로 자동 결정
+        let lats = globalActiveMembers.map(m => m.lat);
+        let lngs = globalActiveMembers.map(m => m.lng);
+        let maxLatGap = Math.max(...lats) - Math.min(...lats);
+        let maxLngGap = Math.max(...lngs) - Math.min(...lngs);
+        // 전국 단위면 격자를 넓게 넓히고, 로컬 모임이면 촘촘하게 줄임
+        let latStep = Math.max(0.03, maxLatGap / 5);
+        let lngStep = Math.max(0.04, maxLngGap / 5);
+
+        // 하드코딩 리스트 100% 영구 제외 -> 순수 49개(7x7) 가상 방사형 위성 그리드망 생성
+        let localScanPool = [];
+        for (let i = -3; i <= 3; i++) {
+            for (let j = -3; j <= 3; j++) {
+                localScanPool.push({ lat: avgLat + (i * latStep), lng: avgLng + (j * lngStep) });
+            }
+        }
+
+        // 경비 및 소요시간 정밀 시뮬레이션 연산
+        let tempScores = [];
+        localScanPool.forEach(target => {
+            let totalCost = 0; let maxDistance = 0; let targetReceipts = [];
+
+            globalActiveMembers.forEach(m => {
+                let radLat1 = Math.PI * m.lat / 180;
+                let radLat2 = Math.PI * target.lat / 180;
+                let theta = m.lng - target.lng;
+                let radTheta = Math.PI * theta / 180;
+                
+                let dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
+                if (dist > 1) dist = 1;
+                dist = Math.acos(dist) * 180 / Math.PI * 60 * 1.1515 * 1.609344;
+                
+                let realRoadDist = Math.round(dist * 1.28); // 굴곡 보정
+                let timeMin = Math.round(realRoadDist * 0.9 + 12); let cost = 0;
+
+                if (m.transport !== '카풀') {
+                    if (m.transport === '자차') {
+                        cost = Math.round((realRoadDist / 11) * 1680 + (realRoadDist > 40 ? 5500 : 1200));
+                    } else {
+                        cost = Math.round(realRoadDist * 160);
+                    }
+                }
+
+                if (m.transport !== '카풀' && realRoadDist > maxDistance) maxDistance = realRoadDist;
+                totalCost += cost;
+
+                targetReceipts.push({
+                    name: m.name, addr: m.addr, lat: m.lat, lng: m.lng, transport: m.transport, dist: realRoadDist, time: timeMin, cost: cost
+                });
+            });
+
+            // 💥 [핵심 기능 개혁 3] 과도했던 시간 격차 가중치를 줄이고, 순수 모임 총경비(totalCost) 비중을 1순위로 올림
+            let travelTimes = targetReceipts.map(r => r.time);
+            let timeGap = Math.max(...travelTimes) - Math.min(...travelTimes);
+            
+            // 종합 가중치 점수 = 총경비 원금 + (최대 시간 편차에 따른 불평등 보정액)
+            let finalScore = totalCost + (timeGap * 250); 
+
+            tempScores.push({ finalScore: finalScore, maxDist: maxDistance, receipts: targetReceipts, rawTarget: target });
+        });
+
+        // 1등부터 정렬 후 상위 3선 발탁
+        tempScores.sort((a, b) => a.finalScore - b.finalScore);
+        let top3Points = tempScores.slice(0, 3);
+
+        globalFinalScores = [];
+        for(let i=0; i<top3Points.length; i++) {
+            let node = top3Points[i];
+            let resolvedName = await getAddressFromCoordsSafe(node.rawTarget.lat, node.rawTarget.lng);
+            globalFinalScores.push({
+                name: resolvedName, cost: node.finalScore, maxDist: node.maxDist, receipts: node.receipts, rawTarget: node.rawTarget
+            });
+        }
+
+        document.getElementById("loadingBar").style.display = "none";
+        
+        let dateHtml = "";
+        if(candidateSchedules.length === 0) { dateHtml = "<div>겹치는 일정이 없습니다.</div>"; } 
+        else {
+            candidateSchedules.slice(0, 3).forEach((s, idx) => {
+                let medal = idx === 0 ? "🥇 최다 인원 가능" : `${idx + 1}순위`;
+                let absents = globalActiveMembers.filter(m => !s.attendees.includes(m.name)).map(m => m.name);
+                let absentText = absents.length > 0 ? `<span class="badge-fail">❌ 미참: ${absents.join(', ')}</span>` : `<span style='color:#166534; font-size:11px;'>🎉 전원 참석!</span>`;
+                dateHtml += `<div class="rank-item"><div><strong>${medal} : ${s.text}</strong> (${s.score}명)</div><div>${absentText}</div></div>`;
+            });
+        }
+        document.getElementById("dateResultContent").innerHTML = dateHtml;
+
+        let locHtml = "";
+        globalFinalScores.forEach((f, idx) => {
+            let medal = idx === 0 ? "🥇 예산 최소 중심지" : `${idx + 1}위 대안 구역`;
+            let explanation = f.maxDist > 160 ? "⚠️ 이동 편차 다소 있음" : "⚖️ 저비용 균등 구역";
+
+            locHtml += `
+                <div class="rank-item loc-rank-item" data-idx="${idx}" onclick="showReceiptForCity(${idx})">
+                    <div>
+                        ${medal} : <strong>${f.name}</strong> 
+                        <span style="font-size:11px; color:#64748b;">(${explanation})</span>
+                        <span class="search-links">
+                            <a href="https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 맛집")}" target="_blank" class="btn-food" onclick="event.stopPropagation()">🍽️ 맛집</a>
+                            <a href="https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 가볼만한곳")}" target="_blank" class="btn-spot" onclick="event.stopPropagation()">📸 명소</a>
+                        </span>
+                    </div>
+                    <div style="color:#b91c1c;">통합 가중치: ${Math.round(f.cost).toLocaleString()}점</div>
+                </div>`;
+        });
+        document.getElementById("locationResultContent").innerHTML = locHtml;
+
+        showReceiptForCity(0);
+        document.getElementById("resultBox").style.display = "block";
+    }
+
+    function showReceiptForCity(idx) {
+        let targetData = globalFinalScores[idx];
+        if(!targetData) return;
+        
+        let pensionHtml = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(targetData.name + " 단체 숙소 펜션")}" target="_blank" class="pension-link">💚 네이버 지도로 [${targetData.name}] 모임 장소/숙소 실시간 확인</a>`;
+        document.getElementById("dynamicPensionLink").innerHTML = pensionHtml;
+        document.getElementById("receiptTitleCity").innerHTML = `[${targetData.name}]`;
+
+        let receiptHtml = `<p style="font-size:12px; color:#475569; margin: 0 0 8px 0;">🎉 실제 주행 경비가 전면 반영된 <strong>[${targetData.name}]</strong> 기준 멤버별 상세 명세서입니다.</p>`;
+        targetData.receipts.forEach(r => {
+            let hourText = r.time >= 60 ? `${Math.floor(r.time/60)}시간 ${r.time%60}분` : `${r.time}분`;
+            let costText = r.cost > 0 ? `${r.cost.toLocaleString()}원` : `0원 (카풀동승)`;
+            
+            let menuType = (r.transport === '자차' || r.transport === '자차 운전') ? 'car' : 'pubtrans';
+            let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},${encodeURIComponent(r.name+"출발")}/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(targetData.name)}/-/${menuType}?c=15,0,0,0,dh`;
+
+            receiptHtml += `
+                <div class="personal-receipt">
+                    <div>
+                        👤 <strong>${r.name}</strong> (<span style="font-size:11px; color:#64748b;">${r.addr.substring(0,8)}</span> · ${r.transport})
+                    </div>
+                    <div style="text-align: right; font-weight: bold;">
+                        <span>⏱️ ${hourText} (${r.dist}km) ➡️ <span style="color:#b91c1c;">💸 ${costText}</span></span>
+                        <a href="${naverMapNaviLink}" target="_blank" class="btn-navi">🗺️ 실시간 경로</a>
+                    </div>
+                </div>`;
+        });
+        document.getElementById("personalReceiptContent").innerHTML = receiptHtml;
+
+        let rankItems = document.querySelectorAll('.loc-rank-item');
+        rankItems.forEach((el) => {
+            let itemIdx = parseInt(el.getAttribute('data-idx'));
+            if(itemIdx === idx) {
+                el.style.border = "2px solid #03c75a"; el.style.backgroundColor = "#f0fdf4";
+            } else {
+                el.style.border = "2px solid #e2e8f0"; el.style.backgroundColor = "white";
+            }
+        });
+    }
+</script>
+</body>
+</html>
