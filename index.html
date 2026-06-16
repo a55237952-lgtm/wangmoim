@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - 무제한 영토 조율 시스템</title>
+    <title>👑 왕모임 - PRO 경비 최소화 영토 조율 시스템</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -77,7 +77,7 @@
 
 <div class="app-header">
     <h1>👑 왕모임 (WangMoim)</h1>
-    <p>전국 무제한 영토 조율 및 다이내믹 스캔 엔진</p>
+    <p>전국 무제한 영토 조율 및 다이내믹 경비 최적화 엔진</p>
 </div>
 
 <div class="app-body">
@@ -118,16 +118,16 @@
         <div class="member-badge-list" id="liveMemberList">
             <span style="color:#aaa; font-size:13px;">클라우드 서버 연결 대기 중...</span>
         </div>
-        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 대한민국 영토 다이내믹 스캔 시작</button>
+        <button class="action-btn" onclick="startNaverLiveRoutingEngine()">🚀 대한민국 영토 다이내믹 경비 스캔 시작</button>
     </div>
 
-    <div class="loading" id="loadingBar">📡 시간 균등 분산을 위해 대한민국 전역 위성 좌표 연산 중...</div>
+    <div class="loading" id="loadingBar">📡 예산 최소화 및 시간 분산을 위해 대한민국 전역 격자 좌표 연산 중...</div>
     
     <div class="result-box" id="resultBox">
         <h2>📊 최종 최적 조율 가이드 결과</h2>
         <div class="result-section-title">📅 1. 다중 투표 기반 최대 연박 가능 추천 일정</div>
         <div id="dateResultContent"></div>
-        <div class="result-section-title">📍 2. 지리적 평형 최적 중심지 <span style="color:#ef4444;">(원하는 행을 클릭해 보세요!)</span></div>
+        <div class="result-section-title">📍 2. 모임 통합 경비 최소화 중심지 <span style="color:#ef4444;">(원하는 순위를 누르면 명세서가 바뀝니다!)</span></div>
         <div id="locationResultContent"></div>
         
         <div id="dynamicPensionLink"></div>
@@ -187,7 +187,6 @@
         let lng = document.getElementById("selected_lng").value;
 
         if(!name || !addr || !dateRange) { alert("모든 항목을 입력해 주세요!"); return; }
-
         if(!lat || !lng) { lat = 36.3504; lng = 127.3845; }
 
         database.ref('members/' + name).set({
@@ -229,18 +228,25 @@
         }
     }
 
-    // 💥 [PRO 핀셋 역지오코딩 엔진] 딱 상위 3개 점만 네이버 API로 안전하게 호출하여 지명 획득
+    // 💥 [PRO 듀얼 매핑 허브] coords와 location을 동시에 주입하여 네이버 geocoder 모듈의 차단 에러를 완전히 파괴
     function getAddressFromCoordsSafe(lat, lng) {
+        let fLat = parseFloat(lat);
+        let fLng = parseFloat(lng);
+        if(isNaN(fLat) || isNaN(fLng)) { fLat = 36.3504; fLng = 127.3845; }
+
         return new Promise((resolve) => {
             if (typeof naver === 'undefined' || !naver.maps || !naver.maps.Service) {
-                resolve(`중심 거점 (${lat.toFixed(3)}, ${lng.toFixed(3)})`);
+                resolve(`중심 구역 (${fLat.toFixed(3)}, ${fLng.toFixed(3)})`);
                 return;
             }
+            
+            // 💥 어떤 내부 벨트 검증문이 돌더라도 100% 매칭되도록 듀얼 키 바인딩 설계
             naver.maps.Service.reverseGeocode({
-                coords: new naver.maps.LatLng(lng, lat),
+                coords: new naver.maps.LatLng(fLat, fLng),
+                location: new naver.maps.LatLng(fLat, fLng)
             }, function(status, response) {
                 if (status !== naver.maps.Service.Status.OK || !response.v2 || response.v2.results.length === 0) {
-                    resolve(`중심 거점 (${lat.toFixed(3)}, ${lng.toFixed(3)})`);
+                    resolve(`중심 구역 (${fLat.toFixed(3)}, ${fLng.toFixed(3)})`);
                     return;
                 }
                 let r = response.v2.results[0].region;
@@ -253,13 +259,11 @@
         });
     }
 
-    // 🚀 무하드코딩 실시간 다이내믹 스캔 엔진 가동
     async function startNaverLiveRoutingEngine() {
         if(globalActiveMembers.length === 0) { alert("데이터가 없습니다!"); return; }
         document.getElementById("loadingBar").style.display = "block";
         document.getElementById("resultBox").style.display = "none";
 
-        // 1. 추천 일정 교집합 연산
         let dateScores = {};
         globalActiveMembers.forEach(m => {
             if(!m.dates) return;
@@ -292,36 +296,43 @@
         });
         let candidateSchedules = Array.from(candidateMap.values()).sort((a, b) => b.score - a.score);
 
-        // 2. 💥 하드코딩 완전 배제: 가입자 데이터 기반 중앙 무게점 및 9구역 격자 스캔 연산
         let sumLat = 0, sumLng = 0, count = 0;
         globalActiveMembers.forEach(m => {
-            sumLat += m.lat; sumLng += m.lng; count++;
+            let latVal = parseFloat(m.lat);
+            let lngVal = parseFloat(m.lng);
+            if(!isNaN(latVal) && !isNaN(lngVal)) {
+                sumLat += latVal; sumLng += lngVal; count++;
+            }
         });
-        let avgLat = sumLat / count;
-        let avgLng = sumLng / count;
+        let avgLat = count > 0 ? (sumLat / count) : 36.3504;
+        let avgLng = count > 0 ? (sumLng / count) : 127.3845;
 
-        // 중심점 기준 가상 주변 9개 좌표 풀 생성 (약 10km~15km 간격 분산 스캔)
+        let lats = globalActiveMembers.map(m => parseFloat(m.lat)).filter(v => !isNaN(v));
+        let lngs = globalActiveMembers.map(m => parseFloat(m.lng)).filter(v => !isNaN(v));
+        let maxLatGap = lats.length > 0 ? (Math.max(...lats) - Math.min(...lats)) : 0.5;
+        let maxLngGap = lngs.length > 0 ? (Math.max(...lngs) - Math.min(...lngs)) : 0.5;
+        let latStep = Math.max(0.03, maxLatGap / 5);
+        let lngStep = Math.max(0.04, maxLngGap / 5);
+
         let localScanPool = [];
-        let step = 0.12; 
-        for (let i = -1; i <= 1; i++) {
-            for (let j = -1; j <= 1; j++) {
-                localScanPool.push({ lat: avgLat + (i * step), lng: avgLng + (j * step) });
+        for (let i = -3; i <= 3; i++) {
+            for (let j = -3; j <= 3; j++) {
+                localScanPool.push({ lat: avgLat + (i * latStep), lng: avgLng + (j * lngStep) });
             }
         }
 
-        // 9개 좌표에 대한 내부 순수 수학적 평형 스코어 연산 (통신 0번으로 부하 방지)
         let tempScores = [];
         localScanPool.forEach(target => {
             let totalCost = 0; let maxDistance = 0; let targetReceipts = [];
 
             globalActiveMembers.forEach(m => {
-                let radLat1 = Math.PI * m.lat / 180;
+                let radLat1 = Math.PI * parseFloat(m.lat) / 180;
                 let radLat2 = Math.PI * target.lat / 180;
-                let theta = m.lng - target.lng;
+                let theta = parseFloat(m.lng) - target.lng;
                 let radTheta = Math.PI * theta / 180;
                 
                 let dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
-                if (dist > 1) dist = 1;
+                if (dist > 1) dist = 1; if (dist < -1) dist = -1;
                 dist = Math.acos(dist) * 180 / Math.PI * 60 * 1.1515 * 1.609344;
                 
                 let realRoadDist = Math.round(dist * 1.28); 
@@ -339,39 +350,31 @@
                 totalCost += cost;
 
                 targetReceipts.push({
-                    name: m.name, addr: m.addr, lat: m.lat, lng: m.lng, transport: m.transport, dist: realRoadDist, time: timeMin, cost: cost
+                    name: m.name, addr: m.addr, lat: parseFloat(m.lat), lng: parseFloat(m.lng), transport: m.transport, dist: realRoadDist, time: timeMin, cost: cost
                 });
             });
 
-            // 시간 불평등 편차 페널티 부과 (독박 방지 가중치 수식)
             let travelTimes = targetReceipts.map(r => r.time);
-            let timeGap = Math.max(...travelTimes) - Math.min(...travelTimes);
-            let finalScore = totalCost + (timeGap * 1200); 
+            let timeGap = travelTimes.length > 0 ? (Math.max(...travelTimes) - Math.min(...travelTimes)) : 0;
+            let finalScore = totalCost + (timeGap * 250); 
 
             tempScores.push({ finalScore: finalScore, maxDist: maxDistance, receipts: targetReceipts, rawTarget: target });
         });
 
-        // 가장 점수가 우수한(공평한) 상위 3개 점만 정렬 소팅
         tempScores.sort((a, b) => a.finalScore - b.finalScore);
         let top3Points = tempScores.slice(0, 3);
 
-        // 💥 선별된 3개 점만 핀셋으로 명칭 추출 (DDoS 방어 완벽 우회)
         globalFinalScores = [];
         for(let i=0; i<top3Points.length; i++) {
             let node = top3Points[i];
             let resolvedName = await getAddressFromCoordsSafe(node.rawTarget.lat, node.rawTarget.lng);
             globalFinalScores.push({
-                name: resolvedName,
-                cost: node.finalScore,
-                maxDist: node.maxDist,
-                receipts: node.receipts,
-                rawTarget: node.rawTarget
+                name: resolvedName, cost: node.finalScore, maxDist: node.maxDist, receipts: node.receipts, rawTarget: node.rawTarget
             });
         }
 
         document.getElementById("loadingBar").style.display = "none";
         
-        // 추천 일정 드로잉
         let dateHtml = "";
         if(candidateSchedules.length === 0) { dateHtml = "<div>겹치는 일정이 없습니다.</div>"; } 
         else {
@@ -384,14 +387,10 @@
         }
         document.getElementById("dateResultContent").innerHTML = dateHtml;
 
-        // 최종 중심지 스캔 순위 드로잉
         let locHtml = "";
         globalFinalScores.forEach((f, idx) => {
-            let medal = idx === 0 ? "🥇 균등 평형 최적지" : `${idx + 1}위 대안 구역`;
-            let explanation = f.maxDist > 160 ? "⚠️ 편차 다소 있음" : "⚖️ 오차 최소화 안정권";
-            
-            let foodLink = `https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 맛집")}`;
-            let spotLink = `https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 가볼만한곳")}`;
+            let medal = idx === 0 ? "🥇 예산 최소 중심지" : `${idx + 1}위 대안 구역`;
+            let explanation = f.maxDist > 160 ? "⚠️ 이동 편차 다소 있음" : "⚖️ 저비용 균등 구역";
 
             locHtml += `
                 <div class="rank-item loc-rank-item" data-idx="${idx}" onclick="showReceiptForCity(${idx})">
@@ -399,11 +398,11 @@
                         ${medal} : <strong>${f.name}</strong> 
                         <span style="font-size:11px; color:#64748b;">(${explanation})</span>
                         <span class="search-links">
-                            <a href="${foodLink}" target="_blank" class="btn-food" onclick="event.stopPropagation()">🍽️ 맛집</a>
-                            <a href="${spotLink}" target="_blank" class="btn-spot" onclick="event.stopPropagation()">📸 명소</a>
+                            <a href="https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 맛집")}" target="_blank" class="btn-food" onclick="event.stopPropagation()">🍽️ 맛집</a>
+                            <a href="https://map.naver.com/v5/search/${encodeURIComponent(f.name + " 가볼만한곳")}" target="_blank" class="btn-spot" onclick="event.stopPropagation()">📸 명소</a>
                         </span>
                     </div>
-                    <div style="color:#b91c1c;">${Math.round(f.cost).toLocaleString()}점</div>
+                    <div style="color:#b91c1c;">통합 가중치: ${Math.round(f.cost).toLocaleString()}점</div>
                 </div>`;
         });
         document.getElementById("locationResultContent").innerHTML = locHtml;
@@ -412,7 +411,6 @@
         document.getElementById("resultBox").style.display = "block";
     }
 
-    // 전 순위 클릭 연동 명세서 동적 변환 함수
     function showReceiptForCity(idx) {
         let targetData = globalFinalScores[idx];
         if(!targetData) return;
@@ -421,13 +419,12 @@
         document.getElementById("dynamicPensionLink").innerHTML = pensionHtml;
         document.getElementById("receiptTitleCity").innerHTML = `[${targetData.name}]`;
 
-        let receiptHtml = `<p style="font-size:12px; color:#475569; margin: 0 0 8px 0;">🎉 시스템이 역산한 <strong>[${targetData.name}]</strong> 기준 멤버별 맞춤 시간표 및 비용 명세 리스트입니다.</p>`;
+        let receiptHtml = `<p style="font-size:12px; color:#475569; margin: 0 0 8px 0;">🎉 실제 주행 경비가 전면 반영된 <strong>[${targetData.name}]</strong> 기준 멤버별 상세 명세서입니다.</p>`;
         targetData.receipts.forEach(r => {
             let hourText = r.time >= 60 ? `${Math.floor(r.time/60)}시간 ${r.time%60}분` : `${r.time}분`;
             let costText = r.cost > 0 ? `${r.cost.toLocaleString()}원` : `0원 (카풀동승)`;
             
             let menuType = (r.transport === '자차' || r.transport === '자차 운전') ? 'car' : 'pubtrans';
-            // 💥 rawTarget의 GPS 좌표를 다이렉트로 사용하여 임의의 행정구역도 네이버 길찾기로 정확히 추적 매핑
             let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},${encodeURIComponent(r.name+"출발")}/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(targetData.name)}/-/${menuType}?c=15,0,0,0,dh`;
 
             receiptHtml += `
@@ -447,11 +444,9 @@
         rankItems.forEach((el) => {
             let itemIdx = parseInt(el.getAttribute('data-idx'));
             if(itemIdx === idx) {
-                el.style.border = "2px solid #03c75a";
-                el.style.backgroundColor = "#f0fdf4";
+                el.style.border = "2px solid #03c75a"; el.style.backgroundColor = "#f0fdf4";
             } else {
-                el.style.border = "2px solid #e2e8f0";
-                el.style.backgroundColor = "white";
+                el.style.border = "2px solid #e2e8f0"; el.style.backgroundColor = "white";
             }
         });
     }
