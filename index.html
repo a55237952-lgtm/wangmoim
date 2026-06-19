@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>👑 왕모임 - 무결점 엔진 복구판 (v50.0)</title>
+    <title>👑 왕모임 - 100% AI 에이전트 & 테마 기획 (v53.0)</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -100,14 +100,15 @@
         .loading-spinner { border: 4px solid #e2e8f0; border-top: 4px solid #3b82f6; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-bottom: 10px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* 💥 결과창 스타일 복구 */
         .result-box { display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .result-section-title { font-size: 15px; font-weight: bold; color: #166534; margin-top: 10px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 2px dashed #bbf7d0; }
-        .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: white; margin-bottom: 6px; border-radius: 6px; font-size: 13px; font-weight: bold; border: 1px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
-        .rank-item:hover { border-color: #03c75a; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(3,199,90,0.1); }
+        
+        .rank-item { display: flex; flex-direction: column; padding: 16px; background: white; margin-bottom: 10px; border-radius: 8px; font-size: 13px; font-weight: bold; border: 2px solid #e2e8f0; cursor: pointer; transition: 0.2s; }
+        .rank-item-header { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 8px; }
+        .ai-reason-box { background: #f8fafc; padding: 10px; border-radius: 6px; font-size: 12px; color: #334155; font-weight: normal; margin-bottom: 0; border-left: 3px solid #3b82f6; }
+        
         .btn-navi { background-color: #03c75a; color: white; font-size: 11px; text-decoration: none; padding: 6px 10px; border-radius: 6px; font-weight: bold; display: inline-block; margin-top: 4px; box-shadow: 0 2px 4px rgba(3,199,90,0.15); transition: 0.2s; }
         .personal-receipt { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 6px; font-size: 12px; margin-bottom: 6px; }
-        .cost-wage-text { color: #d97706; font-size: 11px; display: block; margin-top: 4px; font-weight: bold; }
         .time-badge { background: #e0e7ff; color: #1d4ed8; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid #bfdbfe; display: inline-block; margin-bottom: 4px; }
         
         .roulette-anim-box { display: none; font-size: 24px; font-weight: 900; text-align: center; padding: 30px; background: #f3e8ff; color: #6d28d9; border-radius: 10px; border: 2px dashed #a78bfa; margin-bottom: 15px; }
@@ -141,7 +142,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=n3o9fho7nl&submodules=geocoder"></script>
     
     <script>
         const firebaseConfig = {
@@ -175,6 +175,8 @@
 
     <div id="screen_trip_planning" style="display: none;">
         
+        <input type="hidden" id="gemini_api_key" value="AIzaSyAVZ52WFfOYhmviCbL29lvJ4OEMORCH2u4">
+
         <div style="background: #fffbeb; border: 1px dashed #f59e0b; padding: 10px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span style="font-size: 12px; color: #b45309; font-weight: bold;">💡 다른 방에서 데이터를 그대로 복사해올까요?</span>
             <button onclick="openImportModal()" style="background: #f59e0b; color: white; padding: 6px 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:11px;">💾 데이터 댕겨오기</button>
@@ -187,7 +189,7 @@
         </div>
 
         <div class="global-tabs" style="margin-top:0; max-width:100%;">
-            <div class="g-tab active tab-ai" id="gTab1" onclick="switchGlobalTab(1)">💡 AI 모임 조율</div>
+            <div class="g-tab active tab-ai" id="gTab1" onclick="switchGlobalTab(1)">💡 제미나이(AI) 기획 비서</div>
             <div class="g-tab tab-roulette" id="gTab2" onclick="switchGlobalTab(2)">🎲 복불복 룰렛</div>
         </div>
 
@@ -196,17 +198,16 @@
                 
                 <div class="dashboard-col" id="view_ai">
                     <div class="card theme-ai">
-                        <h3>💡 2. AI 예산 최적화 (기본 모드)</h3>
+                        <h3>💡 2. 제미나이(AI) 맞춤형 기획</h3>
                         
                         <div class="flex-row">
                             <input type="text" id="ai_name" placeholder="이름 (예: 양지현)" style="flex:1;">
-                            <input type="text" id="calendar_input" placeholder="📅 참여 가능 날짜 (여러 개 터치)" style="flex:2;">
+                            <input type="text" id="calendar_input" placeholder="📅 참여 가능 날짜" style="flex:2;">
                         </div>
                         
                         <div class="flex-row">
                             <input type="text" id="my_addr1" placeholder="출발지 1 (필수)" readonly>
                             <button class="btn-addr-trigger" type="button" onclick="openInlinePostcode(1)">검색</button>
-                            <input type="hidden" id="selected_lat1"><input type="hidden" id="selected_lng1">
                         </div>
                         <div id="postcode_layer1" class="inline-postcode-wrapper">
                             <div style="text-align:right;"><button onclick="closeInlinePostcode(1)" style="background:#ef4444;color:#fff;border:none;border-radius:4px;padding:4px 10px;font-weight:bold;cursor:pointer;">닫기 X</button></div>
@@ -217,7 +218,6 @@
                         <div class="flex-row" id="wrap_addr2" style="display: none;">
                             <input type="text" id="my_addr2" placeholder="출발지 2 (선택)" readonly>
                             <button class="btn-addr-trigger" type="button" onclick="openInlinePostcode(2)">검색</button>
-                            <input type="hidden" id="selected_lat2"><input type="hidden" id="selected_lng2">
                         </div>
                         <div id="postcode_layer2" class="inline-postcode-wrapper">
                             <div style="text-align:right;"><button onclick="closeInlinePostcode(2)" style="background:#ef4444;color:#fff;border:none;border-radius:4px;padding:4px 10px;font-weight:bold;cursor:pointer;">닫기 X</button></div>
@@ -233,14 +233,18 @@
                         <button class="btn-submit" onclick="sendToAI()">📍 내 데이터 방에 저장</button>
 
                         <div>
-                            <span style="font-size: 11px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 4px;">📝 AI 참가자 현황 (이름 클릭시 수정)</span>
+                            <span style="font-size: 11px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 4px;">📝 참가자 현황 (이름 클릭시 수정 불러오기)</span>
                             <div id="liveMemberList" class="member-badge-list" style="border:1px dashed #93c5fd;"></div>
                         </div>
 
                         <div style="border-top: 1px dashed #cbd5e1; padding-top: 12px; margin-top: 12px;">
-                            <label style="font-size: 11px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 6px;">⏰ 목표 집결 시간 (역산용)</label>
+                            <label style="font-size: 11px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 6px;">💡 어떤 여행을 원하시나요? (테마)</label>
+                            <input type="text" id="trip_theme" placeholder="예: 바다가 보이는 풀빌라, 맛집 투어, 힐링 등" style="border-color:#bfdbfe;">
+                            
+                            <label style="font-size: 11px; font-weight: bold; color: #1d4ed8; display: block; margin-bottom: 6px; margin-top: 6px;">⏰ 목표 집결 시간 (역산용)</label>
                             <input type="text" id="assembly_time_ai" placeholder="예: 14:00" style="margin-bottom: 8px; border-color:#bfdbfe;">
-                            <button class="action-btn" onclick="startEngine('AI')">💡 AI 최적화 지역 스캔 시작</button>
+                            
+                            <button class="action-btn" onclick="startEngine('AI')">✨ 제미나이 비서에게 100% 기획 및 정산 맡기기</button>
                         </div>
                     </div>
                 </div>
@@ -280,22 +284,16 @@
                         <div id="rouletteHistoryList" style="max-height:250px; overflow-y:auto; font-size:12px; color:#64748b;">아직 돌린 내역이 없습니다.</div>
                     </div>
                 </div>
-            </div> <div class="loading" id="loadingBar"><div class="loading-spinner"></div><div id="loadingText">연산 중입니다...</div></div>
+            </div> <div class="loading" id="loadingBar"><div class="loading-spinner"></div><div id="loadingText" style="margin-top:10px;">제미나이가 여행지와 일정을 기획하고 교통비를 계산 중입니다...</div></div>
             <div class="roulette-anim-box" id="rouletteAnimBox">🎲 룰렛 회전 중...<br><span id="rouletteRollingText" style="color:#1e3a8a; font-size:26px; display:block; margin-top:8px;">-</span><span id="rouletteSubText" style="color:#9333ea; font-size:16px; display:block; margin-top:10px;">역할 분담 중...</span></div>
             
             <div class="result-box" id="resultBox">
-                <div id="winnerBanner" class="winner-banner"></div>
+                <div id="winnerBanner" class="winner-banner" style="display:none;"></div>
                 
-                <div id="aiResultArea">
+                <div id="aiResultArea" style="display:none;">
                     <div style="font-size: 13px; font-weight: bold; color: #e67e22; background: #fff7ed; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px dashed #fdba74;" id="display_assembly_time"></div>
-
-                    <div class="result-section-title" id="locationTitleText">📍 조율 결과 지역 <span style="color:#ef4444; font-weight: bold;">(원하는 곳을 확정하세요!)</span></div>
+                    <div class="result-section-title" id="locationTitleText">📍 제미나이 추천 지역 & 정산 내역 <span style="color:#ef4444; font-weight: bold;">(원하는 곳을 확정하세요!)</span></div>
                     <div id="locationResultContent"></div>
-                    
-                    <div id="dynamicPensionLink" style="margin-bottom: 15px;"></div>
-                    
-                    <div class="result-section-title" id="receiptTitleHeader">🧾 <span id="receiptTitleCity">[선택된 지역]</span> 회원별 맞춤 상세 시간 명세서</div>
-                    <div id="personalReceiptContent"></div>
                 </div>
             </div>
 
@@ -416,32 +414,12 @@
     const DOT_COLORS = ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#14b8a6", "#f97316"];
     let memberColorMap = {};
 
-    const KOR_MASTER_DB = [
-        { n: "서울특별시", lat: 37.5665, lng: 126.9780 }, { n: "부산광역시", lat: 35.1796, lng: 129.0756 },
-        { n: "대구광역시", lat: 35.8711, lng: 128.6014 }, { n: "인천광역시", lat: 37.4563, lng: 126.7052 },
-        { n: "광주광역시", lat: 35.1595, lng: 126.8526 }, { n: "대전광역시", lat: 36.3504, lng: 127.3845 },
-        { n: "경기 수원시", lat: 37.2636, lng: 127.0286 }, { n: "강원 강릉시", lat: 37.7519, lng: 128.8761 },
-        { n: "충북 단양군", lat: 36.9845, lng: 128.3648 }, { n: "전북 전주시", lat: 35.8242, lng: 127.1480 },
-        { n: "전남 여수시", lat: 34.7603, lng: 127.6622 }, { n: "경북 경주시", lat: 35.8562, lng: 129.2247 },
-        { n: "경남 통영시", lat: 34.8544, lng: 128.4332 }, { n: "제주 제주시", lat: 33.4996, lng: 126.5311 }
-    ];
-
-    function getCityLevelCoords(address) {
-        if(address.includes("서울")) return { lat: 37.5665, lng: 126.9780, name: "서울특별시" };
-        if(address.includes("부산")) return { lat: 35.1796, lng: 129.0756, name: "부산광역시" };
-        if(address.includes("대구")) return { lat: 35.8711, lng: 128.6014, name: "대구광역시" };
-        if(address.includes("대전")) return { lat: 36.3504, lng: 127.3845, name: "대전광역시" };
-        for (let i = 0; i < KOR_MASTER_DB.length; i++) {
-            let kw = KOR_MASTER_DB[i].n.split(" ")[1] || KOR_MASTER_DB[i].n;
-            if (address.includes(kw.replace(/[시군구]$/, ""))) return { lat: KOR_MASTER_DB[i].lat, lng: KOR_MASTER_DB[i].lng, name: KOR_MASTER_DB[i].n };
-        }
-        return { lat: 36.3504, lng: 127.3845, name: "대전광역시" }; 
-    }
-
     document.addEventListener("DOMContentLoaded", function() {
         calendarInstance = flatpickr("#calendar_input", { mode: "multiple", locale: "ko", dateFormat: "Y-m-d", minDate: "today", conjunction: ", " });
         let timeInput = document.getElementById("assembly_time_ai");
-        if(timeInput) flatpickr(timeInput, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "14:00" });
+        if(timeInput) {
+            flatpickr(timeInput, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, defaultDate: "14:00" });
+        }
         loadTripList();
     });
 
@@ -465,7 +443,7 @@
                             <h3>✈️ ${trip.name} 🔒</h3>
                             <p>생성일: ${dateStr}</p>
                             <div style="margin-top:8px; display:flex; gap:6px;">
-                                <span style="background:#eff6ff; color:#1d4ed8; padding:3px 8px; border-radius:10px; font-size:10px; font-weight:bold;">👤 AI참여: ${aiCount}명</span>
+                                <span style="background:#eff6ff; color:#1d4ed8; padding:3px 8px; border-radius:10px; font-size:10px; font-weight:bold;">👤 기획참여: ${aiCount}명</span>
                                 <span style="background:#faf5ff; color:#7e22ce; padding:3px 8px; border-radius:10px; font-size:10px; font-weight:bold;">🎲 룰렛: ${rouCount}명</span>
                                 ${statusBadge}
                             </div>
@@ -482,11 +460,8 @@
         if(!tripName || !tripPw) { alert("이름과 비밀번호를 모두 적어주세요!"); return; }
         
         let tripId = "trip_" + Date.now().toString();
-        database.ref('trips/' + tripId).set({ 
-            name: tripName, pw: tripPw, status: 'planning', createdAt: Date.now() 
-        }).then(() => {
-            document.getElementById("new_trip_name").value = ""; 
-            document.getElementById("new_trip_pw").value = ""; 
+        database.ref('trips/' + tripId).set({ name: tripName, pw: tripPw, status: 'planning', createdAt: Date.now() }).then(() => {
+            document.getElementById("new_trip_name").value = ""; document.getElementById("new_trip_pw").value = ""; 
             openTrip(tripId, tripName);
         });
     }
@@ -498,8 +473,6 @@
             let inputPw = prompt(`🗑️ [${trip.name}] 방을 삭제하려면 비밀번호를 입력하세요:`);
             if(inputPw === null) return;
             if(inputPw !== trip.pw) { alert("❌ 비밀번호가 틀렸습니다."); return; }
-        } else {
-            if(!confirm(`[${trip.name}] 방을 정말 삭제하시겠습니까?`)) return;
         }
         database.ref('trips/' + tripId).remove();
     };
@@ -516,8 +489,7 @@
     };
 
     function openTrip(tripId, tripName) {
-        currentTripId = tripId;
-        userSelectedDates = []; 
+        currentTripId = tripId; userSelectedDates = []; 
         document.getElementById('screen_trip_list').style.display = 'none';
         document.getElementById('btnBack').style.display = 'block';
         document.getElementById('mainTitle').innerText = "👑 " + tripName;
@@ -536,11 +508,9 @@
             database.ref(`trips/${currentTripId}/itinerary`).off();
             database.ref(`trips/${currentTripId}/finance`).off();
         }
-        currentTripId = null;
-        globalActiveMembers = []; globalRouletteMembers = []; globalRoles = []; userSelectedDates = [];
+        currentTripId = null; globalActiveMembers = []; globalRouletteMembers = []; globalRoles = []; userSelectedDates = [];
         
-        let resBox = document.getElementById("resultBox");
-        if(resBox) resBox.style.display = "none";
+        let resBox = document.getElementById("resultBox"); if(resBox) resBox.style.display = "none";
         
         document.getElementById("screen_trip_planning").style.display = 'none';
         document.getElementById("screen_trip_confirmed").style.display = 'none';
@@ -569,7 +539,7 @@
             if(data) {
                 for(let key in data) {
                     let m = data[key]; 
-                    if(!m.locations && m.lat && m.lng) m.locations = [{ addr: m.addr || "주소 없음", lat: parseFloat(m.lat), lng: parseFloat(m.lng) }];
+                    if(!m.locations) m.locations = [{ addr: m.addr || "주소 없음" }];
                     if(!m.transports && m.transport) m.transports = [m.transport];
                     if(m.locations && m.locations.length > 0) {
                         globalActiveMembers.push(m);
@@ -593,7 +563,7 @@
                     let m = data[key]; globalRouletteMembers.push(m);
                     html += `<div class="member-badge" style="border-color:#d8b4fe; background:#faf5ff; color:#6b21a8;"><strong>${m.name}</strong> (${m.targets.join(', ')}) <button class="btn-delete-badge" onclick="deleteRoulette('${m.name}')">X</button></div>`;
                 }
-            } else { html = `<span style="color:#aaa; font-size:13px;">후보 대기 중...</span>`; }
+            } else { html = `<span style="color:#aaa; font-size:11px;">후보 대기 중...</span>`; }
             document.getElementById("liveRouletteList").innerHTML = html;
         });
 
@@ -647,14 +617,11 @@
     window.executeImportData = function() {
         let srcId = document.getElementById("import_source_trip").value;
         let srcPw = document.getElementById("import_source_pw").value;
-        
         if(!srcId) { alert("방을 선택해주세요!"); return; }
         
         database.ref('trips/' + srcId).once('value').then(snapshot => {
             let srcData = snapshot.val();
-            if(srcData.pw && srcData.pw !== srcPw) {
-                alert("❌ 선택하신 방의 비밀번호가 틀렸습니다."); return;
-            }
+            if(srcData.pw && srcData.pw !== srcPw) { alert("❌ 선택하신 방의 비밀번호가 틀렸습니다."); return; }
             
             let aiPromise = null, rouPromise = null;
             if(srcData.members) aiPromise = database.ref(`trips/${currentTripId}/members`).update(srcData.members);
@@ -673,15 +640,9 @@
             document.getElementById("ai_name").value = m.name;
             calendarInstance.setDate(m.dates ? m.dates.split(", ") : []);
             
-            if(m.locations.length > 0) {
-                document.getElementById("my_addr1").value = m.locations[0].addr;
-                document.getElementById("selected_lat1").value = m.locations[0].lat;
-                document.getElementById("selected_lng1").value = m.locations[0].lng;
-            }
+            if(m.locations.length > 0) document.getElementById("my_addr1").value = m.locations[0].addr;
             if(m.locations.length > 1) {
                 document.getElementById("my_addr2").value = m.locations[1].addr;
-                document.getElementById("selected_lat2").value = m.locations[1].lat;
-                document.getElementById("selected_lng2").value = m.locations[1].lng;
                 document.getElementById("wrap_addr2").style.display = "flex";
                 document.getElementById("btn_toggle_addr2").style.display = "none";
             } else { clearAddr2(); }
@@ -689,7 +650,7 @@
             let cbs = document.querySelectorAll('input[name="my_trans"]');
             cbs.forEach(cb => cb.checked = m.transports.includes(cb.value));
 
-            alert(`✏️ [${name}]님의 정보를 입력창으로 불러왔습니다. 수정 후 전송을 눌러주세요.`);
+            alert(`✏️ [${name}]님의 정보를 입력창으로 불러왔습니다. 수정 후 저장(전송)을 눌러주세요.`);
             document.getElementById("ai_name").scrollIntoView({behavior: "smooth"});
         }
     };
@@ -704,21 +665,19 @@
         let name = document.getElementById("ai_name").value.trim();
         let dateRange = document.getElementById("calendar_input").value;
         let addr1 = document.getElementById("my_addr1").value.trim();
-        let lat1 = document.getElementById("selected_lat1").value; let lng1 = document.getElementById("selected_lng1").value;
         let addr2 = document.getElementById("my_addr2").value.trim();
-        let lat2 = document.getElementById("selected_lat2").value; let lng2 = document.getElementById("selected_lng2").value;
         let transCheckboxes = document.querySelectorAll('input[name="my_trans"]:checked');
         let transports = Array.from(transCheckboxes).map(cb => cb.value);
 
-        if(!name || !lat1 || !dateRange || transports.length === 0) { alert("입력 정보를 확인해 주세요!"); return; }
+        if(!name || !addr1 || !dateRange || transports.length === 0) { alert("입력 정보를 확인해 주세요!"); return; }
         
-        let locations = [{ addr: addr1, lat: parseFloat(lat1), lng: parseFloat(lng1) }];
-        if(lat2) locations.push({ addr: addr2, lat: parseFloat(lat2), lng: parseFloat(lng2) });
+        let locations = [{ addr: addr1 }];
+        if(addr2) locations.push({ addr: addr2 });
 
         database.ref(`trips/${currentTripId}/members/${name}`).set({
             name: name, locations: locations, transports: transports, dates: dateRange, timestamp: Date.now()
         }).then(() => {
-            alert(`🎉 [${name}]님 AI 조율 정보 전송 완료!`);
+            alert(`🎉 [${name}]님 데이터 저장 완료!`);
             document.getElementById("ai_name").value = ""; document.getElementById("my_addr1").value = ""; clearAddr2(); calendarInstance.clear();
         });
     }
@@ -727,10 +686,10 @@
         let name = document.getElementById("roulette_name").value.trim();
         let r1 = document.getElementById("r_dest1").value.trim(); let r2 = document.getElementById("r_dest2").value.trim();
         let arr = []; if(r1) arr.push(r1); if(r2) arr.push(r2);
-        if(!name || arr.length === 0) { alert("이름과 희망 여행지를 1개 이상 적어주세요!"); return; }
+        if(!name || arr.length === 0) { alert("이름과 희망 여행지를 적어주세요!"); return; }
 
         database.ref(`trips/${currentTripId}/roulette_members/${name}`).set({ name: name, targets: arr, timestamp: Date.now() }).then(() => {
-            alert(`🎲 [${name}]님 룰렛 후보 등록 완료!`);
+            alert(`🎲 [${name}]님 룰렛 후보지 등록 완료!`);
             document.getElementById("roulette_name").value = ""; document.getElementById("r_dest1").value = ""; document.getElementById("r_dest2").value = "";
         });
     }
@@ -742,35 +701,20 @@
         document.getElementById('gTab1').classList.remove('active'); document.getElementById('gTab2').classList.remove('active');
         if(mode === 1) { document.getElementById('gTab1').classList.add('active'); document.getElementById('view_ai').style.display = 'block'; document.getElementById('view_roulette').style.display = 'none'; } 
         else { document.getElementById('gTab2').classList.add('active'); document.getElementById('view_ai').style.display = 'none'; document.getElementById('view_roulette').style.display = 'block'; }
-        
-        let resBox = document.getElementById("resultBox");
-        if(resBox) resBox.style.display = "none";
+        let resBox = document.getElementById("resultBox"); if(resBox) resBox.style.display = "none";
     }
 
     function toggleAddr2() { document.getElementById('wrap_addr2').style.display = 'flex'; document.getElementById('btn_toggle_addr2').style.display = 'none'; }
     function clearAddr2() { document.getElementById('my_addr2').value = ''; document.getElementById('wrap_addr2').style.display = 'none'; document.getElementById('btn_toggle_addr2').style.display = 'block'; }
     
+    // 💥 더 이상 API로 좌표를 따오지 않고 텍스트 그대로 저장합니다.
     function openInlinePostcode(targetIdx) {
         document.getElementById('postcode_layer' + targetIdx).style.display = 'block';
-        
         new daum.Postcode({
             oncomplete: function(data) {
                 let fullAddress = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
-                let safeCoords = getCityLevelCoords(fullAddress);
+                if(data.buildingName !== '') fullAddress += ' (' + data.buildingName + ')';
                 document.getElementById('my_addr' + targetIdx).value = fullAddress;
-                document.getElementById('selected_lat' + targetIdx).value = safeCoords.lat;
-                document.getElementById('selected_lng' + targetIdx).value = safeCoords.lng;
-                
-                if (typeof naver !== 'undefined' && naver.maps && naver.maps.Service) {
-                    try {
-                        naver.maps.Service.geocode({ query: fullAddress }, function(status, response) {
-                            if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
-                                document.getElementById('selected_lat' + targetIdx).value = response.v2.addresses[0].y;
-                                document.getElementById('selected_lng' + targetIdx).value = response.v2.addresses[0].x;
-                            }
-                        });
-                    } catch(e) {}
-                }
                 document.getElementById('postcode_layer' + targetIdx).style.display = 'none';
             }, width: '100%', height: '250px'
         }).embed(document.getElementById('postcode_embed' + targetIdx));
@@ -798,31 +742,20 @@
         
         if(userSelectedDates.includes(dateStr)) {
             statusBox.innerHTML = "현재 이 날짜는 <span style='color:#f59e0b; font-weight:bold;'>[선택됨]</span> 상태입니다.";
-            statusBox.style.borderColor = "#fcd34d";
-            statusBox.style.background = "#fffbeb";
-            btn.innerText = "❌ 모임일 선택 취소하기";
-            btn.style.background = "#ef4444";
+            statusBox.style.borderColor = "#fcd34d"; statusBox.style.background = "#fffbeb";
+            btn.innerText = "❌ 모임일 선택 취소하기"; btn.style.background = "#ef4444";
         } else {
             statusBox.innerHTML = "현재 이 날짜는 <span style='color:#94a3b8; font-weight:bold;'>[미선택]</span> 상태입니다.";
-            statusBox.style.borderColor = "#cbd5e1";
-            statusBox.style.background = "#f8fafc";
-            btn.innerText = "✅ 이 날짜를 모임일로 선택";
-            btn.style.background = "#10b981";
+            statusBox.style.borderColor = "#cbd5e1"; statusBox.style.background = "#f8fafc";
+            btn.innerText = "✅ 이 날짜를 모임일로 선택"; btn.style.background = "#10b981";
         }
         document.getElementById("modalDateInfo").style.display = "block";
     };
-
     window.closeDateModal = function() { document.getElementById("modalDateInfo").style.display = "none"; };
-
     window.toggleDateSelection = function() {
-        if(userSelectedDates.includes(currentModalDateStr)) {
-            userSelectedDates = userSelectedDates.filter(d => d !== currentModalDateStr);
-        } else {
-            userSelectedDates.push(currentModalDateStr);
-            userSelectedDates.sort(); 
-        }
-        closeDateModal();
-        buildVisualCalendar(); 
+        if(userSelectedDates.includes(currentModalDateStr)) { userSelectedDates = userSelectedDates.filter(d => d !== currentModalDateStr); } 
+        else { userSelectedDates.push(currentModalDateStr); userSelectedDates.sort(); }
+        closeDateModal(); buildVisualCalendar(); 
     };
 
     function buildVisualCalendar() {
@@ -834,31 +767,22 @@
 
         let legendHtml = "";
         globalActiveMembers.forEach((m, idx) => {
-            let color = DOT_COLORS[idx % DOT_COLORS.length];
-            memberColorMap[m.name] = color;
+            let color = DOT_COLORS[idx % DOT_COLORS.length]; memberColorMap[m.name] = color;
             legendHtml += `<div class="cal-legend-item"><span class="cal-color-dot" style="background:${color};"></span>${m.name}</div>`;
         });
         document.getElementById("calLegend").innerHTML = legendHtml;
 
         let dateMap = {};
         globalActiveMembers.forEach(m => {
-            if(m.dates) {
-                m.dates.split(", ").forEach(d => {
-                    let trimD = d.trim(); if(!trimD) return;
-                    if(!dateMap[trimD]) dateMap[trimD] = [];
-                    dateMap[trimD].push(m.name);
-                });
-            }
+            if(m.dates) { m.dates.split(", ").forEach(d => { let trimD = d.trim(); if(!trimD) return; if(!dateMap[trimD]) dateMap[trimD] = []; dateMap[trimD].push(m.name); }); }
         });
 
-        let uniqueDates = Object.keys(dateMap).sort();
-        let candidateMap = new Map();
+        let uniqueDates = Object.keys(dateMap).sort(); let candidateMap = new Map();
         uniqueDates.forEach(baseDate => {
             for(let block = 1; block <= 4; block++) {
                 let currentBlockDates = []; let match = true; let commonMembers = null;
                 for(let j = 0; j <= block; j++) {
-                    let d = new Date(baseDate); d.setDate(d.getDate() + j);
-                    let dStr = d.toISOString().split('T')[0]; currentBlockDates.push(dStr);
+                    let d = new Date(baseDate); d.setDate(d.getDate() + j); let dStr = d.toISOString().split('T')[0]; currentBlockDates.push(dStr);
                     if(dateMap[dStr]) {
                         if(commonMembers === null) commonMembers = new Set(dateMap[dStr]);
                         else commonMembers = new Set([...commonMembers].filter(x => dateMap[dStr].includes(x)));
@@ -866,25 +790,15 @@
                 }
                 if(match && commonMembers && commonMembers.size > 0) {
                     let key = currentBlockDates.join(",");
-                    if(!candidateMap.has(key) || candidateMap.get(key).score < commonMembers.size) {
-                        candidateMap.set(key, { dates: currentBlockDates, score: commonMembers.size, attendees: Array.from(commonMembers) });
-                    }
+                    if(!candidateMap.has(key) || candidateMap.get(key).score < commonMembers.size) candidateMap.set(key, { dates: currentBlockDates, score: commonMembers.size, attendees: Array.from(commonMembers) });
                 }
             }
         });
         let cSchedules = Array.from(candidateMap.values()).sort((a, b) => b.score - a.score);
         topDateSchedule = cSchedules.length > 0 ? cSchedules[0] : null;
 
-        let boardHtml = `
-            <div class="cal-header">
-                <button class="cal-nav-btn" onclick="prevMonth()">&lt; 이전달</button>
-                <div class="cal-month-title">${displayCalYear}년 ${displayCalMonth + 1}월</div>
-                <button class="cal-nav-btn" onclick="nextMonth()">다음달 &gt;</button>
-            </div>
-            <div class="cal-grid">
-        `;
+        let boardHtml = `<div class="cal-header"><button class="cal-nav-btn" onclick="prevMonth()">&lt; 이전달</button><div class="cal-month-title">${displayCalYear}년 ${displayCalMonth + 1}월</div><button class="cal-nav-btn" onclick="nextMonth()">다음달 &gt;</button></div><div class="cal-grid">`;
         ['일', '월', '화', '수', '목', '금', '토'].forEach(d => boardHtml += `<div class="cal-header-cell">${d}</div>`);
-
         let firstDay = new Date(displayCalYear, displayCalMonth, 1).getDay();
         let daysInMonth = new Date(displayCalYear, displayCalMonth + 1, 0).getDate();
 
@@ -893,111 +807,82 @@
         for(let i=1; i<=daysInMonth; i++) {
             let cellD = new Date(displayCalYear, displayCalMonth, i);
             let cellDateStr = `${cellD.getFullYear()}-${String(cellD.getMonth()+1).padStart(2,'0')}-${String(cellD.getDate()).padStart(2,'0')}`;
-            
-            let prevD = new Date(cellD); prevD.setDate(cellD.getDate() - 1); 
-            let prevStr = `${prevD.getFullYear()}-${String(prevD.getMonth()+1).padStart(2,'0')}-${String(prevD.getDate()).padStart(2,'0')}`;
-            let nextD = new Date(cellD); nextD.setDate(cellD.getDate() + 1); 
-            let nextStr = `${nextD.getFullYear()}-${String(nextD.getMonth()+1).padStart(2,'0')}-${String(nextD.getDate()).padStart(2,'0')}`;
+            let prevD = new Date(cellD); prevD.setDate(cellD.getDate() - 1); let prevStr = `${prevD.getFullYear()}-${String(prevD.getMonth()+1).padStart(2,'0')}-${String(prevD.getDate()).padStart(2,'0')}`;
+            let nextD = new Date(cellD); nextD.setDate(cellD.getDate() + 1); let nextStr = `${nextD.getFullYear()}-${String(nextD.getMonth()+1).padStart(2,'0')}-${String(nextD.getDate()).padStart(2,'0')}`;
 
             let membersOnThisDay = dateMap[cellDateStr] || [];
-
             let optimalHtml = (topDateSchedule && topDateSchedule.dates.includes(cellDateStr)) ? `<div class="optimal-bg"></div>` : "";
             let selectedHtml = userSelectedDates.includes(cellDateStr) ? `<div class="selected-bg"></div>` : "";
 
             let barsHtml = "";
             globalActiveMembers.forEach(m => {
-                let isHere = membersOnThisDay.includes(m.name);
-                let isPrevHere = (dateMap[prevStr] || []).includes(m.name);
-                let isNextHere = (dateMap[nextStr] || []).includes(m.name);
-
+                let isHere = membersOnThisDay.includes(m.name); let isPrevHere = (dateMap[prevStr] || []).includes(m.name); let isNextHere = (dateMap[nextStr] || []).includes(m.name);
                 if(isHere) {
                     let barClass = "cal-bar";
-                    if(!isPrevHere && !isNextHere) barClass += " single";
-                    else if(!isPrevHere && isNextHere) barClass += " start";
-                    else if(isPrevHere && !isNextHere) barClass += " end";
+                    if(!isPrevHere && !isNextHere) barClass += " single"; else if(!isPrevHere && isNextHere) barClass += " start"; else if(isPrevHere && !isNextHere) barClass += " end";
                     barsHtml += `<div class="${barClass}" style="background-color:${memberColorMap[m.name]};"></div>`;
-                } else {
-                    barsHtml += `<div class="cal-bar" style="background:transparent;"></div>`;
-                }
+                } else { barsHtml += `<div class="cal-bar" style="background:transparent;"></div>`; }
             });
 
-            boardHtml += `
-                <div class="cal-cell" onclick="openDateModal('${cellDateStr}')">
-                    ${optimalHtml}
-                    ${selectedHtml}
-                    <div class="cal-date-num">${i}</div>
-                    <div class="cal-bars-wrap">${barsHtml}</div>
-                </div>`;
+            boardHtml += `<div class="cal-cell" onclick="openDateModal('${cellDateStr}')">${optimalHtml}${selectedHtml}<div class="cal-date-num">${i}</div><div class="cal-bars-wrap">${barsHtml}</div></div>`;
         }
         boardHtml += `</div>`;
         document.getElementById("calendarVisualBoard").innerHTML = boardHtml;
     }
 
-    function runEngine(targetPool) {
-        let tempScores = [];
-        targetPool.forEach(target => {
-            let targetReceipts = [];
-            globalActiveMembers.forEach(m => {
-                let locs = m.locations; let trans = m.transports; let bestIndividualTotalCost = Infinity; let bestSetup = null;
-                locs.forEach(loc => {
-                    trans.forEach(t => {
-                        let radLat1 = Math.PI * parseFloat(loc.lat) / 180; let radLat2 = Math.PI * target.lat / 180;
-                        let theta = parseFloat(loc.lng) - target.lng; let radTheta = Math.PI * theta / 180;
-                        let dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
-                        if (dist > 1) dist = 1; dist = Math.acos(dist) * 180 / Math.PI * 60 * 1.1515 * 1.609344;
-                        let realRoadDist = Math.round(dist * 1.28); 
-                        
-                        let timeMinInternal = Math.round(realRoadDist * 0.9 + 12); 
-                        let timeMinDisplay = 0;
-                        if (t === '자차') {
-                            if(realRoadDist <= 50) timeMinDisplay = Math.round((realRoadDist / 40) * 60 + 10);
-                            else timeMinDisplay = Math.round((50 / 40) * 60 + ((realRoadDist - 50) / 95) * 60 + 15);
-                        } else if (t === '대중교통') {
-                            if(realRoadDist <= 50) timeMinDisplay = Math.round((realRoadDist / 30) * 60 + 20);
-                            else timeMinDisplay = Math.round((50 / 30) * 60 + ((realRoadDist - 50) / 105) * 60 + 35);
-                        } else { 
-                            if(realRoadDist <= 50) timeMinDisplay = Math.round((realRoadDist / 40) * 60 + 20);
-                            else timeMinDisplay = Math.round((50 / 40) * 60 + ((realRoadDist - 50) / 95) * 60 + 25);
-                        }
+    // 💥 [핵심: 100% 제미나이 에이전트 엔진]
+    async function runAIEngine() {
+        let apiKey = document.getElementById("gemini_api_key").value.trim();
+        let theme = document.getElementById("trip_theme").value.trim() || "모두가 편하게 즐길 수 있는 여행";
+        if(!apiKey) { alert("AI 모드를 사용하려면 Gemini API 키가 설정되어 있어야 합니다."); return null; }
 
-                        let transportCost = 0;
-                        if (t === '자차') transportCost = Math.round((realRoadDist / 11) * 1680 + (realRoadDist > 40 ? 5500 : 1200));
-                        else if (t === '대중교통') transportCost = Math.round(realRoadDist * 160);
-                        else transportCost = 0;
+        let payloadText = globalActiveMembers.map(m => {
+            let locStr = m.locations.map(l => l.addr).join(" 또는 ");
+            return `이름: ${m.name}, 출발지: ${locStr}, 선호수단: ${m.transports.join(",")}`;
+        }).join("\n");
 
-                        let timeCost = timeMinInternal * WAGE_PER_MIN;
-                        let individualTotalCost = transportCost + timeCost;
-                        let departMins = currentAssemblyTimeMins - timeMinDisplay;
-                        if (departMins < 0) departMins += 24 * 60; 
+        let prompt = `너는 최고의 여행 기획자야. 한국에 있는 다음 사람들의 출발지와 수단, 그리고 [사용자가 원하는 여행 테마]를 고려해서 이들이 다같이 모이기 좋은 시/군/구 단위 여행지 3곳을 추천해줘.
+        테마: [${theme}]
+        단순한 중간 지점이 아니라 테마와 교통 편의성을 최대한 고려해.
+        각 목적지별로 지역의 유명 관광지나 맛집도 3개씩 추천해.
+        또한, 각 멤버별로 출발지에서 해당 목적지까지 선호수단을 이용했을 때의 '예상 소요 시간(분 단위 정수)'과 '예상 교통비(원 단위 정수)'를 합리적으로 추정해서 계산해줘. (자차는 주유비/톨비, 대중교통은 티켓값 기준)
 
-                        if (individualTotalCost < bestIndividualTotalCost) {
-                            bestIndividualTotalCost = individualTotalCost;
-                            bestSetup = { loc: loc, trans: t, transportCost: transportCost, timeCost: timeCost, time: timeMinDisplay, dist: realRoadDist, departMins: departMins };
-                        }
-                    });
-                });
+        반드시 아래 JSON 형식 배열로만 답해. 마크다운 기호(\`\`\`json)나 다른 말은 절대 쓰지 마.
+        [
+            {
+                "name": "도시이름(예: 강원도 강릉시)", 
+                "reason": "이유를 짧게",
+                "places": ["명소/맛집1", "명소/맛집2", "명소/맛집3"],
+                "receipts": [
+                    {
+                        "name": "멤버명",
+                        "transport": "자차",
+                        "timeMins": 150,
+                        "timeText": "2시간 30분",
+                        "cost": 25000
+                    }
+                ]
+            }
+        ]
+        데이터:
+        ${payloadText}`;
 
-                targetReceipts.push({
-                    name: m.name, addr: bestSetup.loc.addr || "주소 없음", lat: parseFloat(bestSetup.loc.lat), lng: parseFloat(bestSetup.loc.lng), 
-                    transport: bestSetup.trans, dist: bestSetup.dist, time: bestSetup.time, 
-                    transportCost: bestSetup.transportCost, timeCost: bestSetup.timeCost, departMins: bestSetup.departMins
-                });
+        try {
+            let response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
-
-            let groupTransportCost = targetReceipts.reduce((s, r) => s + r.transportCost, 0);
-            let groupTimeCost = targetReceipts.reduce((s, r) => s + r.timeCost, 0);
-            let finalScore = groupTransportCost + groupTimeCost; 
-
-            tempScores.push({ finalScore: finalScore, groupTransportCost: groupTransportCost, groupTimeCost: groupTimeCost, receipts: targetReceipts, rawTarget: target });
-        });
-        tempScores.sort((a, b) => a.finalScore - b.finalScore);
-        return tempScores;
+            let data = await response.json();
+            let text = data.candidates[0].content.parts[0].text;
+            text = text.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(text);
+        } catch(e) { console.error(e); alert("AI 호출 오류. API 키를 확인해주세요."); return null; }
     }
 
     function parseAssemblyTime(mode) {
-        let tInput = "assembly_time_ai"; 
+        let tInput = "assembly_time_ai";
         let timeEl = document.getElementById(tInput);
-        let timeVal = timeEl ? timeEl.value : "14:00";
+        let timeVal = timeEl ? timeEl.value : "14:00"; 
         if(timeVal && timeVal.includes(":")) {
             let parts = timeVal.split(":");
             currentAssemblyTimeMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
@@ -1013,8 +898,9 @@
         }
     }
 
-    function startEngine(mode) {
+    async function startEngine(mode) {
         window.currentActiveMode = mode;
+
         if(mode === 'AI' && globalActiveMembers.length === 0) { alert("입력된 데이터가 없습니다!"); return; }
         if(mode === 'ROULETTE' && globalRouletteMembers.length === 0) { alert("룰렛 후보 데이터가 없습니다!"); return; }
         
@@ -1027,31 +913,46 @@
         
         if(mode === 'AI') {
             document.getElementById("loadingBar").style.display = "flex";
+            document.getElementById("loadingText").innerText = "제미나이가 테마에 맞춰 여행지와 명소를 기획하고 정산 중입니다...";
             
             let aiResArea = document.getElementById("aiResultArea");
             if(aiResArea) aiResArea.style.display = "block";
             
-            document.getElementById("locationTitleText").innerHTML = `📍 AI 기회비용 최소화 지역 <span style="color:#ef4444;">(행을 클릭하세요!)</span>`;
-            
-            let rh = document.getElementById("receiptTitleHeader");
-            if(rh) { rh.style.display = "block"; rh.innerHTML = `🧾 <span id="receiptTitleCity">[선택된 지역]</span> 회원별 맞춤 상세 시간 명세서`; }
-            
-            let pRec = document.getElementById("personalReceiptContent");
-            if(pRec) pRec.style.display = "block";
-            
-            let tempScores = runEngine(KOR_MASTER_DB);
-            globalFinalScores = [];
-            for(let i=0; i < Math.min(3, tempScores.length); i++) {
-                let node = tempScores[i];
-                globalFinalScores.push({
-                    name: node.rawTarget.n, cost: node.finalScore, groupTransportCost: node.groupTransportCost, groupTimeCost: node.groupTimeCost,
-                    receipts: node.receipts, rawTarget: node.rawTarget
-                });
-            }
-            setTimeout(() => {
+            let aiRecommendations = await runAIEngine();
+            if(!aiRecommendations) {
                 document.getElementById("loadingBar").style.display = "none";
-                renderResults("AI");
-            }, 500);
+                return;
+            }
+            globalFinalScores = aiRecommendations;
+            
+            let locHtml = "";
+            aiRecommendations.forEach((item, idx) => {
+                let medal = idx === 0 ? "🥇 제미나이 1PICK" : `${idx + 1}위 추천`;
+                
+                // 그룹 전체 비용/시간 합산
+                let groupTransportCost = 0; let groupTimeCost = 0;
+                item.receipts.forEach(r => {
+                    groupTransportCost += r.cost;
+                    groupTimeCost += r.timeMins * WAGE_PER_MIN;
+                });
+
+                locHtml += `
+                    <div class="rank-item loc-rank-item" style="flex-direction:column; align-items:stretch; border-color:#e2e8f0; background:#fff;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:8px;">
+                            <div style="font-size:16px;">${medal} : <strong>${item.name}</strong></div>
+                            <button onclick="toggleReceipt(${idx})" style="background:#3b82f6; color:white; border:none; padding:8px 14px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">🔍 추천 명소 & 정밀 명세서 보기</button>
+                        </div>
+                        <div class="ai-reason-box" style="margin-bottom:8px; font-size:12px;">✨ ${item.reason}</div>
+                        <div style="font-size:11px; color:#64748b; border-top:1px dashed #cbd5e1; padding-top:8px;">
+                            [제미나이 AI 분석] 💸 전체 차비합: ${groupTransportCost.toLocaleString()}원 / ⏱️ 시급환산: ${groupTimeCost.toLocaleString()}원
+                        </div>
+                        
+                        <div id="receiptBox_${idx}" style="display:none; margin-top:15px; padding-top:15px; border-top:2px dashed #e2e8f0;"></div>
+                    </div>`;
+            });
+            document.getElementById("locationResultContent").innerHTML = locHtml;
+            document.getElementById("loadingBar").style.display = "none";
+            document.getElementById("resultBox").style.display = "block";
             
         } else {
             let animBox = document.getElementById("rouletteAnimBox");
@@ -1088,6 +989,59 @@
             }, 80);
         }
     }
+
+    // 💥 [지연 렌더링 - 클릭 시 명세서 아코디언 펼치기]
+    window.toggleReceipt = function(idx) {
+        let rBox = document.getElementById(`receiptBox_${idx}`);
+        if (rBox.style.display === "block") {
+            rBox.style.display = "none";
+            return;
+        }
+        
+        let f = globalFinalScores[idx];
+        let cMins = currentAssemblyTimeMins;
+        let cleanName = f.name.split("(")[0].trim();
+
+        let placesHtml = `<div style="background:#f0fdfa; padding:10px; border-radius:6px; margin-bottom:12px; border:1px solid #10b981;">
+            <span style="font-size:12px; font-weight:bold; color:#047857;">🌟 제미나이 추천 명소/맛집</span>
+            <ul style="margin:5px 0 0 0; padding-left:20px; font-size:12px; color:#065f46;">
+                ${f.places.map(p => `<li>${p}</li>`).join('')}
+            </ul>
+        </div>`;
+
+        let receiptHtml = placesHtml + `<div style="font-size:12px; color:#475569; margin-bottom:10px; font-weight:bold;">🧾 회원별 맞춤 상세 명세서</div>`;
+
+        f.receipts.forEach(r => {
+            let departMins = cMins - r.timeMins; if (departMins < 0) departMins += 24 * 60;
+            let dH = Math.floor(departMins / 60) % 24; let dM = departMins % 60;
+            let ampm = dH < 12 ? "오전" : "오후"; let fH = dH % 12 === 0 ? 12 : dH % 12;
+            let departTimeStr = `${ampm} ${fH}:${dM.toString().padStart(2, '0')} 출발`;
+
+            let memberData = globalActiveMembers.find(x => x.name === r.name);
+            let startAddr = memberData && memberData.locations.length > 0 ? memberData.locations[0].addr : "출발지";
+            let naverMapNaviLink = `https://map.naver.com/v5/search/${encodeURIComponent(startAddr + '에서 ' + cleanName + ' 가는길')}`;
+
+            receiptHtml += `
+                <div class="personal-receipt">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <div>👤 <strong style="font-size:13px;">${r.name}</strong></div>
+                        <div class="time-badge">⏱️ 역산 ${departTimeStr}</div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-size:11px; color:#64748b;">수단: <strong>${r.transport}</strong></div>
+                        <div style="text-align: right; font-weight: bold; font-size:12px;">
+                            <span>🗺️ 예상: <span style="color:#1d4ed8;">${r.timeText}</span> ➡️ <span style="color:#b91c1c;">💸 ${r.cost.toLocaleString()}원</span></span>
+                            <a href="${naverMapNaviLink}" target="_blank" class="btn-navi" style="background-color:#03c75a; color:white; font-size:11px; text-decoration:none; padding:4px 8px; border-radius:4px; font-weight:bold; display:inline-block; margin-top:4px; margin-left:4px;">길찾기</a>
+                        </div>
+                    </div>
+                </div>`;
+        });
+        
+        receiptHtml += `<button onclick="confirmAITrip('${f.name}')" style="width:100%; background:#10b981; color:white; border:none; padding:12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px; margin-top:15px; box-shadow:0 3px 8px rgba(16,185,129,0.3);">✅ [${f.name}] 이 곳으로 모임 확정 및 역할 배분</button>`;
+        
+        rBox.innerHTML = receiptHtml;
+        rBox.style.display = "block";
+    };
 
     function saveAndProcessRouletteWinner(winnerDest, shuffledMembers) {
         let historyId = "h_" + Date.now();
@@ -1141,7 +1095,6 @@
         if(aiArea) aiArea.style.display = "none";
         
         let listItems = roleAssignmentsArray.map(txt => `<li><strong style="color:#7e22ce;">${txt.split(" : ")[0] || txt}</strong> : ${txt.split(" : ")[1] || ''}</li>`).join("");
-
         let cleanName = winnerDest.split("(")[0].trim();
         let naverMapNaviLink = `https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 가볼만한곳")}`;
 
@@ -1155,39 +1108,10 @@
                 <div style="margin-top:20px;">
                     <a href="${naverMapNaviLink}" target="_blank" style="background:#03c75a; color:white; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:bold; text-decoration:none; display:inline-block; box-shadow:0 4px 10px rgba(3,199,90,0.2);">🗺️ 네이버 지도로 지역 탐색하기</a>
                 </div>
-                <div style="margin-top:15px; font-size:13px; font-weight:normal; color:#78350f;">복잡한 경로 계산은 생략합니다. 즐거운 여행 계획을 세워보세요!</div>
             `;
             wBanner.style.display = "block";
         }
-        
-        let resBox = document.getElementById("resultBox");
-        if(resBox) resBox.style.display = "block";
-    }
-
-    function renderResults(mode) {
-        if(mode !== 'AI') return; 
-        
-        let locHtml = "";
-        globalFinalScores.forEach((f, idx) => {
-            let medal = idx === 0 ? "🥇 AI 강력 추천 (확정은 클릭)" : `${idx + 1}위 대안`;
-            let borderColor = "#e2e8f0"; let bg = "#fff";
-
-            let costHtml = `<div style="margin-top:4px;"><span class="cost-wage-text" style="color:#d97706;">💸 차비합: ${f.groupTransportCost.toLocaleString()}원 / ⏱️ 시급환산 가치합: ${f.groupTimeCost.toLocaleString()}원</span></div>`;
-
-            locHtml += `
-                <div class="rank-item loc-rank-item" data-idx="${idx}" onclick="showReceipt(${idx})" style="border-color:${borderColor}; background:${bg};">
-                    <div>
-                        ${medal} : <strong style="font-size:15px;">${f.name}</strong> 
-                        ${costHtml}
-                    </div>
-                    <button onclick="event.stopPropagation(); confirmAITrip('${f.name}')" style="background:#10b981; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">이곳으로 확정</button>
-                </div>`;
-        });
-        document.getElementById("locationResultContent").innerHTML = locHtml;
-        showReceipt(0);
-        
-        let resBox = document.getElementById("resultBox");
-        if(resBox) resBox.style.display = "block";
+        let resBox = document.getElementById("resultBox"); if(resBox) resBox.style.display = "block";
     }
 
     window.confirmAITrip = function(destName) {
@@ -1308,84 +1232,6 @@
         database.ref(`trips/${currentTripId}/finance/paid/${name}`).set(newStatus);
     };
 
-    function showReceipt(idx) {
-        let targetData = globalFinalScores[idx];
-        if(!targetData) return;
-        
-        let isRoulette = window.currentActiveMode === 'ROULETTE';
-        
-        let cleanName = targetData.name.split(" ")[0].trim();
-        if (cleanName.includes("(")) cleanName = cleanName.split("(")[0].trim();
-        
-        let dpLink = document.getElementById("dynamicPensionLink");
-        if(dpLink) {
-            dpLink.innerHTML = `<a href="https://map.naver.com/v5/search/${encodeURIComponent(cleanName + " 단체 숙소 펜션")}" target="_blank" class="pension-link" style="display:block; text-align:center; background-color:#2c3e50; color:white; padding:14px; text-decoration:none; border-radius:8px; font-weight:bold; font-size:14px; margin-top:12px;">💚 네이버 지도로 [${cleanName}] 모임 장소 실시간 확인</a>`;
-        }
-        
-        if (isRoulette) {
-            let rankItems = document.querySelectorAll('.loc-rank-item');
-            rankItems.forEach((el) => {
-                let itemIdx = parseInt(el.getAttribute('data-idx'));
-                if(itemIdx === idx) el.style.border = "2px solid #a855f7";
-                else el.style.border = "1px solid #e2e8f0";
-            });
-            return;
-        }
-
-        let titleCityEl = document.getElementById("receiptTitleCity");
-        if(titleCityEl) titleCityEl.innerHTML = `[${cleanName}]`;
-
-        let tInput = "assembly_time_ai";
-        let timeEl = document.getElementById(tInput);
-        let timeVal = timeEl ? timeEl.value : "14:00"; 
-        let cMins = 14 * 60;
-        if(timeVal && timeVal.includes(":")) {
-            let parts = timeVal.split(":");
-            cMins = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
-        }
-
-        let receiptHtml = `<p style="font-size:13px; color:#475569; margin: 0 0 10px 0;">🎉 <strong>🗺️ 네이버 지도 앱(예상)</strong> 소요 시간으로 동기화된 정밀 명세서입니다.</p>`;
-            
-        targetData.receipts.forEach(r => {
-            let hourText = r.time >= 60 ? `${Math.floor(r.time/60)}시간 ${r.time%60}분` : `${r.time}분`;
-            let tCostText = r.transportCost > 0 ? `${r.transportCost.toLocaleString()}원` : `0원`;
-            
-            let departMins = cMins - r.time;
-            if (departMins < 0) departMins += 24 * 60;
-            
-            let dH = Math.floor(departMins / 60) % 24; let dM = departMins % 60;
-            let ampm = dH < 12 ? "오전" : "오후"; let fH = dH % 12 === 0 ? 12 : dH % 12;
-            let departTimeStr = `${ampm} ${fH}:${dM.toString().padStart(2, '0')} 출발`;
-
-            let menuType = (r.transport === '자차') ? 'car' : 'pubtrans';
-            let naverMapNaviLink = `https://map.naver.com/v5/directions/${r.lng},${r.lat},출발/${targetData.rawTarget.lng},${targetData.rawTarget.lat},${encodeURIComponent(cleanName)}/-/${menuType}?c=15,0,0,0,dh`;
-
-            receiptHtml += `
-                <div class="personal-receipt">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                        <div>👤 <strong style="font-size:14px;">${r.name}</strong></div>
-                        <div class="time-badge">⏱️ 역산 ${departTimeStr}</div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="font-size:12px; color:#64748b;">수단: <strong>${r.transport}</strong> (${r.dist}km)</div>
-                        <div style="text-align: right; font-weight: bold; font-size:13px;">
-                            <span>🗺️ 지도 예상: <span style="color:#1d4ed8;">${hourText}</span> ➡️ <span style="color:#b91c1c;">💸 ${tCostText}</span></span>
-                            <a href="${naverMapNaviLink}" target="_blank" class="btn-navi" style="background-color:#03c75a; color:white; font-size:12px; text-decoration:none; padding:6px 10px; border-radius:6px; font-weight:bold; display:inline-block; margin-top:6px; box-shadow:0 2px 4px rgba(3,199,90,0.15);">내비 연결</a>
-                        </div>
-                    </div>
-                </div>`;
-        });
-        
-        let prc = document.getElementById("personalReceiptContent");
-        if(prc) prc.innerHTML = receiptHtml;
-
-        let rankItems = document.querySelectorAll('.loc-rank-item');
-        rankItems.forEach((el) => {
-            let itemIdx = parseInt(el.getAttribute('data-idx'));
-            if(itemIdx === idx) el.style.border = "2px solid #03c75a";
-            else el.style.border = "1px solid #e2e8f0";
-        });
-    }
 </script>
 </body>
 </html>
